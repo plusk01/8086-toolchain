@@ -53,7 +53,7 @@ ExecRelease/emu86:	ExecRelease/ProgramCRT \
 
 # CRT Output Console
 ExecRelease/ProgramCRT:	CRT/UNIXCRT.cpp CRT/UNIXCRT.h
-			$(CC) -lncurses CRT/UNIXCRT.cpp -o ExecRelease/ProgramCRT
+			$(CC) CRT/UNIXCRT.cpp -o ExecRelease/ProgramCRT -lncurses
 
 ##############################################################################
 
@@ -109,6 +109,6 @@ PIC.o:		PIC.cpp PIC.h x86emu/x86emui.h
 
 # Cleanup
 clean:		
-		rm *.o ExecRelease/emu86 ExecRelease/ProgramCRT
-		rm $(BIN_DIR)emu86 $(BIN_DIR)ProgramCRT
+		-rm *.o ExecRelease/emu86 ExecRelease/ProgramCRT
+		-rm $(BIN_DIR)emu86 $(BIN_DIR)ProgramCRT
 

@@ -1,5 +1,3 @@
 bin/*
 *.o
 assembler/macros.c
-emulator/ExecRelease/*
-emulator/ExecDebug/*

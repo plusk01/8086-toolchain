@@ -101,7 +101,7 @@ RM=rm -f
 #	-Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations \
 #	-Wredundant-decls -Wnested-externs
 CC=gcc
-CCFLAGS=  -Wall -ansi99 -pedantic -Wshadow -Wpointer-arith \
+CCFLAGS=  -Wall -ansi -std=c99 -pedantic -Wshadow -Wpointer-arith \
 	-Wwrite-strings -Wcast-qual -Wwrite-strings -Wcast-align \
 	-Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations \
 	-Wredundant-decls -Wnested-externs
