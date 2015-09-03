@@ -156,7 +156,7 @@ void lprintf P1V (const char *, formatstr)
 
 #endif /* LIST */
 
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(MACOSX)
 /*
  *  dprintf  functional equivalent to printf that writes
  *           to debug instead of stdout.  The flag argument

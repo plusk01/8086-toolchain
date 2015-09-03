@@ -1,6 +1,10 @@
 #ifndef _PROTO_H
 #define	_PROTO_H
 
+#ifdef __APPLE__
+#define MACOSX
+#endif
+
 #ifdef CPU_DEFINED
 /* analyze.c */
 extern BOOL is_equalnode P_ ((const EXPR *, const EXPR *));
@@ -246,7 +250,7 @@ extern char *longlongStr P_ ((UVAL));
 
 #endif	/* LONGLONG_SUPPORT */
 #ifdef CPU_DEFINED
-#ifdef DEBUG
+#if defined(DEBUG) && !defined(MACOSX)
 extern void dprintf P_ ((int, const char *, ...));
 
 #endif /* DEBUG */

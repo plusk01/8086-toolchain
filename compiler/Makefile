@@ -17,7 +17,7 @@ CFLGS=  -DNDEBUG -O
 
 SRCDIR=
 OBJDIR=unixobj/
-BINDIR=
+BINDIR=../bin/
 
 # cxref flags
 CXFLAGS=-d -l -s
@@ -478,7 +478,7 @@ $(OBJDIR)regppc$(S)$(O) : $(SRCDIR)regppc$(S)c
 	$(CC) $(CFLAGS) $(OF)$(OBJDIR)regppc$(S)$(O) $(SRCDIR)regppc$(S)c
 
 clobber:	clean
-		-$(RM) $(PROG)
+		-$(RM) $(BINDIR)$(PROG)
 		-$(RM) *$(S)exe
 		-$(RM) *$(S)img
 clean:
