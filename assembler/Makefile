@@ -15,7 +15,7 @@ CC = cc
 CFLAGS = -O -I.
 PERL = perl
 MKDIR_P = mkdir -p
-BIN_DIR = ../bin
+BIN_DIR = ../bin/
 
 INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
@@ -50,10 +50,10 @@ NDISASM = ndisasm.o disasm.o sync.o nasmlib.o insnsd.o
 all: nasm ndisasm
 
 nasm: directory $(NASM)
-	$(CC) -m32 -o ../bin/nasm $(NASMO)
+	$(CC) -m32 -o $(BIN_DIR)nasm $(NASMO)
 
 ndisasm: directory $(NDISASM)
-	$(CC) -m32 -o ../bin/ndisasm $(NDISASM)
+	$(CC) -m32 -o $(BIN_DIR)ndisasm $(NDISASM)
 
 directory:
 	$(MKDIR_P) $(BIN_DIR)
@@ -105,14 +105,14 @@ PERLREQ = macros.c insnsa.c insnsd.c insnsi.h insnsn.c \
 	  version.h version.mac 
 perlreq: $(PERLREQ)
 
-install: nasm ndisasm
-	$(INSTALL_PROGRAM) nasm $(bindir)/nasm
-	$(INSTALL_PROGRAM) ndisasm $(bindir)/ndisasm
-	$(INSTALL_DATA) nasm.1 $(mandir)/man1/nasm.1
-	$(INSTALL_DATA) ndisasm.1 $(mandir)/man1/ndisasm.1
+#install: nasm ndisasm
+#	$(INSTALL_PROGRAM) nasm $(bindir)/nasm
+#	$(INSTALL_PROGRAM) ndisasm $(bindir)/ndisasm
+#	$(INSTALL_DATA) nasm.1 $(mandir)/man1/nasm.1
+#	$(INSTALL_DATA) ndisasm.1 $(mandir)/man1/ndisasm.1
 
 clean:
-	rm -f *.o nasm ndisasm
+	rm -f *.o $(BIN_DIR)nasm $(BIN_DIR)ndisasm
 	$(MAKE) -C rdoff clean
 
 rdf:
