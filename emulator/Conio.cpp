@@ -4,6 +4,8 @@
 #include <termios.h>
 #include <string.h>
 
+#include <sys/select.h>
+
 #include "Conio.h"
 
 #ifndef TRUE
