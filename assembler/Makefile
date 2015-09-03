@@ -14,6 +14,8 @@ prefix = /usr/local
 CC = cc
 CFLAGS = -O -I.
 PERL = perl
+MKDIR_P = mkdir -p
+BIN_DIR = ../bin
 
 INSTALL = install -c
 INSTALL_PROGRAM = $(INSTALL)
@@ -28,7 +30,7 @@ mandir = $(prefix)/man
 .SUFFIXES: .c .o .h .mac .pl
 
 .c.o:
-	$(CC) -c $(CFLAGS) $<
+	$(CC) -c $(CFLAGS) -m32 $<
 
 NASM = 	nasm.o nasmlib.o float.o insnsa.o assemble.o labels.o \
        	parser.o outform.o output/outbin.o output/outaout.o \
@@ -47,11 +49,14 @@ NDISASM = ndisasm.o disasm.o sync.o nasmlib.o insnsd.o
 
 all: nasm ndisasm
 
-nasm: $(NASM)
-	$(CC) -o nasm $(NASMO)
+nasm: directory $(NASM)
+	$(CC) -m32 -o ../bin/nasm $(NASMO)
 
-ndisasm: $(NDISASM)
-	$(CC) -o ndisasm $(NDISASM)
+ndisasm: directory $(NDISASM)
+	$(CC) -m32 -o ../bin/ndisasm $(NDISASM)
+
+directory:
+	$(MKDIR_P) $(BIN_DIR)
 
 # These files contains all the standard macros that are derived from
 # the version number.
