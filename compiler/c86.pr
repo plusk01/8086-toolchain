@@ -1,0 +1,87 @@
+--
+--	Project file for building C68.
+--
+--	It is not free-standing, but designed to be invoked
+--	indirectly via the MAKE command.  In theory we could
+--	dispense with this project file completely, and do
+--	everything via the MAKEFILE.  However this would
+--	tend to clutter up the MAKEFILE with TOPSPEED specific
+--	settings - so it is easier to keep them all here.
+
+
+#system epoc img
+#set epocinit=iplib8
+#model small jpi
+
+-- #pragma debug(vid=>full)
+
+#pragma optimize(speed=>off)
+#pragma optimize(cpu=>286)
+
+#pragma option(lang_ext=>on)
+#pragma option(uns_char=>on)
+
+#pragma define(EPOC=>1)
+#pragma define(JPIC=>1)
+#pragma define(__STDC__=>1)
+#pragma define(NDEBUG=>1)
+#pragma define(NO_EMPTY_FILES=>1)
+
+#pragma warn(wclt=>on)
+#pragma warn(wcne=>off)
+#pragma warn(wfnd=>on)
+#pragma warn(wpnd=>on)
+#pragma warn(wnre=>on)
+#pragma warn(wnrv=>on)
+#pragma warn(wpnu=>on)
+#pragma warn(wvnu=>off)
+
+#if (%main.shd #older %main.ms) #then
+  #run "makeshd %main" no_window no_abort
+#endif
+
+#if (%main.rsg #older %main.rss) #then
+  #run "rcomp %main" no_window no_abort
+#endif
+
+#if %main.rzc #older %main.rsc #then
+  #run "rchuf hwim -v -i%main" no_window
+#endif
+
+#compile analyze
+#compile cglbdef
+#compile cmain
+#compile decl
+#compile expr
+#compile extern
+#compile genutil
+#compile getsym
+#compile init
+#compile intexpr
+#compile list
+#compile memmgt
+#compile msgout
+#compile optimize
+#compile stmt
+#compile symbol
+#compile types
+
+#compile genstmt
+-- #compile genieee
+#compile outgen
+#compile genutil
+
+#compile gen86
+#compile regX86
+#compile peepX86
+#compile outX86_b
+
+#compile system
+
+#pragma link(cpoclib.lib)
+
+#if (%main.img #older %main.afl) #then
+  #file delete %main.img
+#endif
+
+#link %main

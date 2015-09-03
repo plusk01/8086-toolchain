@@ -1,0 +1,414 @@
+# Microsoft Developer Studio Generated Dependency File, included by C86.mak
+
+.\Analyze.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Cglbdef.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	
+
+.\Cmain.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	".\Version.h"\
+	
+
+.\Decl.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Outproto.h"\
+	".\Proto.h"\
+	
+
+.\Expr.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Extern.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Flow68k.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Flowc30.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Gen386.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Gen68k.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Gen86.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\gen86.h"\
+	".\Genx86.h"\
+	".\Message.h"\
+	".\Outproto.h"\
+	".\Proto.h"\
+	
+
+.\Genarm.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Genc30.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Genffp.c : \
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Message.h"\
+	
+
+.\Genicode.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Genieee.c : \
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Message.h"\
+	
+
+.\geninit.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Outproto.h"\
+	".\Proto.h"\
+	
+
+.\Genppc.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Genstmt.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Genutil.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Outproto.h"\
+	".\Proto.h"\
+	
+
+.\Getsym.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Init.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Outproto.h"\
+	".\Proto.h"\
+	
+
+.\Intexpr.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\List.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Memmgt.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Msgout.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Optimize.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Out68k_a.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Out68k_c.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Out68k_g.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Out68k_q.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Outarm_o.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Outc30_r.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Outgen.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Outppc.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Outx86_a.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Genx86.h"\
+	".\Message.h"\
+	".\Outproto.h"\
+	".\Proto.h"\
+	".\Version.h"\
+	
+
+.\Outx86_b.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Outx86_g.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Outx86_s.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Peep68k.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Peeparm.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Peepc30.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Peepppc.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Peepx86.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Genx86.h"\
+	".\Message.h"\
+	".\Outproto.h"\
+	".\Proto.h"\
+	
+
+.\Reg68k.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Regarm.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Regc30.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Regppc.c : \
+	".\Check.h"\
+	".\config.h"\
+	
+
+.\Regx86.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Genx86.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Stmt.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Symbol.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Outproto.h"\
+	".\Proto.h"\
+	
+
+.\System.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	
+
+.\Types.c : \
+	".\Cglbdec.h"\
+	".\Chdr.h"\
+	".\Check.h"\
+	".\config.h"\
+	".\Expr.h"\
+	".\Message.h"\
+	".\Proto.h"\
+	

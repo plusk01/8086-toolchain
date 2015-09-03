@@ -1,0 +1,90 @@
+TARGET		c68.exe
+TARGETTYPE	exe
+PROJECT		Compiler
+SUBPROJECT	C68
+
+SYSTEMINCLUDE	\epoc32\include\libc
+SYSTEMINCLUDE	\epoc32\include
+
+#if defined(MARM)
+LIBRARY		ecrt0.o
+#else
+LIBRARY		ecrt0.obj
+#endif
+LIBRARY		estlib.lib
+LIBRARY		euser.lib
+
+// Compiler front end
+SOURCE		analyze.c
+SOURCE		cglbdef.c
+SOURCE		cmain.c
+SOURCE		decl.c
+SOURCE		expr.c
+SOURCE		extern.c
+SOURCE		getsym.c
+SOURCE		init.c
+SOURCE		intexpr.c
+SOURCE		list.c
+SOURCE		memmgt.c
+SOURCE		msgout.c
+SOURCE		optimize.c
+SOURCE		stmt.c
+SOURCE		symbol.c
+SOURCE		system.c
+SOURCE		types.c
+	
+
+// code generator
+SOURCE		genffp.c
+SOURCE		genicode.c
+SOURCE		genieee.c
+SOURCE		genstmt.c
+SOURCE		genutil.c
+SOURCE		outgen.c
+
+// 68K code generator
+SOURCE		flow68k.c
+SOURCE		gen68k.c
+SOURCE		out68k_a.c
+SOURCE		out68k_c.c
+SOURCE		out68k_g.c
+SOURCE		out68k_q.c
+SOURCE		peep68k.c
+SOURCE		reg68k.c
+
+// C30 code generator
+SOURCE		flowc30.c
+SOURCE		genc30.c
+SOURCE		outc30_r.c
+SOURCE		peepc30.c
+SOURCE		regc30.c
+
+// Intel 386 code generator
+SOURCE		gen386.c
+
+// Intel 8086 code generator
+SOURCE		gen86.c
+
+// Intel x86 code generator
+SOURCE		outx86_a.c
+SOURCE		outx86_b.c
+SOURCE		outx86_g.c
+SOURCE		outx86_n.c
+SOURCE		outx86_s.c
+SOURCE		peepx86.c
+SOURCE		regx86.c
+
+// ARM code generator
+SOURCE		genarm.c
+SOURCE		outarm_a.c
+SOURCE		outarm_o.c
+SOURCE		peeparm.c
+SOURCE		regarm.c
+
+// PowerPC code generator
+
+SOURCE		genppc.c
+SOURCE		outppc.c
+SOURCE		peepppc.c
+SOURCE		regppc.c
+

@@ -1,0 +1,99 @@
+<html>
+<body>
+<pre>
+<h1>Build Log</h1>
+<h3>
+--------------------Configuration: c86 - Win32 Release--------------------
+</h3>
+<h3>Command Lines</h3>
+Creating temporary file "C:\DOCUME~1\Wade\LOCALS~1\Temp\RSP75.tmp" with contents
+[
+/nologo /ML /W4 /GX /O2 /I "E:\DJW\PSION\SRC\C86" /D "NDEBUG" /D "WIN32" /D "_CONSOLE" /D "__STDC__" /Fp".\Release/C86.pch" /YX /Fo".\Release/" /Fd".\Release/" /FD /c 
+"C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\Expr.c"
+"C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c"
+]
+Creating command line "cl.exe @C:\DOCUME~1\Wade\LOCALS~1\Temp\RSP75.tmp" 
+Creating temporary file "C:\DOCUME~1\Wade\LOCALS~1\Temp\RSP76.tmp" with contents
+[
+kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /incremental:no /pdb:".\Release/c86.pdb" /machine:I386 /out:"Release\c86.exe" 
+".\Release\Analyze.obj"
+".\Release\Cglbdef.obj"
+".\Release\Cmain.obj"
+".\Release\Decl.obj"
+".\Release\Expr.obj"
+".\Release\Extern.obj"
+".\Release\Flow68k.obj"
+".\Release\Flowc30.obj"
+".\Release\Gen386.obj"
+".\Release\Gen68k.obj"
+".\Release\Gen86.obj"
+".\Release\Genarm.obj"
+".\Release\Genc30.obj"
+".\Release\Genffp.obj"
+".\Release\Genicode.obj"
+".\Release\Genieee.obj"
+".\Release\geninit.obj"
+".\Release\Genppc.obj"
+".\Release\Genstmt.obj"
+".\Release\Genutil.obj"
+".\Release\Getsym.obj"
+".\Release\Init.obj"
+".\Release\Intexpr.obj"
+".\Release\List.obj"
+".\Release\Memmgt.obj"
+".\Release\Msgout.obj"
+".\Release\Optimize.obj"
+".\Release\Out68k_a.obj"
+".\Release\Out68k_c.obj"
+".\Release\Out68k_g.obj"
+".\Release\Out68k_q.obj"
+".\Release\Outarm_o.obj"
+".\Release\Outc30_r.obj"
+".\Release\Outgen.obj"
+".\Release\Outppc.obj"
+".\Release\Outx86_a.obj"
+".\Release\Outx86_b.obj"
+".\Release\Outx86_g.obj"
+".\Release\outx86_n.obj"
+".\Release\Outx86_s.obj"
+".\Release\Peep68k.obj"
+".\Release\Peeparm.obj"
+".\Release\Peepc30.obj"
+".\Release\Peepppc.obj"
+".\Release\Peepx86.obj"
+".\Release\Reg68k.obj"
+".\Release\Regarm.obj"
+".\Release\Regc30.obj"
+".\Release\Regppc.obj"
+".\Release\Regx86.obj"
+".\Release\Stmt.obj"
+".\Release\Symbol.obj"
+".\Release\System.obj"
+".\Release\Types.obj"
+]
+Creating command line "link.exe @C:\DOCUME~1\Wade\LOCALS~1\Temp\RSP76.tmp"
+<h3>Output Window</h3>
+Compiling...
+Expr.c
+outx86_n.c
+C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(670) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(673) : warning C4244: '=' : conversion from 'int ' to 'char ', possible loss of data
+C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(821) : warning C4090: '=' : different 'const' qualifiers
+C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(1159) : warning C4100: 'sp' : unreferenced formal parameter
+C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(1220) : warning C4100: 'segname' : unreferenced formal parameter
+C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(1297) : warning C4057: 'function' : 'const char *' differs in indirection to slightly different base types from 'const unsigned char *'
+C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(1300) : warning C4090: '=' : different 'const' qualifiers
+C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(1303) : warning C4018: '<' : signed/unsigned mismatch
+C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(1370) : warning C4505: 'puttype' : unreferenced local function has been removed
+        C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(1108) : see declaration of 'puttype'
+C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(1370) : warning C4505: 'put_noseg' : unreferenced local function has been removed
+        C:\Documents and Settings\Wade\My Documents\EE425 Work\Work\Main Files\c86_Project\outx86_n.c(92) : see declaration of 'put_noseg'
+Linking...
+
+
+
+<h3>Results</h3>
+c86.exe - 0 error(s), 10 warning(s)
+</pre>
+</body>
+</html>

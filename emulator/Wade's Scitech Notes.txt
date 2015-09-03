@@ -1,0 +1,76 @@
+Changes made to the SciTech project
+
+**** May 9, 2002 *****
+At this point the directory structure included the whole SciTech emulator 
+archive
+
+- Copied files:
+	include/x86emu.h to src/x86emu
+	include/x86emu/types.h,regs.h,fpu_regs.h to src/x86emu/x86emu
+
+- Added defintions:
+	#define u16 unsigned short
+	#define u32 unsigned long
+  to file src/x86emu/x86emu/debug.h
+
+- Added definitions:
+	#define ulong unsigned long
+	#define uint unsigned int
+  to files: src/x86emu/x86emu/debug.h, src/x86emu/validate.c
+
+- Eliminated all sections that compile when __HAVE_INLINE_ASSEMBLER__ is 
+  defined in all files in the src/x86emu directory. This includes the 
+  #if  defined(__HAVE_INLINE_ASSEMBLER__) && !defined(PRIM_OPS_NO_REDEFINE_ASM)
+  section in prim_ops.h since no assember directives will be used.
+  (used VC file search to find references)
+
+- Eliminated file prim_asm.h from project. This file implements Watcom C 
+  inline assembly for speed.  (used VC file search)
+  
+- Removed the validate.c file. This file is used as a test program and only
+  works on an x86 machine with inline assembler. It checks the inline 
+  assembler results to the c version results to ensure correctness of the 
+  emulation.
+  
+- Found that the u15, u32, defenitions were in src/x86emu/x86emu/types.h
+  Added the ulong and uint defentions to this file and removed them from
+  src/x86emu/x86emu/debug.h and src/x86emu/validate.c.
+  
+- Renamed X86EMU_sysEnv struct entry from "void* private" to "void* privatvp"
+  in regs.h to ensure c++ compatibility. This entry does not appear to be 
+  referenced by name anywhere in the code (?????)
+  
+- NOTE: At this point everything compiled fine with 20 warnings dealing with
+  type size and mismatches. I then examined the warinings one by one.
+
+- Almost all the warnings had to do with bitwise operations on short values.
+  Aparently when you do a bitwise operation VC assumes the result is no a
+  short (stupid eh?) so I added type casts to eliminate the warnings.
+  These warnings only affected ops2.c
+    
+- Function abs(int) referenced in prim_ops.c wasn't defined. Added #include 
+  <stdlib.h> to list of libraries in the project enclude file "x86emui.h".
+  
+- The remaining errors had to do with minus operations (subtract,negate) on
+  signed numbers and a < comapre sign mismatch. Those, I assume, are there
+  for a reason and I did not change them.
+
+- Renamed all files to .cpp to ensure c++ compatibility.
+
+- It's clear that the designers wanted to make this code compatible with c++
+  but that they never tested it with a c++ compiler. Had to make the following
+  TWO changes to make c++ compatibility:
+  
+1 Changed printk statement in ops2.cpp for to allow for operand that's
+  supposed to dissapear in c++ mode: search for "X86EMU_UNUSED(op2,)
+ 
+2 Redefined sys.cpp globabl function pointers to be extern "C". This matches
+  the declarations in x86emui.h. Otherwise the compiler didn't recognize them
+  as being the same functions.
+
+
+**** May 9, 2002 *****
+
+- Determined that validate.c and prim_asm.h weren't needed and they were
+  placed in a filder named "Not Needed Files". debug.c is only needed when 
+  in debug mode. 

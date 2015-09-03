@@ -1,0 +1,39 @@
+        Normally when you are going to build a version of the compiler
+        you need to go through the CONFIG.H file to ensure that the
+        options are all set as you want them to be for this build.
+        There are a number of files that are provided for building
+        specific variants of the compiler to stop you having to
+        work out for yourself what are valid options within the
+        CONFIG.H file.
+
+        CONFIG.CHK      Version of CONFIG.H that is used when building
+                        a Psion 3a/3c version of the compiler that
+                        only supports syntax checking (no code generation)
+
+        CONFIG.GEN      Version of CONFIG.H that is used when building
+                        a Psion 3a/3c version of the compiler that
+                        does support code generation.
+
+        CONFIG.C86      Version of CONFIG.H that is used under Linux or
+                        Windows 95/NT when generating a version of the
+                        compiler that is to act as a cross-compiler for
+                        the Psion 3a/3c.
+
+
+        In addition there are a number of ancillary files that are used
+        when building special versions of the compiler:
+
+        CONFIG.BAT      MSDOS Batch file used to build Psion 3a/3c
+                        versions of the compiler. Ensures that correct
+                        CONFIG.??? file is copied to CONFIG.H prior to
+                        building the compiler.
+
+        C86.C           Special file used to generate the C86.RSS file
+                        when building Psion 3a/3c hosted version of the
+                        compiler.
+
+        C86.MAK         Files that are used when building a version of
+        C86.MDP         the compiler using Visual C++ that is to act as
+                        a cross-compiler for the Psion 3a/3c.
+
+
