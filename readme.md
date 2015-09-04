@@ -3,6 +3,8 @@
 
 This project is for BYU ECEn 425, and was taking from the CAEDM servers (`/ee2/ee425/src/dist`). The purpose for posting on GitHub is to make the build process available for Ubuntu 12.04+ and Mac OS X, along with any minor modifications along the way.
 
+**Disclaimer:** For ECEn 425 projects, this may or may not compile exactly the same as the CAEDM machines
+
 ## Installing ##
 
 You can either clone this repo, or on the side click 'Download ZIP'.
@@ -54,4 +56,29 @@ Put this at the bottom of your `~/.profile` `~/.bashrc` (Or whatever your shells
 ```bash
 # ECEn 425 binaries
 export PATH="/Users/plusk01/Documents/8086-toolchain/bin":$PATH
+```
+
+## Common Problems ##
+
+**Linux:**
++ `cdefs` not defined: Make sure Linux prereqs are installed
+
+**Mac:**
++ `cpp` does not remove `//` comments correctly: See Makefile example below, make sure to add `-xc++` flag to `cpp` to remove c99 style comments.
+
+### Makefile Example ###
+
+```Makefile
+lab1.bin:       lab1final.s
+                nasm lab1final.s -o lab1.bin -l lab1.lst  # Step 4, Assemble
+
+lab1final.s:    clib.S lab1asm.S lab1.s
+                cat clib.S lab1asm.S lab1.s > lab1final.s # Step 3, Concatenate
+
+lab1.s:         lab1.c
+                cpp -xc++ lab1.c lab1.i    # Step 1, Preprocess
+                c86 -g lab1.i lab1.s       # Step 2, Compile
+
+clean:  
+                rm lab1.bin lab1.lst lab1final.s lab1.s lab1.i
 ```
