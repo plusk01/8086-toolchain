@@ -58,6 +58,14 @@ Put this at the bottom of your `~/.profile` `~/.bashrc` (Or whatever your shells
 export PATH="/Users/plusk01/Documents/8086-toolchain/bin":$PATH
 ```
 
+Make sure to reload your shells startup by either closing your shell and reopening it, or using the `source` command:
+
+```bash
+source ~/.profile
+```
+
+This will actually add your toolchain bin to the path.
+
 ## Common Problems ##
 
 **Linux:**
