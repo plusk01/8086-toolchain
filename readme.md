@@ -44,8 +44,7 @@ $ make
 
 If all goes as planned, you will have 5 binaries in your `./8086-toolchain/bin/`
  directory. If there are any problems, you can try `cd`ing into each of the tool
- directories and running make individually so you can see the warnings/errors mo
-re clearly.
+ directories and running make individually so you can see the warnings/errors more clearly.
 
 To use the binaries from anywhere, see **Setting Your Path** below.
 
