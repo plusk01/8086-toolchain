@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 	if(!status) return 1;
 
 	// Begin main execution loop
-	SimControl.ExecLoop();
+	SimControl.ExecLoop(argv[1]);
 
 #ifdef TERMIOS_CONSOLE
 	/*

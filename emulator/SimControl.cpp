@@ -3045,13 +3045,18 @@ void CSimControl::CheckRegisterMonitors(void)
 
 // This is the Simulators execution loop. Call this function to start the similator
 // after initialization.
-void CSimControl::ExecLoop(void)
+void CSimControl::ExecLoop(char *loadBin)
 {
 	char cmdString[COMMAND_BUFFER_SIZE];
 	int status;
 	int length;
 
 	SimIO.PrintText("\nWelcome to the BYU ECEn 425 8086 simulator.\nFor a list of commands, enter h or ?.\n\n");
+
+    if (loadBin) {
+        snprintf(cmdString, COMMAND_BUFFER_SIZE, "l %s", loadBin);
+        ExecCommand(cmdString, &cmdCurrent);
+    }
 
 	do {
 		// Display Prompt

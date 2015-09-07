@@ -221,7 +221,7 @@ public:
 	// Interface //
 
 	bool InitSim(char *path);
-	void ExecLoop(void);
+	void ExecLoop(char *loadBin);
 
 	void EnqueueInterrupt(int interruptVector);
 	void ProgramTerminated(unsigned short exitCode);
