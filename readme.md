@@ -89,4 +89,7 @@ lab1.s:         lab1.c
 
 clean:  
                 rm lab1.bin lab1.lst lab1final.s lab1.s lab1.i
+
+test:
+                emu86 lab1.bin
 ```
