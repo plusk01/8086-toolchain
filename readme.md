@@ -92,3 +92,5 @@ clean:
 test:
                 emu86 lab1.bin
 ```
+
+**Makefile error:** If you copy this directly and paste into a Makefile, the tabs will often be converted to spaces. You will get a "Missing separator" error from make. Just replace the indentions with two tabs and it should work.
