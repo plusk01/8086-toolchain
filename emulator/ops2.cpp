@@ -88,68 +88,68 @@ void x86emuOp2_long_jump(u8 op2)
     START_OF_INSTR();
     switch (op2) {
       case 0x80:
-        name = "JO\t";
+        name = (char *)"JO\t";
         cond =  ACCESS_FLAG(F_OF);
         break;
       case 0x81:
-        name = "JNO\t";
+        name = (char *)"JNO\t";
         cond = !ACCESS_FLAG(F_OF);
         break;
       case 0x82:
-        name = "JB\t";
+        name = (char *)"JB\t";
         cond = ACCESS_FLAG(F_CF);
         break;
       case 0x83:
-        name = "JNB\t";
+        name = (char *)"JNB\t";
         cond = !ACCESS_FLAG(F_CF);
         break;
       case 0x84:
-        name = "JZ\t";
+        name = (char *)"JZ\t";
         cond = ACCESS_FLAG(F_ZF);
         break;
       case 0x85:
-        name = "JNZ\t";
+        name = (char *)"JNZ\t";
         cond = !ACCESS_FLAG(F_ZF);
         break;
       case 0x86:
-        name = "JBE\t";
+        name = (char *)"JBE\t";
         cond = ACCESS_FLAG(F_CF) || ACCESS_FLAG(F_ZF);
         break;
       case 0x87:
-        name = "JNBE\t";
+        name = (char *)"JNBE\t";
         cond = !(ACCESS_FLAG(F_CF) || ACCESS_FLAG(F_ZF));
         break;
       case 0x88:
-        name = "JS\t";
+        name = (char *)"JS\t";
         cond = ACCESS_FLAG(F_SF);
         break;
       case 0x89:
-        name = "JNS\t";
+        name = (char *)"JNS\t";
         cond = !ACCESS_FLAG(F_SF);
         break;
       case 0x8a:
-        name = "JP\t";
+        name = (char *)"JP\t";
         cond = ACCESS_FLAG(F_PF);
         break;
       case 0x8b:
-        name = "JNP\t";
+        name = (char *)"JNP\t";
         cond = !ACCESS_FLAG(F_PF);
         break;
       case 0x8c:
-        name = "JL\t";
+        name = (char *)"JL\t";
         cond = xorl(ACCESS_FLAG(F_SF), ACCESS_FLAG(F_OF));
         break;
       case 0x8d:
-        name = "JNL\t";
+        name = (char *)"JNL\t";
         cond = xorl(ACCESS_FLAG(F_SF), ACCESS_FLAG(F_OF));
         break;
       case 0x8e:
-        name = "JLE\t";
+        name = (char *)"JLE\t";
         cond = (xorl(ACCESS_FLAG(F_SF), ACCESS_FLAG(F_OF)) ||
                 ACCESS_FLAG(F_ZF));
         break;
       case 0x8f:
-        name = "JNLE\t";
+        name = (char *)"JNLE\t";
         cond = !(xorl(ACCESS_FLAG(F_SF), ACCESS_FLAG(F_OF)) ||
                  ACCESS_FLAG(F_ZF));
         break;
@@ -180,68 +180,68 @@ void x86emuOp2_set_byte(u8 op2)
     START_OF_INSTR();
     switch (op2) {
       case 0x90:
-        name = "SETO\t";
+        name = (char *)"SETO\t";
         cond =  ACCESS_FLAG(F_OF);
         break;
       case 0x91:
-        name = "SETNO\t";
+        name = (char *)"SETNO\t";
         cond = !ACCESS_FLAG(F_OF);
         break;
       case 0x92:
-        name = "SETB\t";
+        name = (char *)"SETB\t";
         cond = ACCESS_FLAG(F_CF);
         break;
       case 0x93:
-        name = "SETNB\t";
+        name = (char *)"SETNB\t";
         cond = !ACCESS_FLAG(F_CF);
         break;
       case 0x94:
-        name = "SETZ\t";
+        name = (char *)"SETZ\t";
         cond = ACCESS_FLAG(F_ZF);
         break;
       case 0x95:
-        name = "SETNZ\t";
+        name = (char *)"SETNZ\t";
         cond = !ACCESS_FLAG(F_ZF);
         break;
       case 0x96:
-        name = "SETBE\t";
+        name = (char *)"SETBE\t";
         cond = ACCESS_FLAG(F_CF) || ACCESS_FLAG(F_ZF);
         break;
       case 0x97:
-        name = "SETNBE\t";
+        name = (char *)"SETNBE\t";
         cond = !(ACCESS_FLAG(F_CF) || ACCESS_FLAG(F_ZF));
         break;
       case 0x98:
-        name = "SETS\t";
+        name = (char *)"SETS\t";
         cond = ACCESS_FLAG(F_SF);
         break;
       case 0x99:
-        name = "SETNS\t";
+        name = (char *)"SETNS\t";
         cond = !ACCESS_FLAG(F_SF);
         break;
       case 0x9a:
-        name = "SETP\t";
+        name = (char *)"SETP\t";
         cond = ACCESS_FLAG(F_PF);
         break;
       case 0x9b:
-        name = "SETNP\t";
+        name = (char *)"SETNP\t";
         cond = !ACCESS_FLAG(F_PF);
         break;
       case 0x9c:
-        name = "SETL\t";
+        name = (char *)"SETL\t";
         cond = xorl(ACCESS_FLAG(F_SF), ACCESS_FLAG(F_OF));
         break;
       case 0x9d:
-        name = "SETNL\t";
+        name = (char *)"SETNL\t";
         cond = xorl(ACCESS_FLAG(F_SF), ACCESS_FLAG(F_OF));
         break;
       case 0x9e:
-        name = "SETLE\t";
+        name = (char *)"SETLE\t";
         cond = (xorl(ACCESS_FLAG(F_SF), ACCESS_FLAG(F_OF)) ||
                 ACCESS_FLAG(F_ZF));
         break;
       case 0x9f:
-        name = "SETNLE\t";
+        name = (char *)"SETNLE\t";
         cond = !(xorl(ACCESS_FLAG(F_SF), ACCESS_FLAG(F_OF)) ||
                  ACCESS_FLAG(F_ZF));
         break;

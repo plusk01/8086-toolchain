@@ -1254,17 +1254,16 @@ PRIVATE void put_rseg P1 (SIZE, al)
     put_cseg (al);
 }
 
+/*	The following isn't supported by NASM. -WSF
 static void put_noseg P0 (void)
 {
-	/*	The following isn't supported by NASM. -WSF
     nl ();
     if (curseg != noseg) {
 	curseg = noseg;
 	align_type = 0L;
 	oprintf ("\tassume\tds:nothing%s", newline);
     }
-	*/
-}
+}*/
 
 PRIVATE void put_finish P0 (void)
 {

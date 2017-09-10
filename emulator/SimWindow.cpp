@@ -48,7 +48,7 @@ bool CSimWindow::InitWindow(void)
 // For printing normal strings. It supports \n, \r, \t, and \b correctly.
 void CSimWindow::PrintText(const char *string)
 {
-	printf(string);
+	printf("%s", string);
 }
 
 
@@ -90,7 +90,7 @@ int CSimWindow::GetHistory(int dir, char *dest, int clearChars)
 	// Copy command from history
 	strcpy(dest, string);
 	i = strlen(string);
-	printf(string);
+	printf("%s", string);
 	
 	return i;
 }
