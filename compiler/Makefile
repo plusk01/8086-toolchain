@@ -18,6 +18,7 @@ CFLGS=  -DNDEBUG -O
 SRCDIR=
 OBJDIR=unixobj/
 BINDIR=../bin/
+MKDIR_P=mkdir -p
 
 # cxref flags
 CXFLAGS=-d -l -s
@@ -338,8 +339,11 @@ $(S)c$(S)ln:
 $(S)c$(S)cx:
 		cxref $(CXFLAGS) -C $<
 
-$(BINDIR)$(PROG):	$(OBJS)
+$(BINDIR)$(PROG):	directory $(OBJS)
 		$(CC) $(LDFLAGS) $(OF)$@ $(OBJS) $(LIB)
+
+directory:
+	$(MKDIR_P) $(BINDIR)
 
 $(OBJ): 	$(HDR)
 $(OBJ68K):	$(HDR) $(HDR68K)
