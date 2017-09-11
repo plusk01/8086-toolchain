@@ -29,6 +29,7 @@ CC = g++ -m32
 PCRTCC = gcc
 
 BIN_DIR = ../bin/
+MKDIR_P = mkdir -p
 
 # Nasm Source Directory
 ND = NasmDisassemble/
@@ -36,9 +37,12 @@ ND = NasmDisassemble/
 # NOTE: In order to be portable from EE to ET machines
 # libstdc++ must be statically linked (-static).
 
-all: ExecRelease/emu86 ExecRelease/ProgramCRT
+all: directory ExecRelease/emu86 ExecRelease/ProgramCRT
 	cp ExecRelease/emu86 $(BIN_DIR)emu86
 	cp ExecRelease/ProgramCRT $(BIN_DIR)ProgramCRT
+
+directory:
+	$(MKDIR_P) $(BIN_DIR)
 
 # Emu86 Executable
 ExecRelease/emu86:	ExecRelease/ProgramCRT \
