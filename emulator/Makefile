@@ -109,6 +109,6 @@ PIC.o:		PIC.cpp PIC.h x86emu/x86emui.h
 
 # Cleanup
 clean:		
-		-rm *.o ExecRelease/emu86 ExecRelease/ProgramCRT
-		-rm $(BIN_DIR)emu86 $(BIN_DIR)ProgramCRT
+		-rm -f *.o ExecRelease/emu86 ExecRelease/ProgramCRT
+		-rm -f $(BIN_DIR)emu86 $(BIN_DIR)ProgramCRT
 
