@@ -22,10 +22,20 @@ There are a few dependencies needed for this toolchain to be built correctly.
 On Debian based systems (Ubuntu, etc), run the following in your terminal:
 
 ```bash
-sudo apt-get install gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev
+sudo apt-get install gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev xterm
 ```
 
-*Tested on Ubuntu 16.04 x86_64.*
+If on Ubuntu 17.04 or higher, you may get the following error:
+
+```bash
+xterm: cannot load font '-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso10646-1'
+```
+
+emu86 will still work fine, however, if the error is annoying then
+try following the steps in this form:
+http://forum.porteus.org/viewtopic.php?f=53&t=1013
+
+*Tested on Ubuntu 16.04 x86_64, Ubuntu 17.04 x86_64 & Ubuntu 17.10*
 
 **Prerequisites for Mac OS X:**
 
