@@ -22,10 +22,10 @@ There are a few dependencies needed for this toolchain to be built correctly.
 On Debian based systems (Ubuntu, etc), run the following in your terminal:
 
 ```bash
-sudo apt-get install gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev
+sudo apt-get install gcc-multilib g++-multilib libc6-dev-i386 lib32ncurses5-dev xterm
 ```
 
-*Tested on Ubuntu 16.04 x86_64.*
+*Tested on Ubuntu 16.04 x86_64, Ubuntu 17.04 x86_64 & Ubuntu 17.10*
 
 **Prerequisites for Mac OS X:**
 
@@ -70,6 +70,8 @@ This will actually add your toolchain bin to the path.
 **Linux:**
 + `cdefs` not defined: Make sure Linux prereqs are installed
 + Parsing errors with Perl generated headers/macros: At some point the files were saved with 'DOS' line endings instead of Unix, so if you see a `^M` (Windows carriage return char) that is likely the issue and saving (or overwriting) the file correctly should fix it. Make sure to blow away any generated files.
++ If on Ubuntu 17.04 or higher, you may get the following error: `xterm: cannot load font '-misc-fixed-medium-r-semicondensed--13-120-75-75-c-60-iso10646-1'`. emu86 will still work fine. If you wish to fix the error, you can try following the steps in this form:  http://forum.porteus.org/viewtopic.php?f=53&t=1013
+
 
 **Mac:**
 + `cpp` does not remove `//` comments correctly: See Makefile example below, make sure to add `-xc++` flag to `cpp` to remove c99 style comments.
