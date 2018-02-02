@@ -517,12 +517,12 @@ long disasm (unsigned char *data, char *output, int segsize, long offset,
 	else if (*data == 0x2E || *data == 0x36 || *data == 0x3E ||
 		 *data == 0x26 || *data == 0x64 || *data == 0x65) {
 	    switch (*data++) {
-	      case 0x2E: segover = "cs"; break;
-	      case 0x36: segover = "ss"; break;
-	      case 0x3E: segover = "ds"; break;
-	      case 0x26: segover = "es"; break;
-	      case 0x64: segover = "fs"; break;
-	      case 0x65: segover = "gs"; break;
+	      case 0x2E: segover = (char *)"cs"; break;
+	      case 0x36: segover = (char *)"ss"; break;
+	      case 0x3E: segover = (char *)"ds"; break;
+	      case 0x26: segover = (char *)"es"; break;
+	      case 0x64: segover = (char *)"fs"; break;
+	      case 0x65: segover = (char *)"gs"; break;
 	    }
 	} else if (*data == 0x66)
 	    osize = 48 - segsize, data++;

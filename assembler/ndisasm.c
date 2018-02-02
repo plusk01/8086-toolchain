@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 		p++;
 		break;
 	      case 'h':
-		fprintf(stderr, help);
+		fprintf(stderr, "%s", help);
 		return 0;
 	      case 'r':
               case 'v':

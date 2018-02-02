@@ -222,7 +222,7 @@
  *	 NOTE: This must be a signed value.
  */
 #define	STP_PTRDIFF	stp_int		/* ptrdiff_t type; either stp_int or stp_long */
-								/* 8086 Needs 16-bit pointers. -WSF /*
+								/* 8086 Needs 16-bit pointers. -WSF */
 
 /*
  *	The type of a wide character is implementation defined and has an

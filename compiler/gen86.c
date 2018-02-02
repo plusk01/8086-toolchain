@@ -1553,7 +1553,7 @@ static ADDRESS *g_shift P3 (const EXPR *, ep, FLAGS, flags, OPCODE, op)
 static ADDRESS *g_asshift P3 (const EXPR *, ep, FLAGS, flags, OPCODE, op)
 {
     ADDRESS *ap1, *ap2;
-    EXPR   *ep1;    FLAGS   flgs;   // Added for new code below - WSF
+    FLAGS   flgs;   // Added for new code below - WSF
 
 
     switch (ep->etp->type) {
@@ -1578,9 +1578,8 @@ static ADDRESS *g_asshift P3 (const EXPR *, ep, FLAGS, flags, OPCODE, op)
 	// code for the 8086 (i.e., uses an immediate operand). The code was 
 	// taken from the g_shift() function. - WSF
 	ap1 = g_expr (ep->v.p[0], (FLAGS) (F_DREG | F_VOL | F_NOECX));
-	ep1 = ep->v.p[1];
-		flgs = (FLAGS) (F_DREG | F_ECX);
-	    ap2 = g_expr (ep->v.p[1], flgs);
+	flgs = (FLAGS) (F_DREG | F_ECX);
+	ap2 = g_expr (ep->v.p[1], flgs);
 	validate (ap1);
 	g_code (op, (ILEN) ep->etp->size, ap2, ap1);
 	freeop (ap2);

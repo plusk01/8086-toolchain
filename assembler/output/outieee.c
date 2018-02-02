@@ -1102,7 +1102,7 @@ static void ieee_putascii(char *format, ...)
 		if ((buffer[i] & 0xff) > 31)
 			checksum+=buffer[i];
 	va_end(ap);
-	fprintf(ofp,buffer);
+	fprintf(ofp,"%s",buffer);
 }
 
 /*
