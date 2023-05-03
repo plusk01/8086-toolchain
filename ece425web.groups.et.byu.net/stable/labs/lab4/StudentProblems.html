@@ -1,0 +1,382 @@
+<html><head><title>Student Problem List</title></head>
+
+<body bgcolor="#ffffff">
+<h2>Student Problem List</h2>
+
+Below is a list of problems that students ran into during previous
+semesters while completing lab 4 (parts B, C, and D). Reading through the list may
+help you avoid these same problems.
+
+<ul>
+
+<li> At first, I initialized stack values for
+  new tasks to be all 0's.  But when I was verifing that the stack was
+  getting written to the correct location, I wanted to put a non-zero
+  value into the stack locations.  I assumed that wouldn't hurt
+  anything.  I left CS at 0 but I ignorantly assigned DS to be 1.
+  What did that do?  It added 16 to the address of any reference to
+  the data segment.  I was thrown off the trail because it looked like
+  I was just getting bad reads from memory and I couldn't figure out
+  why. 
+
+<li> We used the -= operator, and it ended up with sub ax, -18h  when the c said -= 18h,  thus it added instead of subtracted, and it took a lot of debugging to figure out that it wasn't our fault.  We fixed the problem by using x = x - 18h and it worked correctly.
+
+  <li> The c86 compiler was saying "TERMINATING: - signal 11 received"
+when it tried to compile my yakc.i.  We had the TCB and TCBptr
+typedefs BELOW a function prototype that used TCBptr as an argument.
+Once we moved the typedefs above the function prototypes, we didn't
+have any more problems.  
+
+  <li> We forgot that declarations of variables have to happen at the
+beginning of a scope (i.e. before function calls).  Otherwise, you get
+strange behavior.  
+
+   <li> We inserted the TCB into a sorted list before assigning the
+task its priority--this caused everything to have a priority of 0
+(which caused our "insert" function to stop working).  
+
+   <li> We attempted to do more than necessary for this lab--we
+thought that YKEnterISR and YKExitISR were required, and they were
+giving us trouble.  But then were told that we didn't have to do them
+for this lab--we'll do them next time.
+
+  <li>We copied and pasted Dr. Archibalds linked list code and it came back 
+  to bite us.  We understood the code, but made the assumption it worked for 
+  all the cases we needed.  In the code that puts a task back into the ready 
+  list from the suspend list, we had to set the prev pointer back to 0 if it 
+  was going to the front of the list.
+
+  <li>We had to make sure that the scheduler was not called until after YKRun was 
+  called.  That means that YKExitISR shouldn't call it. The fix meant that at 
+  the beginning of scheduler we checked a global variable that was set once 
+  YKRun was called...if it hadn't been set we simply returned from YKScheduler 
+  without doing anything.
+
+  <li>We forgot to update our #define for MAXTASKS after part B - easy fix.
+
+  <li>We ran into an iret problem because we were taking care of some business 
+  before pushing our flags onto the stack.  This was remedied by pushing the 
+  iret stuff on and moving it to replace the code that was in the first few lines.
+
+  <li>We were pushing bp on the stack instead of [bp] in the dispatcher, 
+  which was not allowing us to roll out of the scheduler. 
+
+  <li>The biggest error we had was that we called YKExitISR at the end of our 
+  interrupt handler rather than right after the EOI command.
+
+  <li>We forgot that the first time you call YKScheduler from YKRun you don’t 
+  have to save context. If you do, you end up saving the YKRun’s context over 
+  the TCB of your first task.</li>
+
+  <li>We passed in a pointer to the bottom of the stack rather than to the top 
+  of the stack when creating our idle task. This caused problems. </li>
+
+  <li>In YKNewTask we set up a char pointer pointing to the top of the stack and 
+  when we set things up on the stack the indexes were not words, but bytes.</li>
+
+  <li>After spending 20 hours on this part of the lab, one hint I'd give future 
+  students: make sure your dispatcher is doing EXACTLY what you think it's doing 
+  before you mess with your other code too much.</li>
+
+  <li>The clib.h doesn't have NULL defined and we had to determine how to define 
+  NULL</li>
+
+  <li>All of our problems revolved around setting up the stack for each task in 
+  YKNewTask and properly pushing and popping on the correct stack when in 
+  YKDispatcher. To solve the problems, we put breakpoints at YKNewTask and 
+  YKDispatcher, then looked at a dump of the stack at certain points to make 
+  sure the correct information was being pushed/popped and in the right order. 
+  Drawing out the stack frame for each task helped as well.</li>
+
+  <li>Pointers in assembly. Make sure you really dereference them. Or 
+  vise-versa. Symptoms were usually overwritten memory. Especially with strings 
+  to be printed.</li>
+
+  <li>Declared variables in middle of functions rather than top. That did weird 
+  things. DON’T DO THAT !!!!</li>
+
+  <li>The only major problem we encountered was with our dispatcher. We kept on 
+  dispatching functions with the stack pointed to one value higher than it 
+  should have been. The problem was that we forgot to account for the IP that 
+  was pushed onto the stack when dispatcher was called.</li>
+
+  <li>The most difficult thing to implement was saving and restoring state. We 
+  figured out that we could save state of the current running task first thing 
+  in the dispatcher, than restore state of the task it's switching to right 
+  after. This way when a task is restored it will restore and return to the 
+  scheduler, since it is what called the dispatcher, then return to the task, or 
+  whatever called the scheduler.</li>
+
+  <li>We forgot to add ret statements to EnterMutex and ExitMutex minor bug, but 
+  took a minute to figure it out.</li>
+
+  <li>We traversed our entire TCB array (of 100 TCBs) everytime the tick ISR was 
+  called to decrement all the delayed tasks. This took so long that when we 
+  lowered the tick delay to 750, the tick ISR ran continuously.</li>
+
+  <li>When dealing with the interrupts, we didn't think to use the same clib.s 
+  file as we used in lab 3. Because of this, when an interrupt happened, code 
+  starting executing at the interrupt table.</li>
+
+  <li>Getting the code to execute properly with ticks at 750. It seemed that 
+  interrupts were not being reenabled after Task C started to run. What really 
+  happened was that when YKNewTask was called to create the TCB and context for 
+  Task C, it was interrupted by the tick before it could be properly setup, and 
+  then it was restored by the YKDispatcher with incorrect context. Thus, the key 
+  to making sure tick interrupts were enabled was to DISABLE interrupts at the 
+  beginning of YKNewTask! </li>
+
+<li> My scheduler has to search for the highest priority task.  It was
+failing to do so correctly because I didn't initialize my highest
+priority TCB pointer correctly.  To fix it, I had to initially set my
+highest priority task pointer to a dummy TCB whose priority was lower
+than the idle task (a value higher than the idle task) so that my
+search algorithm would always find the idle task even if nothing else
+was on the list.</li>
+
+<li> Our problem list:
+  <ol>
+  <li> Our CS register was being modified without us knowing, throwing
+       the location of the instructions into a non-existent place in
+       memory.  We changed a lot of code because this indicated that
+       our stack pointer was off.  When we restored context, a weird
+       value was put into CS instead of the value it should have been:
+       0x0000.
+
+  </li><li> In our tick isr we weren't being as careful as we should have
+       been with replacing the pointers in the doubly linked list of
+       TCBs.  We made sure that we disabled and enabled interrupts
+       around the transfer between lists as well as making sure that
+       we weren't making any TCBs null.
+
+  </li><li> Our idle task was taken out of the ready list and put into the
+       suspended list when it shouldn't have been.  We changed that by
+       changing how we moved things from the suspended list to the
+       ready list.
+
+  </li><li> We had difficulty setting up the initial stack of each task.
+       We used the dummy stack, then switched to just creating a small
+       stack of values to stick on each stack when we initialized each
+       new task.  We had to be very careful with our stack pointer in
+       these cases, making sure it pointed to the correct places on
+       the stack for us.
+
+  </li><li> Because of number 4, that caused problems with how we saved and
+       restored context.  We solved this by fixing problem 4.
+  </li></ol>
+
+</li><li> I could run tasks initially, but they would not work the second
+time they were called.  I discovered that the section of code in my
+dispatcher that saves the context was not being executed.  The cmp
+instrution, followed by a jump if 0, was incorrectly set.  It would
+jump every time to the code to restore the other task, but skip the
+code to save the old.  I was did not know the compare was not a word
+compare.  when I changed it from cmp byte [bp+4],1 to cmp byte
+[bp+5],1 it worked.
+
+</li><li> I was careless about parts of the code where interrupts were
+re-enabled.  I had to re-check all my functions to ensure that none
+were re-enabling them unless it was absolutely necessary.  Before I
+did this, the code would work great most of the time but it had
+desultory stalls.  When the tick was set to 1000, it could aggravate
+it.  It would also only call task C after a while.  One I made sure
+the interrupts were correctly set it worked fine.
+
+</li><li> The global variables declared in the header had duplicate copies.
+I just consolidated the functions that needed those vars into one
+file.
+
+</li><li> In delay task, when we moved a node from one list to another, we
+   started traversing the wrong list in our while loop. (temp-&gt;next no
+   longer pointed to the next node in the delayed list, but in the
+   ready list).  Solution: save the temp-&gt;next pointer before changing
+   lists.
+
+</li><li> We forgot to disable interrupts when we were dealing with lists,
+   and sometimes a task would disappear.  Surround anything dealing
+   with the lists with Enter and ExitMutex().
+
+</li><li> When we removed a task we would accidentdly move down the
+ready list instead of the delayed list, and only one task could run
+per tick.
+
+</li><li> We didn't know before that we would need to save the bp.
+
+</li><li> We first had problems ascertaining exactly when and where we were
+to save context.  After deciding that, we then spent the rest of our
+debugging time just working out the actual implementation of the
+saving and restoring of the context.  We did not suffer from
+compilation errors, but our run-time errors were always related to
+improper saving of the context.  Our biggest challenge was
+understanding the status of the stack with respect to function calls
+and the pointer bp.
+
+</li><li> The major problem we had was incorrectly using global variables
+and missunderstanding how function calls are pushed onto the stack.
+
+</li><li> The only major problem we ran into was that our code was not
+optimized so that it operated correctly at 1,000 ticks.  It worked
+perfect down to about 2500 but we had to re-write our sorting
+algorithm in order for it to work with the 1000. Another problem we
+ran into was with our saving of context.  We eventually realized that
+on our stack we had two different return IP's.  One for the actual
+task that was running and another for the function that had called
+YKSaveContext...YKScheduler.
+
+</li><li> Another problem we encountered was making sure the YKISRCallDepth
+got incremented and decremented properly in the various situations
+(ISR interrups -&gt; return to previoussly running task, ISR interrupts
+-&gt; return to higher priority task, etc.)  The solution to this problem
+just involved looking at all the possible cases and making sure our
+code handled them right.
+
+</li><li> We had the hardest time with the assembly language and using it
+to save context and restore context correctly.  We weren't saving the
+stack pointer in the right place in the TCB and we weren't returning
+from a function correctly.  It also had to do with not understanding
+how the stack was working entirely.
+
+</li><li> Our dispatcher, which saves and restores context for us, was not
+written following c-calling conventions.  Therefore, when we saved our
+context it went to a location in memory that was unexpected.
+
+</li><li> After we saved the context we failed to update the stack pointer
+in our TCB.  Of course this meant that we couldn't find our context
+later when it was needed for task restoration.
+ 
+</li><li> We passed a parameter to the dispatcher informing it if it was
+being called from a task or an ISR.  If it was from an ISR then we
+didn't save the context, since the ISR would have already done this.
+We set this flag in the YKDelayTask() function.  When our idle task
+was preempted by the scheduler, control would never pass to
+YKDelayTask(), and therefore the ISR flag would be kept set from the
+last time it was set.  When the dispatcher was called it thought it
+was coming off an ISR, when in reality the previous context was the
+idle task.  So, the context of the idle task wouldn't get saved.  This
+was our most difficult and subtle bug, by far.  We spent about 3 hours
+searching for it, and would have spent much more time on it if
+[another student} hadn't pointed out that he had had such a bug.  We
+fixed it and the program worked after that.
+
+</li><li> We used a linked list to keep track of our TCB's, but we
+forgot\didn't understand that a pointer in C merely holds an
+address--not space for the parameters.  Because of this, our TCB's
+were getting initialized with wrong values.  We solved this by
+creating an array of TCB's to allocate the space necessary.  Our other
+main problem was a fuzzy understanding of saving and restoring context
+and how the dispatcher transfers control to the task.  When we talked
+to the TA and finally understood how saving and restoring context and
+the dispatcher work, we were able to rewrite our dispatcher and pass
+off the lab in a couple of hours.
+
+</li><li> Some of the problems encountered: calling the scheduler from the
+tickhandler; setting up the save context and saving the appropriate
+return IP for the pseudo Iret was also a challenge.
+
+</li><li> In our YKNewTask we didn't figure out correctly the number of
+bytes that we needed to allocate for saving our context.  Because of
+this, our CS was set to our IP and our IP was set to 0 so when we
+dispatched the task it tried to execute the instruction in address:
+CS:IP which didn't exist.  The other big "bug" was that we were not
+updating our TCBsp every time we saved the context for the task. so
+every time the task was dispatched, our TCBsp was set to the initial
+value that we had given to it in YKNewTask.
+
+</li><li> We were trying to get fancy with our context saving and
+restoring.  Specifically, we were trying to save and restore context
+outside of the dispatcher. We re-worked our strategy to save and
+restore the context from inside the dispatcher, and we wrote multiple
+dispatchers to deal with three cases: When we launch the first task
+from the main, when we switch from a running task to a task that was
+never run before, and when we switch from a running task to a task
+that has been run before. Things worked then.
+
+</li><li> We tried making our YKEnterMutex and YKExitMutex too smart. They
+were keeping track of enable and disable requests in an attempt to not
+allow the user to inadvertently re-enable interrupts when the program
+has had two disable requests in a row previously (nested interrupt
+disabling and enabling). Since interrupts may be enabled with "iret"
+outside of the control of the YKEnterMutex and YKExitMutex functions,
+our "smartness" was, um, outsmarted. In short, we just figured out
+manually where it would be safe to re-enable interrupts from the
+context of our kernel implementation. Since the kernel is so small,
+this was not difficult.
+
+</li><li> Our first problem was that in our dispatcher, we were overwriting
+bp when restoring context, and we couldn't fetch our ip to go to the
+next instruction.  Our other major problem was that we weren't saving
+our sp in our ISR assembly code.
+
+</li><li> The major problems we ran into were putting the end of interrupt
+code in the wrong place.  We updated the TCB's stack pointer every
+time we went into an interrupt.  But we only want update it when we go
+into the first interrupt.  Also we had some problems when we had
+interrupts enabled when the scheduler was running.
+
+</li><li> We did not correctly update the pointer to the current task.  This resulted in our blocked task list becoming a circular list, cycling on the first item in the list, as we kept trying to add the same one to the list.</li>
+
+<li>Because we were making a call to the dispatcher as a function, the stack pointer was in the wrong place. The stack pointer was referencing points in the function call, instead of somewhere we could restore context to safely.
+
+</li><li> We had to decide when to enter and exit the mutex.  We were
+returning from the dispatcher to the scheduler after an IRET for
+restoring the context, and, if we were entering back into the idle
+task it would hang.  To fix this problem we had to put the mutex into
+an else statement if it entered into the dispatcher.
+
+</li><li> We had difficulty initializing a stack when the task was first
+created.  We finally created a function in assembly.  This function
+was passed the task pointer and the taskstack pointer.  We then pushed
+on fake flags, the CS, then the task pointer onto the taskstack.
+Finally we pushed on 9 dummy registers containing 0's and returned the
+SP to the calling funcion, which, in turn, saved it in the TCB.
+
+</li><li> We originally wrote several different dispatchers to handle the
+different cases, but in the end, we just wrote one, and made all
+context pushes appear as if they were pushed by an interrupt. 
+
+</li><li> We failed to include clib.s as the first item when running
+cat. This led to all kinds of weird bugs until we corrected it.
+
+</li><li> When returning a task to the ready list from the delayed list, we
+would sometimes skip checking the state of one of the delayed tasks at
+the end of the list. This was because we moved to the next item in the
+list even if we removed an item. Changing the code to an if-else
+solved this problem.
+ 
+</li><li> Stack overflow: We were not setting the stack pointer quite
+correctly, so each time a task was delayed, 2 words of garbage
+remained on the stack. After a few hundred ticks, the stack would
+overflow and overwrite other code. Correctly removing all necessary
+items from the stack in the dispatcher solved this problem.
+
+</li><li> Setting stack pointer: originally we forgot to supply the
+starting stack pointer for each task when it was launched. The task
+stack pointer then looked like the system stack pointer at a really
+high address like FFE0. Setting the initial task stack pointer to the
+value *taskstk passed into YKInitialize solved this problem.
+ 
+</li><li> In setting up our initial context we had major problems because
+we were pushing the program bp instead of the bp for the taskstack.
+So we had a bp value of FFFF.  Another one of our problems was that we
+were checking for which return type to use based on the function that
+called the interupt instead of what type of function was called to
+stop the task.  We also would over run our stack with really deep
+nested interupts so we had to fix that.  Most of the otherbugs we had
+were based on having the wrong sp or bp or number of things on the
+stack.
+</li>
+
+<li> Symptom: Returning to the wrong place. Some other problems were: We
+wrote functions to save context, but they wouldn't return to the right
+place because the RET instruction would pop off the wrong address from
+the stack.  So we just copied the code instead of calling some generic
+function to save and restore context.  The next problem was that our
+ENTERISR updated the stack frame so that we could pop the context off
+at the end of the dispatcher.  Unfortunately since it was a function
+call, the stack frame was off by two bytes and we would return to
+whatever our flags were pointing to.  </li>
+
+<li>The TICK handler was that it wasn't updating the delayed list correctly.</li>
+</ul>
+
+</body></html>

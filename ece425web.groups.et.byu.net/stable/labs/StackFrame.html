@@ -1,0 +1,285 @@
+<html>
+
+<head>
+<title>C Calling Convention and the 8086</title>
+</head>
+
+<body>
+<h2>The C Calling Convention and the 8086: Using the Stack Frame</h2>
+<hr>
+<a href="#QuickReference"><h3>Quick Reference</h3></a>
+<hr>
+<h3>
+
+C Functions on the 8086 (Near Calls)</h3>
+<p>
+When a C function call is made, arguments are passed to the function by being pushed one word (i.e., 16-bits) at a time onto the stack in reverse
+of the order as listed in the C function declaration. All near functions are of the following form (or an equivalent form):
+<pre>MyFunc:
+      push    bp                           ; (1) save bp
+      mov     bp, sp                       ; (2) set bp for referencing stack
+      sub     sp, {local data size}        ; (3) allocate space for local variables
+      ...
+      ... &lt;- function body
+      ...
+      mov     {return reg}, {return value} ; (4) set return value
+      mov     sp, bp                       ; (5) free space used by local variables
+      pop     bp                           ; (6) restore bp
+      ret</pre>
+The first thing a C function does (1) is save bp. It can then (2) put a copy of sp into bp. Once bp is set up, (3) storage space for any local variables is reserved on the stack. These first three steps set up the
+<i> stack frame</i> for the function. Since the initial value of sp is saved in register bp, bp can be used as a reference to access the arguments that were pushed onto the stack when the function was called as well as the local variables declared within the function. At the end of the function, if the function returns a value, (4) the return value is placed in the appropriate registers. To clean up, (5) the stack is restored to its initial value, freeing the local data space that was allocated in step 3, and (6) bp is restored, thus removing the stack frame.
+In order for this system to work properly, bp should not be modified in the function body.
+<p>
+<b>Note 1:</b> If there are no local variables then there is no need to reserve space on the stack (step (3)). If there are no function arguments or local variables then it may not be necessary to set up and restore the stack frame (steps (1)-(3) and (5)-(6)). If there is no return value for a function then step (4) can be omitted.
+<p>
+<b>Note 2:</b> When writing functions in assembly language, the conventions above should always be followed. Also, many compilers (including c86) expect certain registers to be unchanged when a function returns, except for those registers used to save the return value. Therefore, <b>the stack should be used to save and restore registers that are used in the function body</b>.
+For example if I wanted to use the register bx in a function I should execute "<samp>push bx</samp>" at the beginning of the function and "<samp>pop bx</samp>" at the end.
+<p>
+Consider the following C function:
+<pre>int MyFunc(int arg1, int arg2, int arg3)
+{
+    int local1;
+    int local2;
+    int local3;
+    ...
+    ... &lt;- function body
+    ...
+    return 3;
+}</pre>
+For this function, compared to the assembly version above, <samp>{local data size}</samp> would be 6 for the three word-sized variables (or 6 bytes), <samp>{return reg}</samp> would be ax because MyFunc returns type int, and {return value} would be 3. Access to the arguments and to the local variables is made relative to bp. For example, the following assembly memory references would be used to access the variables in MyFunc():
+<pre>	[bp+8] -&gt; arg3
+	[bp+6] -&gt; arg2
+	[bp+4] -&gt; arg1
+	[bp+2] -&gt; saved ip (return address)
+	[bp]   -&gt; saved bp
+	[bp-2] -&gt; local1
+	[bp-4] -&gt; local2
+	[bp-6] -&gt; local3</pre>
+Therefore, if you wanted to load variable local2 into register dx, you could use the following instruction:
+<pre>	mov	dx, word [bp-4]</pre>
+The numbers used in the memory references change based on the size of the data values. However, the first argument is always located at [bp+4] and the first local variable is always just below [bp] (i.e., at [bp-1] for a byte, at [bp-2] for a word, etc.).
+<p>
+<b>Byte Sized Variables</b><p>
+Byte sized variables can be a point of confusion. When passing <i>arguments</i> to a function, byte sized arguments are always pushed onto the stack as words, since the 8086 push instruction will only push 16-bit values. The <i>least</i> significant byte of the word is used to store the value (i.e., the lower memory address). Similarly, for local variables, a full word is reserved for byte sized variables. However, for byte sized
+<i> local variables</i>, the part of the word that is used is the <i>most</i> significant byte (i.e., the higher memory address). Using
+word sizes ensures that there will be no misaligned memory accesses, which can slow performance. It's important to remember when accessing byte sized variables that the unused byte of the word may or may not be zero and should be avoided.
+<p>
+<b>Local Variable Examples</b><p>
+The table below shows the effects that changing the above C function has on
+local variable locations. In the left column is the original example. The middle
+column shows the effects of changing local1 from type int to type char. The
+right column shows the effects of changing local1 from type int to type long.
+The changes are noted in bold.
+<br><blockquote>
+<table border="1" cellpadding="6">
+  <tr>
+    <td align="center">
+<p align="center"><b>Original Int Example</b>
+    </td>
+    <td align="center">
+<p align="center"><b>Char Local Variable</b>
+    </td>
+    <td align="center">
+<p align="center"><b>Long Local Variable</b>    </td>
+  </tr>
+  <tr>
+    <td>
+<pre>int MyFunc(...)
+{
+    int local1;
+    int local2;
+    int local3;
+    ...
+    ...
+}</pre>
+    </td>
+    <td>
+<pre>int MyFunc(...)
+{
+    <b>char</b> local1;
+    int  local2;
+    int  local3;
+    ...
+    ...
+}</pre>
+    </td>
+    <td>
+<pre>int MyFunc(...)
+{
+    <b>long</b> local1;
+    int  local2;
+    int  local3;
+    ...
+    ...
+}</pre>    </td>
+  </tr>
+  <tr>
+    <td>
+<pre>[bp-2] -&gt; local1 (word)
+[bp-4] -&gt; local2 (word)
+[bp-6] -&gt; local3 (word)</pre>
+    </td>
+    <td>
+<pre><b>[bp-1]</b> -&gt; local1 (<b>byte, [bp-2] is unused</b>)
+[bp-4] -&gt; local2 (word)
+[bp-6] -&gt; local3 (word)</pre>
+    </td>
+    <td>
+<pre><b>[bp-4]</b> -&gt; local1 (<b>dword, [bp-2] is high word</b>)
+<b>[bp-6]</b> -&gt; local2 (word)
+<b>[bp-8]</b> -&gt; local3 (word)</pre>
+    </td>
+  </tr>
+</table></blockquote>
+<p>
+<b>Argument Examples</b><p>
+The table below shows the effects that changing the C function example has on
+argument locations. In the left column is the original example. The middle
+column shows the effects of changing arg1 from type int to type char. The right
+column shows the effects of changing arg1 from type int to type long. The
+changes are noted in bold.
+<br><blockquote>
+<table border="1" cellpadding="6">
+  <tr>
+    <td align="center">
+<p align="center"><b>Original Int Example</b>
+    </td>
+    <td align="center">
+<p align="center"><b>Char Argument</b>
+    </td>
+    <td align="center">
+<p align="center"><b>Long Argument</b>    </td>
+  </tr>
+  <tr>
+    <td>
+<pre>int MyFunc(int arg1, int arg2, int arg3)
+{
+    ...
+    ...
+}</pre>
+    </td>
+    <td>
+<pre>int MyFunc(<b>char</b> arg1, int arg2, int arg3)
+{
+    ...
+    ...
+}</pre>
+    </td>
+    <td>
+<pre>int MyFunc(<b>long</b> arg1, int arg2, int arg3)
+{
+    ...
+    ...
+}</pre>    </td>
+  </tr>
+  <tr>
+    <td>
+<pre>[bp+8] -&gt; arg3 (word)
+[bp+6] -&gt; arg2 (word)
+[bp+4] -&gt; arg1 (word)</pre>
+    </td>
+    <td>
+<pre>[bp+8] -&gt; arg3 (word)
+[bp+6] -&gt; arg2 (word)
+[bp+4] -&gt; arg1 (<b>byte, [bp+5] is unused</b>)</pre>
+    </td>
+    <td>
+<pre><b>[bp+10]</b> -&gt; arg3 (word)
+<b>[bp+8]</b>  -&gt; arg2 (word)
+[bp+4]  -&gt; arg1 (<b>dword, [bp+6] is high word</b>)</pre>
+    </td>
+  </tr>
+</table></blockquote>
+<p>
+<b>Return Values</b><p>
+The following table shows the registers that are used to return values, based on the size of the return type.
+<pre>
+    byte             al
+    word  (2 bytes)  ax
+    dword (4 bytes)  dx::ax (i.e., the high word in dx and the low word in ax).
+</pre>
+On the 8086 char types are a byte; short, enum, and int types are a word (2 bytes); and long types are a dword (4 bytes).
+For larger types (e.g., structs), a more sophisticated method is used to return values.
+
+<p>&nbsp;
+
+<hr>
+<h3>C Functions on the 8086 (Far Calls)
+</h3>
+<p>
+The following information is supplementary and is not required for any labs.
+<p>
+Far functions are used to make function calls across segment boundaries, which is often required in programs larger than 64
+KB. Far calls differ from near calls in that both the CS and IP registers are saved on the stack when the call is made, rather than just saving IP. The only difference between the assembly code of a near function and a far function is that when returning, the far function uses the retf instruction instead of ret. The retf instruction reloads both CS and IP from the stack.
+<p>
+For example, consider the following function:
+<pre>int far MyFunc(int arg1, int arg2, int arg3)
+{
+    int local1;
+    int local2;
+    int local3;
+    ...
+    ...
+    return 3;
+}</pre>
+Note the far keyword in the declaration. Because an extra word is saved on the stack for the return segment when the function call is made, the arguments placed on the stack are offset by one extra word relative to bp (the local variables remain the same relative to bp). The variables for the above function are located as follows:
+<pre>	[bp+10] -&gt; arg3
+	[bp+8]  -&gt; arg2
+	[bp+6]  -&gt; arg1
+	[bp+4]  -&gt; return CS (segment)
+	[bp+2]  -&gt; return IP (offset)
+	[bp]    -&gt; saved sp
+	[bp-2]  -&gt; local1
+	[bp-4]  -&gt; local2
+	[bp-6]  -&gt; local3
+</pre>
+Compare the locations of arg1, arg2, and arg3 to the locations for the near function example.
+There may also be a different data segment associated with a far function, in which case the DS
+register is saved and modified at the beginning of the function then restored at the end.
+This is necessary so that the global and static data associated with the far function can be
+correctly accessed.
+<p>&nbsp;
+<hr>
+<a name="QuickReference"></a><h3>Quick Reference</h3>
+<pre>
+<b>For near calls:</b>
+Location relative to bp                        | Variable
+-----------------------------------------------|------------
+...                                            | ...
+[bp+4+wsize(arg1)+wsize(arg2)] --------------- | arg3
+[bp+4+wsize(arg1)] --------------------------- | arg2
+[bp+4] --------------------------------------- | arg1
+[bp+2] --------------------------------------- | return address
+[bp] ----------------------------------------- | saved bp
+[bp-size(local1)] ---------------------------- | local1
+[bp-wsize(local1)-size(local2)] -------------- | local2
+[bp-wsize(local1)-wsize(local2)]-size(local3)] | local3
+...                                            | ...
+
+<b>For far calls:</b>
+Location relative to bp        | Variable
+-------------------------------|------------
+...                            | ...
+[bp+6+wsize(arg1)+wsize(arg2)] | arg3
+[bp+6+wsize(arg1)] ----------- | arg2
+[bp+6] ----------------------- | arg1
+[bp+4] ----------------------- | return address segment
+[bp+2] ----------------------- | return address offset
+{same as above} -------------- | local variables
+...                            | ...</pre>
+
+<b>Notes:</b> <samp> size(X)</samp>  is the size (in bytes) of <samp> X</samp>
+and <samp> wsize(X)</samp>  is the word size of
+<samp>X</samp>, i.e., the largest multiple of 2 that is at least as big as <samp>size(X)</samp>.
+The variables local1, local2, etc.&nbsp; refer to local variables and the variables
+arg1, arg2, etc. refer to function arguments. The names with a 1 suffix designate those
+that are declared first in the C source.
+<p>
+Return values are placed in al, ax, or dx:ax for byte, word, and dword sized values respectively.
+
+<p>
+&nbsp;
+<hr>
+</body>
+
+</html>

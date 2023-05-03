@@ -1,0 +1,376 @@
+<html>
+
+<head>
+<title>Emu86 Manual</title>
+</head>
+
+<body>
+<h2>The Emu86 Simulator</h2>
+The simulator executes binary programs compiled for the 8086. You can start the simulator by typing "emu86" in a terminal window
+(after setting up your path). When emu86 starts, a second window should appear with the title "Program Output". This window is used to display all output from your program as it executes in the simulator. The original terminal window will contain the "Emu86>" prompt and is used to enter commands and program input as well as to receive information from the simulator.
+<b>Important tip</b>: Make sure you run Emu86 in a terminal with the scroll bar enabled.
+<p>
+<br>
+
+<h3>Quick Command Lookup</h3>
+<table border=0 cellspacing=0>
+<tr valign=top>
+<td width=20>&nbsp;</td>
+<td align=right><samp>
+<a href="#h">?</a><br>
+<a href="#a">a</a><br>
+<a href="#addr">addr</a><br>
+<a href="#b">b</a><br>
+<a href="#c">c</a><br>
+<a href="#clear">clear</a><br>
+<a href="#CtrlB">Ctrl+b</a><br>
+<a href="#d">d</a><br>
+<a href="#ds">ds</a><br>
+<a href="#dump">dump</a><br>
+<a href="#dumpX">dumpb</a><br>
+<a href="#dumpX">dumpw</a><br>
+<a href="#dumpX">dumpd</a><br>
+<a href="#e">e</a><br>
+<a href="#eto">eto</a><br>
+<a href="#f">f</a><br>
+<a href="#fX">fb</a><br>
+<a href="#fX">fm</a><br>
+<a href="#g">g</a><br>
+<a href="#h">h</a><br>
+<a href="#hist">hist</a><br>
+<a href="#l">l</a><br>
+<a href="#lexe">lexe</a><br>
+</samp></td>
+<td width=20>&nbsp;</td>
+<td align=left><samp>
+help<br>
+assert<br>
+address lookup<br>
+breakpoint<br>
+clear breakpoint<br>
+clear breakpoints & monitors<br>
+program break<br>
+disassemble<br>
+dump stack<br>
+dump<br>
+dump byte<br>
+dump word<br>
+dump dword<br>
+execute<br>
+execute to<br>
+reg monitor info<br>
+reg monitor (become)<br>
+reg monitor (modify)<br>
+clear reg monitor<br>
+help<br>
+inst/int history<br>
+load<br>
+load exe<br>
+</samp></td>
+<!-- <td width=5>&nbsp;</td> -->
+<td align=right  width=100><samp>
+<a href="#m">m</a><br>
+<a href="#mX">ma</a><br>
+<a href="#mX">mb</a><br>
+<a href="#mX">mm</a><br>
+<a href="#mX">mr</a><br>
+<a href="#mX">mw</a><br>
+<a href="#n">n</a><br>
+<a href="#o">o</a><br>
+<a href="#pX">pb</a><br>
+<a href="#pX">pd</a><br>
+<a href="#pr">pr</a><br>
+<a href="#pX">pw</a><br>
+<a href="#q">q</a><br>
+<a href="#r">r</a><br>
+<a href="#r">rd</a><br>
+<a href="#r">ru</a><br>
+<a href="#regs">regs</a><br>
+<a href="#s">s</a><br>
+<a href="#simptris">simptris</a><br>
+<a href="#t">t</a><br>
+<a href="#v">v</a><br>
+<a href="#w">w</a><br>
+</samp></td>
+<td width=20>&nbsp;</td>
+<td align=left><samp>
+mem monitor info<br>
+mem monitor (access)<br>
+mem monitor (become)<br>
+mem monitor (modify)<br>
+mem monitor (read)<br>
+mem monitor (write)<br>
+clear mem monitor<br>
+step over<br>
+poke byte<br>
+poke double<br>
+poke register<br>
+poke word<br>
+quit<br>
+print regs (hex)<br>
+print reg (signed dec)<br>
+print reg (unsigned dec)<br>
+register info<br>
+step<br>
+simptris mode<br>
+tick<br>
+verbose<br>
+wipe output window<br>
+</samp></td>
+</tr>
+</table>
+<p>
+&nbsp;
+
+
+<h3>Parameter Formats</h3>
+<p>
+Parameters (or arguments) entered with simulator commands can be numbers, 
+addresses, labels, or register names. Only labels are case sensitive.
+<h4>
+Numbers:</h4>
+<p>
+If a parameter is a number, it can be entered in decimal or hexadecimal. 
+For example you can enter the number 171 in the following ways:
+<pre>
+    171     (Decimal)
+    ABh     (Hexadecimal)
+    0xAB    (Hexadecimal)
+</pre>
+
+
+<h4>
+Addresses:
+</h4>
+<p>
+If a command parameter is an address, it can be entered as a segment and offset (representing a logical address), as a single number (representing a physical address), or as the symbolic label for the address (see the section on <b>Labels</b> below). The 8086 uses logical addresses for all memory references but physical addresses can be useful since several logical addresses can represent the same physical address (Reminder: the physical address equals (segment << 4) + offset). For example, if you had a global variable, named <samp>MyGlobal</samp>, at address 12AB:34CD (physical address 89,981 or 15F7Dh), you could enter its address in the following ways: 
+<pre>
+    12AB:34CD    (Hexadecimal logical address)
+    15F7Dh       (Hexadecimal physical address)
+    0x15F7D      (Hexadecimal physical address)
+    89981        (Decimal physical address)
+    MyGlobal     (Symbolic label for the location)
+    
+</pre>
+<p>
+Note: if you use the segment and offset notation, it must be entered in hexadecimal.
+
+<h4>Labels:</h4>
+Symbolic labels from the listing file output by NASM can be used in place of numeric address parameters. For example, if you had a global variable named <samp>MyGlobal</samp> in your C or assembly code, you could simply refer to it by that name rather than entering its address. This also works for function names as well as any other label that appears in the listing file.
+<p>
+In order to use this feature, the listing file must have the same name as the binary file except it must have the ".lst" extension. For example, if you loaded a file "<samp>my_program.bin</samp>" using the load command, the simulator will automatically attempt to load the symbols from a listing file named "<samp>my_program.lst</samp>".
+
+
+<h4>
+Registers:
+</h4>
+<p>
+To identify a register, use the Intel register name (e.g., AX, BX, BP, etc.). Enter 'regs' at the emu86 prompt to see a list of register names and descriptions.
+<p>
+&nbsp;
+
+
+<h3>Command Descriptions</h3>
+<p>
+Below is a comprehensive description of simulator commands. A shorter description can be obtained by entering 'h' in the simulator window. After each command, the allowable parameters are shown. Optional parameters are enclosed in brackets ('[...]'), required parameters are not. To enter a command, simply type the command name at the "<samp>Emu86></samp>" prompt followed by the desired parameters. If you do not enter an optional parameter then some default is value assumed.
+<p>
+
+<br><h4>
+Getting help:
+</h4>
+<a name="h"><samp><b>h, ?</b>&nbsp;&nbsp;<i> - help</i></samp><br>
+Enter "h" or "?" to display a concise list of commands and descriptions.
+<p>
+<a name="regs"><samp><b>regs</b>&nbsp;&nbsp;<i> - register info</i></samp><br>
+Enter this command to see an explanation of what the different 8086 registers are and what they are typically used for.
+<p>
+
+<br>
+<h4>
+Using the simulator:
+</h4>
+<p>
+<a name="l"><samp><b>l [FILE] [ADDR] [ADDR]</b>&nbsp;&nbsp;<i> - load file</i></samp><br>
+Loads a binary file (like the DOS .COM format) specified by the FILE parameter into the simulator for execution. Normally no parameters are needed other than the filename. Use "<samp>l</samp>" by itself to reload the last file that was loaded and reset the processor for a second run. By default, files are loaded at address 0000:0000, all segment registers are set to 0, SP is set to FFFEh, and IP is set to 100h. If you do not enter a filename as the FILE parameter, the simulator will reload the last file that was loaded using the same parameters that were used previously. If an address is given as the first ADDR parameter, the file will be loaded at that address. If a second address is given, the segment of the address will be used to initialize the processor's segment registers and its offset will be used to initialize the IP register. For this command, ADDR must be a numeric address, not a label.
+<p>
+<a name="lexe"><samp><b>lexe FILE</b>&nbsp;&nbsp;<i> - load exe file</i></samp><br>
+Load a DOS .EXE format file.
+<p>
+<a name="q"><samp><b>q</b>&nbsp;&nbsp;<i> - quit</i></samp><br>
+Quits the simulator.
+<p>
+<a name="w"><samp><b>w</b>&nbsp;&nbsp;<i> - wipe output window</i></samp><br>
+Wipes (i.e., clears) the program output window.
+<p>
+<!--
+<b><samp>reset<br>
+</samp></b>
+Resets the registers to the initial state they had after the last file was loaded.
+Be aware however that most programs will need to be reloaded to be run a second
+time since simply entering 'reset' will not reinitialize the data of the program.
+Use the 'l' command instead.
+<p>-->
+<br>
+<h4>
+
+Program execution:
+</h4>
+<p>
+<a name="CtrlB"><samp><b>Ctrl+B</b>&nbsp;&nbsp;<i> - program break</i></samp><br>
+This key combination (the 'Ctrl' and 'B' keys pressed simultaneously) can be pressed any time while a program is executing to stop execution of the program at its current location. This is very useful when your program appears to be frozen. You can stop the program and immediately see where it is executing.
+<p>
+<a name="e"><samp><b>e [NUM]</b>&nbsp;&nbsp;<i> - execute</i></samp><br>
+If no NUM parameter is given, this command executes the program from the current CS:IP to the end of the program. If given, NUM tells the simulator to execute NUM instructions.
+<p>
+<a name="eto"><samp><b>eto ADDR</b>&nbsp;&nbsp;<i> - execute to</i></samp><br>
+This command causes the simulator to execute up the address ADDR, where ADDR is a numeric address or label.
+<p>
+<a name="s"><samp><b>s</b>&nbsp;&nbsp;<i> - step into</i></samp><br>
+Steps through the next instruction. Use this command to execute a program one instruction at a time.
+<p>
+<a name="o"><samp><b>o</b>&nbsp;&nbsp;<i> - step over</i></samp><br>
+Steps over the next instruction. This command is very similar to the 's' command. The difference is that it will step "over" call and int instructions. If you do not wish to step through the code of a procedure or software interrupt, use this command to run the entire function in a single step.
+<p>
+<a name="v"><samp><b>v</b>&nbsp;&nbsp;<i> - verbose toggle</i></samp><br>
+Enter this command to turn verbose mode on and off. When verbose mode is turned on, the instruction count, address, disassembly, and assembly instruction will be displayed. This greatly slows down the execution time but can be useful to see what is being executed.
+<p>
+
+<br>
+<h4>
+
+Displaying simulator state:
+</h4>
+<p>
+<a name="r"><samp><b>r<br>rd</i><br>ru</b>&nbsp;&nbsp;<i> - display registers</i></samp><br>
+Entering "r" will print in hexadecimal the CPU's current register values, the register
+contents of the PIC (programmable interrupt controller), the instruction count (in decimal), and the next instruction to be executed (address, disassembly, and assembly name). Use 'r' for hexadecimal output, 'rd' for signed decimal output and 'ru' for unsigned decimal output.
+<p>
+<a name="addr"><samp><b>addr SYMBOL</b>&nbsp;&nbsp;<i> - display address</i></samp><br>
+Use this command to display the address for a symbolic label. For example, if you hade a global variable named "<samp>MyGlobal</samp>" (in your C or assembly code) and you wanted to know its address, you could enter the command "<samp>addr MyGlobal</samp>". The listing file must have been created and automatically loaded with the binary in order for this command to work. 
+<p>
+<a name="d"><samp><b>d [ADDR] [NUM]</b>&nbsp;&nbsp;<i> - disassemble</i></samp><br>
+Use this command to disassemble instructions. With no parameters, this command will display the address, hexadecimal value, and assembly code for several instructions starting at the address CS:IP. If given, ADDR specifies the address or label at which to disassemble. The NUM parameter specifies the number of instructions to disassemble.
+<p>
+<a name="ds"><samp><b>ds [NUM]</b>&nbsp;&nbsp;<i> - dump stack</i></samp><br>
+Use this command to display the values at the top of the stack. It also shows the various BP offsets, making it easy to look at local variables. If given, NUM specifies the number of words to dump from the top of the stack. Otherwise a default number is used.
+<p>
+<a name="dump"><samp><b>dump ADDR [NUM]</b>&nbsp;&nbsp;<i> - dump memory</i></samp><br>
+This command dumps memory to the screen as hexadecimal numbers and as text characters 16 bytes per line. A starting address or label, specified by ADDR, must be given. By default, one row of 16 bytes will be displayed. To display more than 16 bytes, a minimum number of bytes can be specified by NUM. Be aware, however, that ADDR does not necessarily specify the address of the first byte that will be dumped. Instead, ADDR will be used to determine the 16 byte region in which to begin. For example, if you enter "dump 0000:1005", the command will dump from address 0000:1000 to 0000:100F (16 bytes). Use the index numbers displayed at the top of the dump to help you determine exact addresses.
+<p>
+<a name="dumpX"><samp><b>dumpb ADDR [NUM]<br>
+dumpw ADDR [NUM]<br>
+dumpd ADDR [NUM]</b>&nbsp;&nbsp;<i> - dump memory values</i></samp><br>
+These commands dump NUM bytes of memory starting at address or label ADDR. The three versions interpret the memory as bytes, words, and double words, respectively, and each displays the values as a hex, unsigned decimal and signed decimal (and ASCII for dumpb).
+<p>
+
+<br>
+<h4>
+
+Modifying simulator state:
+</h4>
+<p>
+<a name="pr"><samp><b>pr REG VAL</b>&nbsp;&nbsp;<i> - poke register</i></samp><br>
+This command pokes (i.e., places or puts) the value specified by VAL into the register specified by REG.
+<p>
+<a name="pX"><samp><b>pb ADDR VAL<br>
+pw ADDR VAL<br>
+pd ADDR VAL</b>&nbsp;&nbsp;<i> - poke memory</i></samp><br>
+These commands poke (i.e., place or put) the value specified by VAL into the memory location at ADDR. Use 'bp' to write a byte value (8 bits), 'pw' to write a word value (16 bits), or 'pdw' to write a doubleword value (32 bits). All values are poked as little endian format values (i.e., the least significant bytes are written at lower memory locations). Note: the size (byte, word, or dword) specifies the number of bytes that will be written at ADDR, not the number of bytes required to fit VAL.
+<p>
+<a name="clear"><samp><b>clear</b>&nbsp;&nbsp;<i> - clear all breakpoints, memory monitors, and register monitors</i></samp><br>
+This command is clears all breakpoints, memory monitors, and register watches. It is equivalent to entering the three commands "<samp>c all</samp>", "<samp>n all</samp>", and "<samp>g all</samp>".
+<p>
+
+<br>
+<h4>
+
+Breakpoint support:
+</h4>
+<p>
+Breakpoints allow you to specify points in the code at which execution of a program should stop. Once stopped, the simulator state can be viewed and execution can be continued or restarted as desired.
+<p>
+<a name="b"><samp><b>b</b>&nbsp;&nbsp;<i> - view breakpoint info</i></samp><br>
+Entering 'b' displays a list of the current breakpoints with each breakpoint's ID number and address.
+<p>
+<a name="b"><samp><b>b ADDR</b>&nbsp;&nbsp;<i> - set breakpoint</i></samp><br>
+Entering 'b' followed by an address or label will set a new breakpoint for the instruction located at ADDR. When a breakpoint is created, it is automatically given an ID number. Care must be taken when specifying ADDR since 8086 instructions can be from one to several bytes in length. ADDR must be the address of the first byte of the instruction. If ADDR is not the first byte then the simulator may not know when a breakpoint has been reached.
+<p>
+<a name="c"><samp><b>c ID</b>&nbsp;&nbsp;<i> - clear breakpoint(s)</i></samp><br>
+This command clears the breakpoint with the given ID number. Enter 'all' as the ID to clear all current breakpoints.
+<p>
+
+<br>
+<h4>
+
+Memory monitors:
+</h4>
+<p>
+Memory monitors can be used like breakpoints to stop execution when regions of memory are accessed by the processor. There are several memory monitor modes that can be used to determine when execution should be stopped. They are:
+<pre>   modify: Stop when a modification (change) occurs in the memory region.
+   read:   Stop when a value is read from the memory region.
+   write:  Stop when a value is written in the memory region.
+   access: Stop when the region is accessed (i.e., read or written).
+   become: Stop when the memory region becomes a certain value.</pre>
+<p>
+<a name="m"><samp><b>m</b>&nbsp;&nbsp;<i> - view memory monitor info</i></samp><br>
+Enter "m" to display a list of the current memory monitors with each monitor's ID number, address, size, and mode.
+<p>
+<a name="mX"><samp><b>mX ADDR [SIZE]</b>&nbsp;&nbsp;<i> - set memory monitor</i></samp><br>
+This command sets a memory monitor for the location specified by ADDR. The X should be first letter of the mode you wish to use (i.e., enter 'mm', 'mr', 'mw', 'ma', or 'mb', for modify, read, write, access, and become). If given, SIZE specifies the size of the region to monitor in bytes. If SIZE is not given then a size of 2 is assumed. Note that if 'become' mode is used then a value must be given. When the monitored region becomes this value, the simulator will stop execution. The syntax for this mode is:  <samp>mb ADDR VALUE [SIZE]</samp>. For this mode, the size must be from 1 to 4 bytes, 2 being the default. When a monitor is created, it is automatically assigned an ID number.
+<p>
+<a name="n"><samp><b>n ID</b>&nbsp;&nbsp;<i> - clear memory monitor(s)</i></samp><br>
+This command removes the memory monitor with the given ID number. Enter 'all' as the ID to clear all memory monitors.
+<p>
+
+<br>
+<h4>
+
+Register monitors:
+</h4>
+<p>
+Register monitors are just like memory monitors except that registers are monitored. However, for register monitors, only two modes are allowed: modify and become.
+<p>
+<a name="f"><samp><b>f</b>&nbsp;&nbsp;<i> - view register monitor info</i></samp><br>
+Displays a list of the current register monitors with each monitor's ID number, register, and mode.
+<p>
+<a name="fX"><samp><b>fm REG<br>
+fb REG VAL</b>&nbsp;&nbsp;<i> - set register monitor</i></samp><br>
+These commands set a monitor for the register specified by REG. Use the 'fm' command for modify mode and 'fb' for become mode. When using become mode a value must be given. When the register becomes this value, the simulator will stop execution. When a monitor is created, it is automatically assigned an ID number.
+<p>
+<a name="g"><samp><b>g ID</b>&nbsp;&nbsp;<i> - clear register monitor(s)</i></samp><br>
+This command clears the register monitor with the given ID number. Enter 'all' as the ID to clear all register monitors.
+<p>
+
+<br>
+<h4>
+
+Interrupt support:
+</h4>
+<p>
+<a name="a"><samp><b>a NUM</b>&nbsp;&nbsp;<i> - assert</i></samp><br>
+Asserts the interrupt with IRQ specified by NUM. Note: the IRQ is not the same as the interrupt vector number but refers to the pin number on the
+PIC.
+<p>
+<a name="t"><samp><b>t [NUM]</b>&nbsp;&nbsp;<i> - tick</i></samp><br>
+This command displays, sets, or disables the timer tick interval. Enter "t" to simply display the current timer tick interval. Add the NUM parameter to set the timer tick interval to NUM instructions. To disable timer ticks, enter "t 0".
+<p>
+<a name="hist"><samp><b>hist [NUM]</b>&nbsp;&nbsp;<i> - instruction/interrupt history</i></samp><br>
+This command displays two lists. The list on the left shows the addresses and labels of the most recently executed instructions. The list on the right shows the addresses and labels of the most recently interrupted instructions (i.e., the value of CS:IP when the interrupt occurred, which corresponds to the next instruction that would have executed had the interrupt not occurred) as well as the IRQ number for the interrupt. The most recent occurrences are listed at the bottom. NUM, if present, specifies the number of entries to display. 
+<p>
+
+<br>
+<h4>
+
+Simptris support:
+</h4>
+<p>
+Simptris is a simplified version of Tetris that can be played via the 8086 interrupts. Simptris mode will be used in one of the labs.
+<p>
+<a name="simptris"><samp><b>simptris</b>&nbsp;&nbsp;<i> - simptris mode</i></samp><br>
+This command is used to turn Simptris mode on and off. When you type this command, simptris mode will be enabled and the Simptris window should appear. When you type it again the mode will be disabled and the Simptris window should disappear.
+<p>
+<br>
+<hr>
+</body>
+
+</html>

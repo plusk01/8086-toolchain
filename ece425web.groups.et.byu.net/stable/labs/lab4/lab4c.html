@@ -1,0 +1,156 @@
+<html>
+
+<head>
+<title> ECEn 425 Lab 4c</title>
+</head>
+
+<body>
+
+<center>
+<h2> ECEn 425</h2>
+<h2> Lab #4: Design and Implementation of Kernel Essentials<br>
+Part C</h2>
+</center>
+
+
+<hr>
+<h3> Overview </h3>
+
+In this lab you will extend your kernel's functionality by adding
+several more key functions. With these extensions your kernel will be
+able to delay and switch between tasks. However, to ensure you have
+sufficient testing and debugging time, the application code for this
+lab will not fully exercise these capabilities. Lab 4d will further
+test your kernel.  You are expected to complete this lab with a
+partner.
+
+<h3> Requirements </h3>
+
+In this lab you will add the following features to your kernel, based on the
+YAK specification.
+<p>
+
+<ul>
+<li> <samp>YKDelayTask -</samp> Delays a task for specified number of clock ticks
+<li> <samp>YKEnterISR -</samp> Called on entry to ISR
+<li> <samp>YKExitISR -</samp> Called on exit from ISR
+<li> <samp>YKTickHandler -</samp> The kernel's timer tick interrupt handler
+<li> <samp>YKTickNum -</samp> Global variable incremented by the kernel's tick handler
+</ul>
+
+Once again, in addition to these required functions, you must have ISRs and
+interrupt handlers to support the reset, tick, and keypress interrupts, exactly as in
+lab 3. However, <samp>YKEnterISR</samp> and <samp>YKExitISR</samp>
+must be called by the ISRs, as described in the <a href="../kernel.html">YAK Specification</a> document.
+This will allow your kernel to switch tasks at the end of an ISR, thus supporting preemption
+of tasks and allowing another task to deal with the results of the interrupt.
+<p>
+
+Once you have implemented these functions, your kernel should be able
+to run the application code <a href="lab4c_app.c">lab4c_app.c</a>
+correctly without crashing. Make sure you look at the application code
+so that you understand what it is supposed to do. As before, your code
+must function with a tick frequency of every <b>750</b> instructions,
+no matter what key sequence is pressed. (At a high tick rate, there
+may not be enough time for the task to generate all its output in one
+tick interval, so your output may differ from that shown below, but
+your code should not malfunction or otherwise fail to make progress.)  <p>
+
+Below is a sample of what the application's output should look like:
+<blockquote><pre>
+Creating task...
+Starting kernel...
+Task started.
+Delaying task...
+
+TICK 1
+
+TICK 2
+Task running after 3 context switches! YKIdleCount is 2330.
+Delaying task...
+
+TICK 3
+
+TICK 4
+Task running after 5 context switches! YKIdleCount is 2328.
+Delaying task...
+
+TICK 5
+
+TICK 6
+Task running after 7 context switches! YKIdleCount is 2328.
+Delaying task...
+</pre></blockquote>
+The only thing that might differ when run with your kernel is the value of <samp>YKIdleCount</samp>.
+
+
+<h3>Pass-off</h3>
+When the kernel runs the application code correctly, show and demonstrate your
+code to a TA. <b>Since you must demonstrate working code to a TA on or before the due date, please
+consider their lab schedule well in advance</b>.<p>
+
+In addition to the demonstration, you must a written summary of
+problems you encountered, if any, in completing this lab.  You should
+also include a report of the number of hours you spent on the lab,
+including coding and debugging. A realistic estimate is
+sufficient. Send a submission even if you didn't encounter any
+noteworthy bugs along the way. <b>You will not receive full credit for
+the lab unless you send a report.</b><p>
+
+<font color=red>New for Fall 2019: we want both your report and your
+source code for the lab.  The easiest way to do this is to create a
+report file (for consistency call it report.txt or report.pdf), to add
+it to the working directory for the lab, to create a compressed tar
+file (with all the files in your directory), and then to upload that
+file to Learning Suite. <p>
+
+To review, if 425/labx is your working directory for this lab, type
+the following in the 425 directory: 
+
+<blockquote><pre> tar -cvzf submission.tar.gz labx
+</pre></blockquote>
+
+and then upload the resulting compressed tar file (submission.tar.gz)
+to Learning Suite.</font>
+
+<h3>Important Notes</h3>
+
+Now would be a good time to review how ISRs should be written when used with an RTOS.
+Take another look at the document <a href="../InterruptMechanism.html">The 8086 Interrupt Mechanism</a>
+if you are not completely sure how the ISRs should be written.
+Pay particular attention to where <samp>YKEnterISR()</samp> and <samp>YKExitISR()</samp> should be called.
+<p>
+It is quite possible that the new application code will uncover bugs that
+existed in your lab4b code. The addition of the new functions can also introduce
+new bugs into your code. Be aware of both possibilities as you debug.
+<p>
+Keep in mind that <samp>YKDelayTask</samp> and <samp>YKExitISR</samp> can both call the scheduler,
+allowing your kernel to break in new and interesting ways. Make sure that your
+kernel properly saves and restores context for all the cases outlined in lab
+4a. Also, make sure that interrupts are disabled when they should be.
+
+
+<h3>Debugging Help</h3>
+
+Here is a statistical summary of the total time spent on part C in Fall 2017,
+according to the reports submitted by each group:
+<ul>
+  <li> Low: 1.0 hours
+  <li> High: 19.0 hours
+  <li> Average: 7.3 hours
+</ul>
+<p>
+
+Once again, you may want to look at the problems students had in past semesters.
+The link below points to the list of problems from student reports for lab 4.
+<p>
+
+<a href="StudentProblems.html"><b>Student Problem List</b></a>
+
+<p>
+<br>
+<hr>
+<address>Last updated 26 August 2019</address>
+<br>
+</body>
+</html>

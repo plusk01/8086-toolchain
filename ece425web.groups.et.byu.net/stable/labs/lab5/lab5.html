@@ -1,0 +1,376 @@
+<html>
+<head>
+<title> ECEn 425 Lab #5</title>
+</head>
+
+<body>
+<center>
+<h2> ECEn 425</h2>
+<h2> Lab #5: Semaphores and Statistics</h2>
+</center>
+
+<hr>
+<h3> Overview </h3>
+
+As the next step in the creation of the YAK kernel, you are to add
+functions to your existing code so that you can correctly execute the
+application program <a href="lab5app.c">lab5app.c</a>. You are free to
+make changes in the kernel code you wrote for the last lab, but you
+should not need to change the application program provided.  You are
+expected to complete this lab with a partner.<p>
+
+The added functionality comes in two forms: (1) routines to create,
+pend on, and post to semaphores; and (2) a support mechanism to track
+the number of context switches and the CPU utilization.
+<p>
+
+<h3> Functionality </h3>
+
+You must add these kernel functions to your kernel. You should
+implement each function exactly according to the prototype detailed on the <a href="../kernel.html">YAK
+Kernel</a> webpage. Refer to that web
+page for additional details about these functions.
+
+<ul>
+<li> <samp>YKSemCreate -</samp>  Create and initialize a semaphore
+<li> <samp>YKSemPend -</samp> Obtain a semaphore
+<li> <samp>YKSemPost -</samp> Release a semaphore
+</ul><p>
+
+In addition to these functions, your ISRs and interrupt handlers
+should function as in the last lab, with one exception: <b> You should
+modify your keypress interrupt handler so that it calls
+YKSemPost(NSemPtr) if the 'p' key is pressed.</b> Other keypresses
+should behave as before.
+<p>
+
+You also need to make sure that your kernel code defines and maintains
+the global variables YKCtxSwCount and YKIdleCount, both unsigned integers
+that track information about the current workload that the user might
+be interested in (see the YAK web page).  YKCtxSwCount should simply
+be incremented each time a context switch occurs, and the idle task
+should repeatedly increment YKIdleCount in its while(1) loop.  These
+variables are used to output simple statistics in the application code
+provided with this lab.
+<p>
+When the application is run correctly, it should output the text
+<samp>"Hey, it works!"</samp> every 6 ticks. When the 'p' key is
+pressed, it should output a long series of prime numbers. The CPU
+usage should be fairly low (less than 10%) at a tick rate of 10,000
+ticks. Output from a working version of the lab is shown below.
+<p>
+<blockquote><pre>TICK 1
+Welcome to the YAK kernel
+Determining CPU capacity
+
+TICK 2
+
+TICK 3
+
+TICK 4
+
+TICK 5
+
+TICK 6
+
+TICK 7
+"Hey, it works!"
+
+TICK 8
+
+TICK 9
+
+TICK 10
+
+TICK 11
+
+TICK 12
+
+TICK 13
+"Hey, it works!"
+
+TICK 14
+ 1009 1013 1019 1021 1031 1033 1039 1049 1051 1061         <- <i>User pressed 'p' key</i>
+ 1063 1069 1087
+TICK 15
+ 1091 1093 1097 1103 1109 1117 1123
+ 1129 1151 1153 1163 1171 1181 1187 1193 1201 1213
+ 1217 1223
+TICK 16
+1229 1231 1237 1249 1259 1277 1279 1283
+ 1289 1291 1297 1301 1303 1307 1319 1321 1327 1361
+ 1367
+TICK 17
+ 1369 1373 1381 1399 1409 1423 1427 1429 1433
+ 1439 1447 1451 1453 1459 1471 1481 1483 1487 1489
+
+TICK 18
+1493 1499
+
+TICK 19
+"Hey, it works!"
+
+TICK 20
+
+TICK 21
+
+TICK 22
+</pre></blockquote>
+<p>
+
+<h3> Requirements </h3>
+
+Implement the required functions and make sure that the application
+program runs correctly. The system should run correctly when key
+presses occur in rapid succession and when the timer tick frequency is
+increased to every <b>750</b> instructions.
+
+<h3>Pass-off</h3>
+
+When the kernel runs the application code correctly, show and demonstrate your
+code to a TA. <b>Since you must demonstrate working code to a TA on or before the due date, please
+consider their lab schedule well in advance</b>.<p>
+
+In addition to the demonstration, you must a written summary of
+problems you encountered, if any, in completing this lab.  You should
+also include a report of the number of hours you spent on the lab,
+including coding and debugging. A realistic estimate is
+sufficient. Send a submission even if you didn't encounter any
+noteworthy bugs along the way. <b>You will not receive full credit for
+the lab unless you send a report.</b><p>
+
+<font color=red>New for Fall 2019: we want both your report and your
+source code for the lab.  The easiest way to do this is to create a
+report file (for consistency call it report.txt or report.pdf), to add
+it to the working directory for the lab, to create a compressed tar
+file (with all the files in your directory), and then to upload that
+file to Learning Suite. <p>
+
+To review, if 425/labx is your working directory for this lab, type
+the following in the 425 directory: 
+
+<blockquote><pre> tar -cvzf submission.tar.gz labx
+</pre></blockquote>
+
+and then upload the resulting compressed tar file (submission.tar.gz)
+to Learning Suite.</font>
+
+<h3>Important Notes </h3>
+
+<ul>
+
+<li> <b>The operation of the tasks in this lab</b> are intended to give you
+some insight into possible uses of semaphores.  Note how the word,
+space, and punc(tuation) tasks cooperate to output a message, using
+semaphores to force a particular execution sequence.  Pressing the 'p'
+key should fire up (via a semaphore) the task that computes primes, so
+you should see substantial differences in CPU utilization during those
+periods of time when it is running.  Make sure you understand the
+simple mechanism used to calculate CPU utilization. <p>
+
+<li> <b>The file "yakk.h" </b> that the application code includes makes
+available to the user code any struct or constant definitions that you
+(as the kernel designer) need to provide.  Part of your assignment is
+to add the YKSEM definition to this file.  This approach hides the implementation details of
+the semaphores from the user code, while still making them available
+to the application program.
+<p>
+
+<li> <b> Pacing yourself.</b>  Here is a statistical summary of hours
+of work reported by each group completing this lab in Fall 2017:
+
+<ul>
+  <li> Low: 0.5 hours
+  <li> High: 12.0 hours
+  <li> Average: 3.8 hours
+</ul>
+<p>
+
+
+<li> <b> Amount of code to be written.</b> For comparison, here are
+the sizes of my source files for my lab5 code for the 8086:
+
+<ul>
+  <li> myinth.c: 26 lines
+  <li> myisr.s: 32 lines
+  <li> yaku.h: 4 lines
+  <li> yakk.h: 37 lines
+  <li> yakc.c: 266 lines
+  <li> yaks.s: 65 lines
+</ul><p>
+
+</ul>
+
+<h3> Debugging help </h3>
+
+Here are comments from student reports (edited only for length)
+describing their problems and how they tracked them down.  As always,
+take them with a grain of salt.
+
+<ul>
+
+<li>YKSemPend was missing the YKEnterMutex and YKExitMutex calls
+to make it atomic.
+<li>*semaphore++ incremented the pointer value when we thought it
+incremented the actual value for the semaphore.  (*semaphore)++ fixed it.
+<li>Remember to change your MAXTASKS #.
+<li>We didn't make sure that your idle task is the lowest priority.
+<li>The only problems we came across were with compilation. Our global
+variables were declared in our .h file, so every time we #included yakk.h,
+they were redeclared.
+<li>When you move TCB's between lists such as the delayed or sempending
+lists make sure you change all of the pointers…prev and next.
+<li>We also had a problem creating our semaphores.  We initially didn't
+use an array of semaphore structs, so we kept overwriting our semaphores.
+<li>We needed to make sure we didn't call YKScheduler until after we called YKRun,
+especially from YKExitISR.
+
+<li> We had two major bugs. We left some bad code in YKSemPend, and it
+was trying to put the task on the blocked list twice. The other bug
+was that we weren't cheking YKinterruptLevel in YKSemPost, and so
+called the scheduler without doing and EOF.
+
+<li> The most major bug we had in our code was in our SemPend routine.
+We were only taking a semaphore if it was available, else we were
+blocking the task on the semaphore.  This caused problems in the case
+when we block a task on a semaphore, then pend the semaphore from
+another task.  This unblocks our original task and resumes execution.
+But since we were in the else portion of the if statement, we never
+take the newly posted semaphore.  This caused the our code to think
+there was one more semaphore than there actually was.  We fixed this
+by replacing the "if(semaphore avail) then get it, else block code"
+with "get semaphore, then if(semaphore not avail) block" This fixed
+our erratic output.
+
+<li> The biggest problem I had was my linked list manipulation.  In my
+data structures for the semaphores, there is a linked list containing
+the tasks waiting for the semaphores.  When adding new tasks to the
+waiting list, I always add them to the back (and remove the highest
+priority when it unblocks) but I did not nullify the link to the next
+element in the list of the new unit when the initial waiting list
+status was NULL.  After a few iterations, the list would duplicate
+itself several times.  Simply correcting the list function corrected
+that.  The keypressed interrupt would also cause a bug, but it was
+very desultory and usually occurred only after I held the key for 30
+seconds or more.  Disabling interrupts in my YKDelayTask fixed that.
+
+<li> One problem we ran into was having maximum number of tasks set at
+3, from last lab, which cause a lot of problems until we fixed it.
+
+<li> The biggest problem we had was not with the semaphores, but a bug
+that finally came out now.  We were restoring context in ISRs then
+calling YKExitISR; this was a terrible mistake.  We fixed it and there
+were no more weird interrupt problems.
+
+<LI> We forgot to disable interrupts in our YKSemPend/Post functions.
+
+<li> If we used our YKSaveContext function and then manipulated a few
+more variables (either local or non-local) before calling the
+YKScheduler, then the pointers 'bp' and 'sp' began pointing at all
+sorts of odd things.  So, we made sure to modify all variables and do
+any clean up that needed to be done before calling our YKSaveContext
+function, and that was followed immediately by YKScheduler.
+
+<li> I am used to C++, which allows you to declare 'int' inside of a
+for-loop statement -> for(int i = 1;i<10;i++).  However, our compiler
+does not function properly if you follow this syntax.  It does not
+declare any errors, but it never enters the loop.  To fix this, merely
+declare the variable at the beginning of a function and use a simple
+statement -> for(i = 1;...etc.).
+
+<li> We are using an Array for our TCB's, so our scheduler loops
+through each of the tasks and finds the highest-priority ready task.
+However, the upper limit to our loop was the constant MAXTASKS.  When
+we called the scheduler before there were MAXTASKS created, then we
+would be searching through garbage for some of the loop, which
+returned bad values and caused the kernel to crash if we ever set our
+tick number below 1530.
+
+<li> When we moved a task from the delay task list into the running
+task list it erased a task already in there.
+
+<Li> The bug that killed us this time was that when the keypress
+handler posted a semaphore, it didn't set to ready the highest
+priority task blocked on the semaphore, but left that to the
+scheduler.
+
+<li> Another nasty bug was that we signalled in YKExitISR that we need
+to restore context of a task in all interrupts, instead of only when
+the ISRCallDepth is 0. This caused the context of an interrupt to be
+restored instead of the task, when the task was dispatched.
+
+<li> The problems we had were modifying our semaphore pends and posts.
+We also had to hack a bit of code since the tasks weren't created in
+priority order.  We had to make sure our priority array was in
+priority order.
+
+<li> Our dispatcher appeared to work in lab4, but it really didn't. We
+were trying to save our ip in a different place than our registers and
+our sp. This is a bad idea.
+
+<li> We forgot to set the runstate to ran for the first task ever run.
+
+<li> The problems we encountered were in our tick handler. We were not
+pushing and popping the registers after the interrupt. It was a
+pridiculous problem. We spent between 20 and 25 hours combined on the
+problem.
+
+<li> The main problems I encountered were from lab 4 code that was not
+caught through testing until now. I found that my partner and I had
+incorrectly written the ISRs for lab 4.  For lab 5 I was using a
+priority queue to keep track of all tasks that were blocked on each
+semaphore. This made it easy to pop of the highest priority task from
+the semaphore when it got posted to but I was forgetting to check for
+null pointers so I was adding null pointers to the ready queue which
+was causing the program to access invalid code.
+
+<li> I was inserting new tasks TCBs with an insertion sort, but I
+forgot to update the pointer to the running task.
+
+<li> I was not setting the semaphores to the initial value.
+
+<li> We had a problem with our kernel working fine up to a certain
+number of ticks and then it would stop printing out the "Hey, it
+works!" line after every 6 ticks.  We checked the semaphores and they
+seemed to have the right values and everything and we checked a ton of
+stuff.  After many, many hours, we realized that out stack was growing
+too big and that we were overwriting part of the next stack.  (When we
+changed the stack sizes to be bigger, it would print out the "Hey..."
+line every 6 ticks up to a higher number of ticks...)  Our approach
+had been to store the context of the current task within the kernel
+functions which could potentially cause another higher priority task
+to be ready than the one currently running and then at the end of the
+task, we would check if it had changed, and update the stack pointer
+in the TCB to the appropriate spot.  Then our dispatcher simply
+reassigned the stack pointer to the value in the TCB of the highest
+priority ready task, popped the context, and didn't worry at all about
+saving context.  One big problem was accounting for parameters passed
+to functions (such as in DelayTask and SemPost and SemPend and
+NewTask) and that once control returned to them, the next instruction
+was to increment the stack pointer to get rid of the space where the
+parameters passed would have been.  This messed us up, since we were
+rearranging the stack to have our context popped on before the stack
+frame for the kernel function.  In any case, we're re-structuring our
+kernel to save context in the Dispatcher rather than in the individual
+functions that might change the highest priority ready task.
+
+<li> One problem was with the function that would take the TCB that is
+being delayed and put it in the Suspended List. It would only take the
+very first TCB in our YKRdyList and put it in the YKSuspList. So when
+the application code finished running it would delay the punctuation
+task but put the highest priority task in the YKSuspList, being the
+word task. So we made the proper changes in the function to take into
+account the fact that the task being delayed is not necessarily the
+highest priority task.
+
+
+<li> We forgot to save context in Post and Pend.
+
+</ul>
+
+<p>
+<br>
+<hr>
+<address>Last updated 26 August 2019</address>
+<br>
+</body>

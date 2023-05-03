@@ -1,0 +1,57 @@
+<head>
+<title>Setting your path</title>
+</head>
+
+<h2> Setting Your Path </h2>
+
+When you type a command, the shell you are running examines a specific
+set of directories in a specific order to find an executable file of
+that name.  This set of directories is called your <i> search
+path</i>.  All of the tools you will be using for this class are found
+in /ee2/ee425/bin, a location that your path would not normally
+include, so you need to change it explicitly.  <p>
+
+If you cannot access the /ee2 directory when you log in to the ECEn
+"Spice" machines (in 425 CB), the system probably knows you are part
+of the "caedm" organization only, and not part of the "ee"
+organization.  If you can't see the /ee2 files ("cd /ee2" gives a
+response something like "No such file or directory") let the
+instructor know via email and he'll have the sysops change your
+account info.<p>
+
+You can change the path each time you login, or you make a single
+change to an initialization file in your home directory for your shell
+that will work all semester.  The syntax for this depends on the shell
+you are using.  Popular shells include bash (GNU's Bourne Again
+Shell), tcsh (T shell), and csh (C shell).
+
+<h3> tcsh and csh </h3>
+
+The command you want here is along these lines:
+<blockquote>
+  <p><samp>set path = ($path /ee2/ee425/bin)</samp></p>
+</blockquote>
+This will append the directory with the class tools to the end of your
+current search path (the value of $path).  Typing this at the prompt
+will make a change for your current session.  To make a one-time
+change for the entire semester, insert the above line near the end of
+your .cshrc file.  Make sure you add the line after all other lines
+in the file that reference the path variable.
+<p>
+
+Once you have changed your .cshrc file, simply save it to disk.  Any
+terminal windows you start after the file has been edited should see
+the change in your .cshrc file and be able to find the tools.  To make
+the change take effect in any windows already open, type "<samp>source
+~/.cshrc"</samp>.</p>
+
+
+<h3> bash </h3>
+
+Use the command 
+<blockquote>
+  <p><samp>export PATH=$PATH:/ee2/ee425/bin</samp></p>
+</blockquote>
+To make a permanent change, add the above line near the end of your
+.bashrc file. <p>
+

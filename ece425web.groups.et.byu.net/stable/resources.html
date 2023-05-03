@@ -1,0 +1,289 @@
+<html>
+
+<style type="text/css">
+   h4 {
+       margin: 0 0px; padding: 4;
+  }
+   h3 {
+       margin: 0 0px; padding: 4;
+  }
+   li {
+       margin: 0 20px; padding: 1;
+  }
+   ul {
+       margin: 0 20px; padding: 1;
+  }
+</style>
+
+<head>
+<TITLE>ECEn 425 Resources</TITLE>
+</head>
+
+<body bgcolor="#ffffff">
+
+<center>
+<h2> ECEn 425: Online Resources </h2>
+</center>
+
+<P>
+<HR>
+<h3> Lab Info </h3>
+<ul compact="compact">
+<li spacing="compact"><h4>YAK Info</h4>
+  <ul>
+  <li><a href="labs/kernel.html">YAK Kernel Specification</a>
+  </ul>
+<li spacing="compact"><H4>8086 Info</H4>
+  <ul>
+  <li><a href="labs/8086Assembly.html">8086 Assembly Language</a>
+  <li><a href="labs/8086InstructionSet.html">8086 Instruction Set</a>
+  <li><a href="labs/InterruptMechanism.html">8086 Interrupt Mechanism: 8259A PIC</a>
+  <li><a href="labs/StackFrame.html">C Calling Convention and the 8086</a>
+  </ul>
+<li spacing="compact"><H4>Class Software Tools</H4>
+  <ul>
+  <li><a href="labs/tool_issues.html">Known Tool Problems</a>
+  <li><a href="labs/BuildProcess.html">Building Programs with the Tools</a>
+  <li><a href="labs/C86Features.html">C86 Compiler Features</a>
+  <li><a href="labs/NASM.html">NASM Syntax</a>
+  <li><a href="labs/Emu86.html">Emu86 Manual</a>
+    <li>Enabling remote execution of the tools on ECEn Linux machines
+    <ul>
+      <li> If you ssh in to the ECEn Linux machines, you are likely to
+      see this error message: "Error: no display specified". This can
+      be addressed by a combination of setting the DISPLAY
+      environment variable on the local machine, and making sure you
+      use the -X switch on the command line to ssh. See the solutions
+      discussed <a href="https://unix.stackexchange.com/questions/138936/why-wont-x11-display-work-through-ssh-login">here</a>.
+      </ul>
+  <li><a href="https://github.com/plusk01/8086-toolchain">GitHub Repository</a>
+    <ul>
+      
+      <li> This site has the source code to all class tools if you
+    want to run them on your own computer. It appears that the code
+    compiles and runs "as is" on Linux and Mac OS X. I'm not sure about
+    Cygwin/Windows. Let me know if you go that route so I can update
+    this with an appropriate note.
+      
+      <li>CAUTION #1: You're on your own here in getting the tools to
+    work!  This is not officially supported or maintained as part of
+    this class, so the TAs and instructor can't be expected to help.
+
+      <li> CAUTION #2: Remember, ECEn Linux machines are the reference
+    platform for correctness -- your code will be evaluated on these
+    machines.  I have seen few if any discrepancies (between, say, code
+    running on my Mac and the same code running on a spice machine)
+    but no one can guarantee that you'll see exactly the same
+    execution behavior. 
+
+    </ul>
+  </ul>
+<li><H4>Class Downloads</H4>
+  <ul>
+  <li><a href="labs/library/clib.s">clib.s</a>
+  <li><a href="labs/library/clib.h">clib.h</a>
+  <li><a href="labs/library/simptris.s">simptris.s</a>
+  <li><a href="labs/library/simptris.h">simptris.h</a>
+  </ul>
+<li><h4>uC/OS Info</h4>
+  <ul>
+  <li><a href="labs/ucos.html">The uC/OS real-time kernel</a>
+  </ul>
+<li><h4>C Help</h4>
+  <ul>
+  <li><A HREF="ctutorials.html">C tutorials</A>
+  <li><a href="labs/ptrs.c">Code example: TCBs, pointers, lists</a>
+  </ul>
+<li><h4>Linux Help</h4>
+  <ul>
+  <li><a href="labs/linuxpath.html">Setting Your Path</a>
+  <li><a href="labs/unix.html">Scroll bars, command completion, tcsh, etc.</a>
+  <li><A href="emacs.html">Emacs notes and tutorial links</A>
+  <li><A HREF="help.html">Help with Make and Unix</A>
+  </ul>
+</ul>
+<hr>
+<h3> Assigned Reading / Viewing</h3>
+
+<p> Note: Links to some articles will work only from machines on campus,
+due to licensing restrictions.<p>
+
+<ul>
+  <li> Athens Affair
+  <ul> 
+
+    <li> V. Prevelakis, D. Spinellis, "The Athens Affair", Spectrum,
+    July 2007 [<a href="http://dx.doi.org/10.1109/MSPEC.2007.376605">
+    download </a>]</li>
+
+  </ul>
+
+  <li> High-Frequency Trading
+  <ul>
+    
+    <li>David Schneider, "The Microsecond Market", IEEE Spectrum,
+    June 2012 [<a href="http://dx.doi.org/10.1109/MSPEC.2012.6203974"> download
+    </a>]</li>
+
+    <li>60 Minutes, "Wall Street: the speed traders", June 2011 
+    [<a href="http://www.cbsnews.com/video/watch/?id=7368460n"> view </a>]</li>
+
+  </ul>
+  <li> Electronic Voting
+  <ul>
+
+    <li> David L. Dill and Daniel Castro, "Point/counterpoint: The
+    U.S. should ban paperless electronic voting machines",
+    Communications of the ACM, October 2008 [<a
+    href="http://doi.acm.org/10.1145/1400181.1400192"> download </a>]
+  
+    <li>Charlene O'Hanlon, "A Conversation with Douglas W. Jones and Peter
+    G. Neumann", Queue, November 2006 [
+    <a href="http://doi.acm.org/10.1145/1180176.1180188"> download </a>]</li>
+
+    <li>Ariel J. Feldman, J. Alex Halderman, and Edward W. Felten,
+    "Security Analysis of the Diebold AccuVote-TS Voting Machine",
+    Proc. of the USENIX Workshop on Accurate Electronic Voting
+    Technology, 2007 [<a
+    href="http://www.usenix.org/events/evt07/tech/full_papers/feldman/feldman_html/">
+    download </a>]
+  </ul>
+
+  <li> Timing
+  <ul>
+
+    <li>Edward A. Lee, "Computing Needs Time", CACM, May 2009 [
+    <a href="http://dx.doi.org/10.1145/1506409.1506426"> download
+    </a>]</li>
+  </ul>
+
+  <li> Therac-25
+  <ul>
+
+    <li> N.G. Leveson, C.S. Turner, "An Investigation of the Therac-25
+    Accidents", Computer, July 1993 [<a
+    href="http://dx.doi.org/10.1109/MC.1993.274940"> download
+    </a>]</li>
+
+  </ul>
+  <li> Memory Testing
+  <ul>
+
+    <li>Michael Barr, "Fast Accurate Memory Test Suite",
+    www.netrino.com [<a
+    href="http://www.netrino.com/Embedded-Systems/How-To/Memory-Test-Suite-C">
+    download </a>]</li>
+
+  </ul>
+  <li> Software Development
+  <ul>
+    
+    <li>David B. Stewart, "Twenty-five common mistakes with real-time
+    software development", Embedded Systems Conference, September 2006
+    [<a
+    href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.113.6245&rep=rep1&type=pdf">
+    download </a>]</li>
+
+  </ul>
+</ul>
+  <hr>
+<h3> Supplemental Reading / Viewing </h3>
+<ul>
+
+  <li> High Frequency Trading
+  <ul>
+
+    <li>"Spread betting", The Economist, 14 August 2010 [<a
+    href="http://www.economist.com/node/16792950?story_id=16792950">
+    download</a>] [<a href="resources/spreadbetting.pdf"> cached </a>]</li>
+
+    <li> Scott Patterson, Geoffrey Rogow, "What's behind high-frequency
+    trading", The Wall Street Journal, 1 August 2009 [<a
+    href="http://online.wsj.com/article/SB124908601669298293.html">
+    download </a>]</li>
+
+    <li>Matthew Philips, "Fast, Loose, and Out of Control", Newsweek, 1
+    June 2010 [<a
+    href="http://www.newsweek.com/2010/06/01/fast-loose-and-out-of-control.html">
+    download </a>] [<a href="resources/fastloose.pdf"> cached </a>]</li> 
+
+    <li> "The Impact of High-frequency Trading: Manipulation, Distortion
+    or a Better-functioning Market?", Knowledge@Wharton, 30 September
+    2009 [<a
+    href="http://knowledge.wharton.upenn.edu/article.cfm?articleid=2345">
+    download </a>]</li>
+  
+    <li>Karl Denninger, "HFT: The High Frequence Trading Scam", Seeking
+    Alpha, 24 July 2009 [<a
+    href="http://seekingalpha.com/article/151173-hft-the-high-frequency-trading-scam">
+    download </a>] [<a href="resources/thehftscam.pdf"> cached </a>]</li>
+
+    <li>David Schneider, "Trading at the speed of light", IEEE Spectrum,
+    October 2011 [<a href="http://dx.doi.org/10.1109/MSPEC.2011.6027232"> download
+    </a>]</li>
+
+  </ul>
+  <li> Electronic Voting
+  <ul>
+
+    <li> Anthony DiFranco, Andrew Petro, Emmett Shear, Vladimir
+    Vladimirov, "Small vote manipulations can swing elections", CACM,
+    October 2004 [<a href="http://doi.acm.org/10.1145/1022594.1022621">
+    download </a>]</li>
+  
+    <li>David L. Dill, Bruce Schneier, Barbara Simons, "Voting and
+    technology: who gets to count your vote?", CACM, August 2003 [<a
+    href="http://doi.acm.org/10.1145/859670.859692"> download
+    </a>]</li>
+
+    <li> "Electronic voting not hard to hack" (video), CNN, October
+    27, 2010 [<a
+    href="http://www.cnn.com/video/#/video/politics/2010/10/27/feyerick.vote.hacking.cnn">
+    view </a>]</li>
+  </ul>
+
+  <li> Software Development
+  <ul>
+
+    <li>Michael Barr, "Five top causes of nasty embedded software
+    bugs", EE Times, 1 April 2010 [<a
+    href="http://www.embedded.com/design/prototyping-and-development/4008917/Five-top-causes-of-nasty-embedded-software-bugs">
+    download </a>]</li>
+
+    <li>Michael Barr, "Five more top causes of nasty embedded software
+    bugs", EE Times, 2 November 2010 [<a href="http://www.embedded.com/electronics-blogs/barr-code/4210308/Five-more-top-causes-of-nasty-embedded-software-bugs"> download </a>]</li>
+  
+    <li>Kent Beck, "Embracing change with Extreme Programming",
+    Computer, October 1999 [<a
+    href="http://dx.doi.org/10.1109/2.796139"> download </a>]</li>
+
+    <li>Christof Ebert, Capers Jones, "Embedded Software: Facts,
+    Figures, and Futures", Computer, April 2009 [
+    <a href="http://dx.doi.org/10.1109/MC.2009.118"> download </a>]</li>
+
+    <li>Jack G. Ganssle, "A guide to code inspections" [<a
+    href="http://www.ganssle.com/inspections.pdf"> download </a>]</li>
+
+    <li>Philip E. Ross, "The exterminators", IEEE Spectrum, September
+    2005 [<a href="http://dx.doi.org/10.1109/MSPEC.2005.1502527"> download
+    </a>]</li> 
+
+    <li>Laurie A. Williams, Robert R. Kessler, "All I really need to
+    know about pair programming I learned in kindergarten", CACM, May
+    2000 [<a href="http://doi.acm.org/10.1145/332833.332848"> download
+    </a>]</li>
+
+  </ul>
+  <li> Forensics
+  <ul>
+  
+    <li> Richard P. Mislan, "Cellphone Crime Solvers", IEEE Spectrum,
+    July 2010, [<a href="http://dx.doi.org/10.1109/MSPEC.2010.5491013"> download
+    </a>]</li>
+  </ul>
+  
+</ul>
+<hr>
+<ADDRESS>Last updated 26 August 2019</ADDRESS>
+</body>
+</html>

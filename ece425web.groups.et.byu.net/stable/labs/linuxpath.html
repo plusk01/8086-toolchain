@@ -1,0 +1,53 @@
+<head>
+<title>Setting your path</title>
+</head>
+
+<h2> Setting Your Path </h2>
+
+When you type a command, Linux examines a specific set of directories
+in a specific order to find an executable file of that name.  This set
+of directories is called your <i> search path</i>.  All of the Linux
+tools you will be using for this class are found in
+/ee2/ee425/bin/linux, a location that your path would not normally
+include, so you need to change it explicitly.  <p>
+
+If you cannot access the /ee2 directory when you log in to the Linux
+machines, the system probably knows you are part of the "caedm"
+organization only, and not part of the "ee" organization.  If you
+can't see the /ee2 files ("cd /ee2" gives a response something like
+"No such file or directory") let the instructor know via email and
+he'll have the sysops change your account info.<p>
+
+The simplest way to make a single change that will work all semester
+is to edit the .cshrc file (or your .bashrc file if you use the bash
+shell) in your home directory.  In it you should find lines that looks
+something like this (with potentially a lot more entries, such as
+/usr/bin, /usr/lib/, etc.): 
+
+<blockquote> 
+<pre> set path = (. $path /usr/local/bin) </pre>
+</blockquote>
+
+Similar lines may appear several times in your .cshrc or .bashrc
+file. If you know which one of these lines you need to modify, simply
+append /ee2/ee425/bin/linux to the end of the set path statement. For
+example, you would change the example above to: 
+
+<blockquote>
+  <p><samp>set path = (. $path /usr/local/bin /ee2/ee425/bin)</samp></p>
+</blockquote>
+
+<p>If you are not sure which line you should edit, the easiest way to add the
+ECEn425 tools to your path is to add the following line at the very end of your .cshrc
+file:</p>
+
+<blockquote>
+  <p><samp>set path = ($path /ee2/ee425/bin/linux)</samp></p>
+</blockquote>
+
+<p>This will append the linux tools directory to your current
+path. Once you have changed your .cshrc or .bashrc file, simply save
+it.  Any terminal windows you start after the file has been edited
+should see the change to your path and be able to find the tools.  To
+make the change take effect in any windows already open, type
+"<samp>source ~/.cshrc"</samp>.</p>

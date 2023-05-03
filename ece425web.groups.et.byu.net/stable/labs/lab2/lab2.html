@@ -1,0 +1,182 @@
+<head>
+<title> ECEn 425 Lab #2</title>
+</head>
+
+<center>
+<h2>ECEn 425 </h2>
+<h2>Lab #2: Debugging with the 8086 Tools</h2>
+</center>
+
+<hr>
+
+<h3> Overview </h3>
+Complete this lab by yourself. This lab will teach you how to use the tools to debug your programs. You are given a simple program and asked to find out specific information about it.
+<h3>Instructions</h3>
+
+<ol>
+
+<li> Download the file <A HREF="lab2.c" >lab2.c</A>. This is the program you
+  will run and use to answer the questions below. You may look at the code, but do NOT modify it.
+
+<li> Build the executable for lab2.c as explained in the <a href="../BuildProcess.html">documentation</a> and as demonstrated in the <a href="../lab1/lab1.html">previous lab</a>. Once again you will need <a href="../library/clib.s">clib.s</a> and <a href="../library/clib.h">clib.h</a> to build your program. Use the following file names for the files you generate:
+<pre>  lab2.i	- preprocessed C file
+  lab2.s	- compiled file
+  lab2final.s	- concatenation of clib.s and lab2.s
+  lab2.bin	- binary executable
+  lab2.lst	- listing file
+</pre>
+  Your final assembly file should be composed only of clib.s and lab2.s. Make sure that you use the "-g" flag with C86 when compiling the program and make sure to generate the listing file during assembly by using the "-l" option with NASM.<br>
+  <b>WARNING</b>: You should use the current version of c86
+  and NASM (in /ee2/ece425/bin) on the spice machine, or your answers
+  to the questions below might differ slightly. <br>
+
+<li> Take a look at lab2.c to get an idea of what it does. Then take a moment to look through the
+assembly file (lab2.s) that you generated from lab2.c to get an idea of what the compiler output looks
+  like. Notice how the "-g" option caused the compiler to
+  insert the actual C code into the assembly file as comments.
+
+<li> Now take a moment to look at the listing file for the executable. Notice the
+  columns and what they are used for. The line number column on
+  the left refers to the line number of the listing file only, not the line number
+  of the assembly file. Most of the listing file was generated from clib.s. The portion generated from lab2.s is at the end of the file.
+
+<li> Load the executable (lab2.bin) into Emu86 using the <samp>'l'</samp> command. Once loaded, you can enter <samp>'l'</samp> by itself to reload the executable for a second run.
+  Briefly read through the <a href="../Emu86.html">Emu86 Manual</a> to get an idea of what commands are available.
+  At a minimum, experiment with the following commands:<p>
+<ul>
+<li>Execute ('e', 'eto')
+<li>Single stepping execution (<samp>'o', 's'</samp>)
+<li>Register commands (<samp>'r', 'rd', 'ru'</samp>)
+<li>Breakpoints (<samp>'b', 'c'</samp>)
+<li>Verbose output mode (<samp>'v'</samp>)
+<li>Disassemble (<samp>'d'</samp>)
+<li>Dump (<samp>'dump', 'dumpb', 'dumpw', 'dumpd'</samp>)
+<li>Register monitors (<samp>'f', 'fX', 'g'</samp>)
+<li>Memory monitors (<samp>'n', 'm', 'mX'</samp>)
+<li>Wipe (<samp>'w'</samp>)
+<li>Help (<samp>'h'</samp>)
+<li>Register info (<samp>'regs'</samp>)
+</ul><p>
+  Careful and judicious use of these commands will save you hours of debugging.
+  You must also be aware of the other commands available to you. Commands such as
+  manual interrupt assertion (<samp>'a'</samp>), address lookup (<samp>'addr'</samp>), manual break (<samp>Ctrl+b</samp>),
+  clear (<samp>'clear'</samp>), history (<samp>'hist'</samp>), poke (<samp>'pb', 'pw', 'pr'</samp>), and tick (<samp>'t'</samp>)
+  can be invaluable in later labs.
+
+  Make sure you are aware of the functionality these commands provide.
+  Use the <samp>'h'</samp> command to remind yourself the syntax of the various commands or
+  <b>refer to the <a href="../Emu86.html">Emu86 Manual</a> for more information</b>.
+</ol>
+
+<h3>Helpful Hints and Advice</h3>
+<ul>
+<li>Make sure you use a terminal that supports scrolling, since many Emu86 commands can output large amounts of
+information. Also, keep in mind that the Emu86 output window can also be scrolled.<p>
+<li>Save yourself time by not quitting and restarting the simulator each time you want to recompile your code.
+You can do your compiling and assembling in one terminal window and leave the simulator running in another terminal window.
+Simply type <samp>'l'</samp> to reload the last file loaded and
+reinitialize the simulator.<p>
+<li>Start learning to use the simulator now! The better you are at using Emu86 the more time you will save on
+your labs. Don't be one of those students who end up saying,
+"If I had only known about that command before I started these labs..."
+</ul>
+
+
+<h3>Questions</h3>
+<p>
+Using Emu86, the listing file, and some ingenuity, you should be able
+to find the information required to answer all of the following
+questions.
+<p>
+
+When asked for an address, just give the physical address in
+hexadecimal (instead of the full logical address with segment and
+offset), keeping in mind that the program is loaded at address 0. Use
+proper notation('0x---' or '---h') when writing hexadecimal numbers.
+
+</p>
+
+<ol>
+
+<li> At what address does the function <samp>a()</samp> begin?
+
+<li> If you wanted to set a breakpoint for the start of the "<samp>return fibonacci(n-1) + fibonacci(n-2);</samp>"
+  line in the <samp>fibonacci()</samp> function of lab2.c, what address would you use?
+
+<li> What would you type in Emu86 to create the breakpoint just mentioned?
+
+<li> What command is used to display the current breakpoints? If a breakpoint had ID number 0, what command
+would you enter to delete the breakpoint?
+
+<li> What is the address of the memory location assigned to global variable <samp>k</samp>?
+
+<li> What could you type in Emu86 to view the contents of
+<samp>k</samp> as an integer?
+
+<li> What command would you type to put a memory watch (a.k.a. monitor) on global variable <samp>k</samp> that would cause
+the simulator to stop executing when <samp>k</samp> is modified? What command would you type if <samp>k</samp> were of type char (instead of int)?
+
+<li> What command is used to list the current memory monitors?
+If a memory monitor had ID number 3, what command would you enter to delete the monitor?
+
+<li> What would you type in Emu86 to store the value 0x113 into global variable <samp>k</samp>?
+
+<li> What is the address of the memory location
+assigned to local variable <samp>i</samp> when function <samp>a()</samp> runs the first
+time?
+
+<li> What is the address of the memory location
+assigned to local variable <samp>i</samp> when function <samp>a()</samp> runs the second
+time?
+
+<li> What is the address of the memory location
+assigned to local variable <samp>j</samp> when function <samp>a()</samp> runs the first
+time?
+
+<li> What is the address of the memory location assigned to local variable <samp>j</samp> when function
+  <samp>a()</samp> runs the second
+time?
+
+<li> What command would you type in Emu86 to create a register watch on AX that causes the simulator to
+stop when AX becomes the value 0x333?
+
+<li> What command is used to display the most recently executed and interrupted instructions?
+
+<li> What value is the stack pointer initialized to?
+
+<li> Does the stack grow up (increasing memory addresses) or down
+(decreasing memory addresses)?
+
+<li> The stack grows as the depth of recursive calls to the <samp> fibonacci()</samp>
+function increases.  Of all memory accesses to stack locations, what
+address is accessed that is farthest away from the initial value of
+the stack pointer?
+
+<li> How is the parameter <samp>n</samp> passed to the <samp> fibonacci()
+  </samp>function?
+
+<li> How are values returned from the <samp>fibonacci()</samp> function?
+
+<li> What is the purpose of the "<samp>add sp, 2</samp>" instruction
+  that is repeated so often in the assembly code for lab2.c?
+
+<li> How is the "<samp>add sp, 2</samp>" instruction encoded in
+  hexadecimal? How large is this instruction in bytes? Which byte(s)
+  represent the numerical value 2 that is added?
+
+<li> What does the "<samp>TIMES 2 db 0</samp>" statement at the very end of
+  the assembly file do and what is its purpose?
+
+</ol>
+<h3>Pass-off</h3>
+On or before the due date for this lab, you must submit via Learning Suite
+your answers to each of the above questions.  Make sure
+your response is well organized with each response clearly numbered.
+<p>&nbsp;</p>
+
+<HR>
+<ADDRESS>Last updated 26 August 2019</ADDRESS>
+<ADDRESS>James Archibald jka@ee.byu.edu</ADDRESS>
+
+
+

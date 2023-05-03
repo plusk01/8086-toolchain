@@ -1,0 +1,78 @@
+<html>
+
+<head>
+<title>ECEn 425 Set #5</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+<CENTER>
+<h2> Homework Set #5 </h2>
+</CENTER>
+<HR>
+
+<OL>
+<li> Problem 6.1 from the text. Explain your answer.<p>
+
+<li> Problem 6.2 from the text. Explain your answer.<p>
+
+<li> Let's investigate two ways of declaring and initializing
+two-dimensional arrays, as illustrated in this short C program: <a href="array.c">C Program</A>.
+Study the source code, then compile, assemble, and run the program using the ECEn 425 tools.
+Then use the listing file to answer the following questions: <p>
+
+<ol type="a">
+<li> How many identical copies of each string are stored in memory
+when the program loads?
+
+<li> How did the compiler represent a and b in the assembly file?
+
+<li> How many total bytes are required to represent array a?
+
+<li> How many total bytes are required to represent array b (including string data)?
+
+<li> Suppose we wish to sort the strings in each array in alphabetical
+order.  Let us assume that the sorting algorithm will swap the
+contents of pairs of rows in some unspecified order until they are
+sorted.  Are there substantial differences in the relative overhead of
+swapping rows in the two different array representations?  Why or why
+not?
+</ol>
+<p>
+
+<li> Consider the following sample program:
+<blockquote><pre>
+#include "clib.h"
+
+int AsmFunction(int a, char b, int c);
+
+void main(void)
+{
+    printString("Hello, world!\n");
+    AsmFunction(10, 35, 3);
+}
+</pre></blockquote>
+
+The function <samp>AsmFunction()</samp> is written in assembly and is contained in
+another source file. Notice the line
+"<samp>int AsmFunction(int a, char b, int c);</samp>" at
+the beginning of this code. This type of statement is often called a <i>function prototype</i>.
+Answer the following questions:<p>
+
+<ol type="a">
+<li>What is the purpose of the function prototype?
+<li>Why do we not see a function prototype for
+the function <samp>printString()</samp> in the above code?
+<li>Where is the code for <samp>printString()</samp>?
+</ol>
+<p>
+
+</ol>
+
+<hr>
+Turn in your typed solution for this assignment via LearningSuite by 11:00pm on the due date.
+<hr>
+<ADDRESS>Last updated 26 August 2019</ADDRESS>
+<ADDRESS>James Archibald jka@ee.byu.edu</ADDRESS>
+</body>
+</html>

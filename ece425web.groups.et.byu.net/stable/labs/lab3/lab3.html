@@ -1,0 +1,333 @@
+<html>
+<head>
+<title>ECEn 425 Lab #3</title>
+</head>
+
+<body>
+<center>
+<h2>ECEn 425</h2>
+<h2>Lab #3: Writing and Debugging ISRs</h2>
+</center>
+<hr>
+<h3> Overview </h3>
+
+<p>This lab must completed by each individual in the class. For this
+lab you will write the necessary code to allow a program running on
+the simulator to respond to interrupts.  This requires writing code in
+both assembly and C for each individual interrupt that must be dealt
+with. (For each interrupt, the assembly code will run first, saving the
+context, and then calling the associated C function to respond to the
+interrupt.)<p>
+
+You are given a rather long-running program that we will consider to
+be the background task.  While this program is running on the
+simulator, your ISRs must respond to any interrupts that occur,
+perform the specified actions, and (in cases where the specified
+actions do not include termination) return control to the main program
+without affecting its operation in any way (other than slowing
+it a bit). <p>
+
+With the exception of timer ticks, which the simulator generates
+automatically in its normal operation, the interrupts you must deal
+with are caused by pressing keys on the keyboard. Three specific
+interrupts may be generated in this way:
+<ul>
+<li> RESET, caused by pressing the 'reset' key (currently Ctrl-R)
+<li> TICK, caused by pressing the 'tick' key (currently Ctrl-T, also generated automatically)
+<li> KEYPRESS, caused by pressing any other key
+</ul><p>
+
+You will know when your ISRs work when you can press an arbitrarily
+long sequence of keys in rapid succession, generate the correct output
+for each in your interrupt handlers, and not have the program hang or
+crash.  Because of the way the interrupt handlers are defined, this
+will very likely ensure that your ISRs also handle interrupt nesting
+correctly. <p>
+
+<h3> Reading </h3>
+
+Read the document <a href="../InterruptMechanism.html">The 8086 Interrupt Mechanism</a>
+before writing any code for this lab. A solid understanding of the interrupt mechanism can save you
+from a lot of unnecessary debugging in this lab and especially in future labs.
+
+<p>
+
+<h3> Details </h3>
+
+The background task is defined by the code in the file <a
+href="primes.c">primes.c</a>.  This
+program computes and displays all primes in a particular range, but it
+takes quite a bit of time in the process.  You are free to look
+through the source code, but you do not have to concern yourself with
+any of its implementation details since it does not share data with
+your ISRs.
+
+
+<p>You are to write ISRs for each of the following interrupts:</p>
+<table border=3 cellpadding="2">
+<tr>
+<th> Interrupt
+<th> Priority
+<th> Generated manually by
+
+<tr>
+<td> Reset
+<td align=center> 0
+<td align=center> Ctrl-R
+
+<tr>
+<td> Tick
+<td align=center> 1
+<td align=center> Ctrl-T
+
+<tr>
+<td> Keyboard
+<td align=center> 2
+<td align=center> Any other key
+
+</table><p>
+
+Here is the functionality required for each ISR or interrupt handler:
+
+<ul>
+
+<li><b>Reset</b>.  Program execution should cease.  The handler should call
+  exit(0).  This terminates the <i>program</i>, not the
+<i>simulator</i>.<p>
+
+This interrupt occurs only when the reset key (Ctrl-R) is pressed.<p>
+
+<li><b>Tick</b>. The handler should increment a tick counter and display "TICK <i>n</i>", where
+  <i> n</i> is the total number of ticks, and then return.  To keep
+output consistent, make the output for this interrupt occupy a line by
+itself.  <p>
+
+Normally, this interrupt occurs automatically every 10,000
+instructions when the simulator runs a program, but the frequency can
+be changed with the "t <i> n</i>" command, where <i>n</i> is the number
+of instructions between ticks.  If <i>n</i> is 0 ("t 0"), then no
+automatic timer ticks are generated. This tick can also be generated manually by
+pressing Ctrl-T.  <p>
+
+<li><b>Keyboard</b>. For the press of any key other than 'd', the handler
+should display "KEYPRESS (<i>key</i>) IGNORED" (where <i>key</i> is
+the key that was pressed) and then return.  The simulator will store
+the value of the key that was pressed in the variable KeyBuffer. You
+can access this variable (defined in clib.s) by including the line
+
+<blockquote><samp>extern int KeyBuffer;</samp></blockquote>
+
+near the top of your C file.  For consistency,
+the output should occupy a line by itself. <P>
+
+When the key pressed is a 'd', the handler should (1) display "DELAY
+KEY PRESSED" on a line by itself, (2) increment some local variable in
+a loop repeated 5000 times (just to cause some delay), then (3) output
+"DELAY COMPLETE" on a line by itself.  This will ensure that this
+lowest priority interrupt will be interrupted by the tick interrupt
+(generating its own output between the output lines of this ISR).
+Your code must handle nested interrupts correctly. <p>
+
+This interrupt occurs whenever any keypress other than Ctrl-R or Ctrl-T
+occurs, ignoring codes such as Ctrl-C, which is caught by the shell on
+the underlying machine and causes the OS to terminate the simulator, and Ctrl-B,
+  which is caught by the simulator causing a manual program break.
+</ul>
+
+Here is an example of output with functional ISRs:
+<blockquote><pre>TICK 22
+ 2467 2473 2477 2503
+TICK 23
+ 2521 2531 2539
+TICK 24
+ 2543 2549 2551
+ 2557 2579 2591 2593 2609 2617 2621 2633 2647
+KEYPRESS (8) IGNORED
+ 2657
+ 2659 2663 2671 2677 2683 2687 2689
+KEYPRESS (k) IGNORED
+ 2693 2699 2707
+TICK 25
+ 2711 2713 2719 2729 2731 2741 2749 2753
+KEYPRESS (j) IGNORED
+ 2767 2777
+ 2789 2791 2797 2801 2803 2809 2819 2833 2837 2843
+ 2851 2857 2861
+TICK 26
+ 2879 2887 2897 2903 2909 2917 2927
+ 2939 2953 2957
+DELAY KEY PRESSED
+TICK 27
+TICK 28
+DELAY COMPLETE
+ 2963 2969 2971
+TICK 29</pre></blockquote>
+
+Some of the tick interrupts were generated automatically and others
+were generated manually.  Obviously the keys '8', 'k', 'j', and 'd'
+were also pressed along the way.  The special case handling for the
+'d' key confirms that nested interrupts work.  The interrupt handler (C
+code) for the 'd' keypress is running from the time that "DELAY KEY
+PRESSED" is output until "DELAY COMPLETE" is output.  You will notice
+that it runs long enough to be interrupted twice by the timer tick.
+Note that every time an interrupt handler runs, control is returned to
+what was running before (either another interrupt handler or the
+background task) which simply resumes where it left off.  This is how
+you can tell if your interrupt routines are working correctly.<p>
+
+<h3>Requirements</h3>
+
+In stress testing your code, the TA may revise the tick frequency and
+press any sequence of keys.  Your code must support a tick frequency
+up to every 500 instructions, and it must work correctly when a key is
+held down or when any key sequence is typed in rapid succession.  Well
+designed code will handle any sequence of interrupts.  Your code
+<i>must</i> support nested interrupts correctly. <p>
+
+After verifying that your code works, the TA will examine your ISR
+code (assembly), your interrupt handler code (C), and your makefile.  You
+are <b> required</b> to use a makefile for this lab.<p>
+
+You must also do the reading about the 8086 interrupt mechanism.<p>
+
+<h3>Pass-off</h3>
+
+To pass off this lab, you must have done the reading about the
+interrupt mechanism. Then, you must demonstrate to a TA the correct
+operation of your ISRs.  <b>Since you must demonstrate working code to
+a TA, please consider their lab schedule well in advance.</b><p>
+
+<font color=red>New for Fall 2019: Submit a compressed tar file of
+your working code to Learning Suite. (A tar file is an archive file
+that can contain multiple other files.) If 425/labx is your working
+directory for this lab (that contains your ISR code, your interrupt
+handler code and your makefile), type the following in the 425
+directory:
+
+<blockquote><pre> tar -cvzf submission.tar.gz labx
+</pre></blockquote>
+
+and then upload the resulting compressed tar file (submission.tar.gz)
+to Learning Suite.</font>
+
+<p>
+<h3> Important Notes, Hints, and Recommendations </h3>
+
+<h4>Where do I start?</h4>
+
+<ul>
+<li>First, be sure you've read about and thoroughly understand the material in <a
+href="../InterruptMechanism.html">The 8086 Interrupt Mechanism</a>, especially the section on ISR actions.  You will have a <i>much</i> easier time in
+the next couple of labs if you understand the sequence of events that
+takes place when an interrupt occurs.  For this lab, you do not need to perform
+  the ISR steps of calling OS functions on entry and exit since we don't
+have an OS to call yet.<p>
+
+<li>Look at the library header file <a href="../library/clib.h"> clib.h</a> to see what
+  library functions are
+  available to you. You will need them for string output and program termination
+  in your interrupt handlers.<p>
+
+<li>Remember that the interrupt vector table needs to be initialized
+with the beginning address of each ISR (the routine written in
+assembly). This table is actually located in the clib.s file which you
+must modify. Use the "<samp>dd </samp><i>label</i>" directive to set
+the contents of an entry to the address of <i>label</i>, where
+<i>label</i> should be the entry point to your ISR routine. Using
+"<samp>dd</samp>" will create a doubleword (32 bits), setting the
+segment for the entry to 0 and the offset to <i>label</i>. You can get
+a fresh copy of clib.s by clicking here: <a
+ href="../library/clib.s">clib.s</a>.<p>
+
+<li>You may want to write the reset ISR first.  Since you never return
+from this ISR, it doesn't have to be tidy about saving context, so it
+isn't a bad place to start.  You don't technically need all the
+pieces, but it is recommended that you write an ISR in assembly and a
+simple handler in C.  Make sure you update the interrupt vector
+table with the address of your ISR before testing it.  (If you test it
+before writing the other ISRs, you <b>must ensure that no tick or
+keyboard interrupts occur</b> while the task executes; until you install
+meaningful ISRs for the other interrupts, the system will respond to
+those interrupts in ways that can mess up the processing of <em>all</em>
+interrupts. You can stop the system from generating tick interrupts in
+Emu86 by typing <b>"<samp>t 0</samp>"</b>.  You'll avoid generating keyboard
+interrupts if you don't press other keys. For the curious, this was
+not a problem in the first two labs only because we didn't press keys
+during execution and the code didn't run long enough to have an
+automatically generated timer tick.)
+<p>
+
+<li>The remaining ISRs will be a bit more involved since they must
+save and restore context as well as inform the PIC when the ISR is
+complete. Save the context by pushing registers <b>ax, bx, cx, dx, si,
+di, bp, es, and ds</b> onto the stack. DO NOT push or pop sp or ss
+since this is unnecessary and "push sp" behaves differently on some
+8086 clones.  It is also unnecessary to save ip, cs, or the flags
+since these are saved automatically by the CPU when the interrupt
+occurs. Restore the context by popping from the stack (in reverse
+order) the registers you previously pushed. Always use iret at the end
+an ISR to restore execution.<p>
+
+</ul>
+
+<h4>How do I organize my files?</h4>
+
+<ul>
+<li>For this lab you should probably have one .s file with all of your
+ISR code and one .c file with all of your interrupt handling code.
+<i>Please note that these files are separate from and in addition to
+the primes.c application code and the clib.s file.</i> There should be
+no main() in either of the new files you create since the main()
+routine is found in primes.c and that is where execution will begin.
+</ul>
+
+<h4>Compiling/Assembling</h4>
+
+<ul>
+
+<li>Don't forget that clib.s has to be listed first when the files are
+assembled so that the vector table gets placed at address zero.
+<p>
+
+<li>The details of preprocessing, compiling, concatenating, and assembling files
+  to create a single .bin file should be thought
+about carefully when creating your makefile. You can review the document on
+<a href="../BuildProcess.html">Building Programs with the Tools</a> for a discussion on makefiles.
+
+Be careful not to use the same
+  filename for different purposes in the makefile. Once the makefile is complete, you
+shouldn't have to worry about it again for this lab. Trying to do this lab or
+any future labs without makefiles is <b>not</b> something you should
+seriously consider!<p>
+Here is a sample <a href="Makefile"> Makefile </a> that can serve as a
+starting point.  It assumes that your ISR code (assembly) is in a file
+named myisr.s, that your interrupt handler code (C) is in a file named
+myinth.c, and that you want your output file to be named lab3.bin. These names can
+be changed easily if you wish to name your files differently.
+</ul>
+
+
+<h4>Other Tips</h4>
+<ul>
+
+<li>Although you do not need to explicitly modify the PIC's registers for this lab or any future labs,
+being aware of the IRR and ISR register contents can be very helpful in debugging. You can view the
+contents of these registers using the '<samp>r</samp>' command in Emu86.<p>
+
+<li> To help debug your tick ISR, it is sometimes helpful to turn off the automatic generation of ticks and use only manually generated
+ticks.<p>
+
+<li> Note that the interrupt behavior is defined only when pressing Ctrl-R, Ctrl-T, and standard alpha-numeric keys found on any keyboard.
+  However, the function keys on keyboards and other key sequences can generate a
+  series of multiple interrupts, as though multiple keys had been pressed.
+Stick to standard keys to get the expected behavior.
+
+</ul>
+<p>
+
+<br>
+<hr>
+<address>Last updated 26 August 2019</address>
+<br>
+</body>
+</html>

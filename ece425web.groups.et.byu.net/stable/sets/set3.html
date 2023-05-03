@@ -1,0 +1,108 @@
+<html>
+<head>
+<title>ECEn 425 Set #3</title>
+</head>
+
+<body bgcolor="#FFFFFF">
+<center>
+<h2> Homework Set #3 </h2>
+</center>
+<HR>
+
+<OL>
+<LI> Problem 4.1 from the text. Explain your answer.<p>
+
+<li> Problem 4.2 from the text. Assume that the code "<samp>return
+(lSecondsToday)</samp>" is implemented such that it reads
+lSecondsToday from the least significant word (or byte) to the most
+significant word (or byte). Explain your answers.<p>
+
+<li> Problem 4.3 from the text.<p>
+
+<li>Consider the following C function in which the function body has been omitted:
+<blockquote><pre>
+void MyFunction(int argWord, char argByte)
+{
+    int localWord;
+    char localByte;
+
+    ...
+    ...
+    ...
+}
+</pre></blockquote>
+<ol type="a">
+
+<li>Write working 8086 assembly that would be used to make the
+function call "<samp>MyFunction(1, 2);</samp>". (Hint: This includes
+pushing the arguments onto the stack and cleaning up the stack after
+the call)
+
+<li>How would the compiler reference each of the variables
+<samp>argWord</samp>, <samp>argByte</samp>, <samp>localWord</samp> and
+<samp>localByte</samp> in assembly? (Hint: For example, one of them
+might be referenced by "<samp>word [bp-2]</samp>". Be careful on
+<samp>localByte</samp>.)
+
+<li><i>How</i> and <i>where</i> is space allocated for the local
+variables <samp>localWord</samp> and <samp>localByte</samp>?
+
+</ol>
+<p>
+
+<li>
+<i> Make </i> is a very useful tool on Unix systems that you will
+be required to use in future assignments.  Make provides
+support to maintain programs based on multiple source files that you
+won't be able to live without once you've used it.  You provide make
+with a file specifying file dependencies and also the actions required
+to update targets if any of the files have changed on which the target
+is dependent.  <p>
+
+Here is a sample makefile:
+<blockquote><pre>
+CC = cc
+CFLAGS = -g
+OBJ = src1.o src2.o src3.o
+
+prog1:	$(OBJ)
+	$(CC) $(CFLAGS) $(OBJ) -o prog1
+
+src1.o:	ops.h def.h src1.c
+
+src2.o:	ops.h def.h src2.c
+
+src3.o:	ops.h def2.h src3.c
+</pre></blockquote>
+
+Learn about what make does when called with the above makefile by
+talking to classmates and TAs, reading the man page for
+make, <font color=red>using your favorite search engine</font>, and
+experimentation. <font color=red>(Be careful here, as make is smart
+enough to use implicit rules for updating files when it is pretty
+obvious what needs to be done. Read and experiment.)</font>  After you
+understand what it does, write a description of make's actions when
+run with the above makefile. Write your description in pseudo-code.
+I'll define this loosely as a mixture of C and English of your own
+devising that uses the structure of C to avoid ambiguity and English
+for convenience in expressing high-level conditions and actions.  Here
+is an example of acceptable pseudo-code:
+
+<pre><blockquote>
+if (you'd like to come && you have time)
+   come to the class BBQ at my house;
+else
+   don't worry about it but you'll miss the fun;
+</pre></blockquote>
+<p>
+
+
+</OL>
+
+<HR>
+Turn in your typed solution for this assignment via LearningSuite by 11:00pm on the due date.
+<hr>
+<ADDRESS>Last updated 26 August 2019</ADDRESS>
+<ADDRESS>James Archibald jka@ee.byu.edu</ADDRESS>
+</body>
+</html>

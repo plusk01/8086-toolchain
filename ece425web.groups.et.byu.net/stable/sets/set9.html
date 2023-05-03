@@ -1,0 +1,120 @@
+<html>
+
+<head>
+<title>ECEn 425 Set #9</title>
+</head>
+
+<body bgcolor="#ffffff">
+<center>
+<h2> Homework Set #9 </h2>
+</center>
+<hr>
+<p>
+Using your YAK kernel code from lab 6, make the measurements described
+below using whatever tools are most convenient.  To simplify, assume
+that the application code running is that from lab 6.  (For the
+measurements relating to semaphores, assume that the lab 5 application
+code is running.)  This constrains such factors as worst-case
+interrupt nesting, number of tasks, and number of semaphores, ensuring
+that we're actually measuring the same things. (With these
+assumptions in mind, please report raw numbers, not expressions that
+include any sort of variables.)<p>
+
+<b>Important Notes:</b>
+<ul>
+
+<li>All measurements except the last three are in terms of
+<i>machine instructions</i> on the target platform.
+
+<li>You should spend less than two hours on this assignment.
+
+<li>For each answer, explain briefly how it was determined.
+
+<li>You should be able to defend the accuracy of your reported
+measurements.
+
+<li>You may work with your lab partner and you only need to submit one
+copy of the assignment for both partners. Make sure both names are on
+the assignment then <b><font color=#ff0000>submit your results via Learning Suite.</font></b>.
+
+</ul>
+<P>
+
+<ol>
+<li> <b> Longest critical section.</b> The maximum number of
+consecutive instructions your kernel ever executes with interrupts
+disabled.  Don't count initialization code that runs before YKRun and
+ignore YKNewTask. (Let's limit our attention to code likely to run in
+steady state.)
+
+<li> <b> Worst case interrupt latency.</b> The maximum number of
+instructions your kernel could execute from the time an interrupt is
+asserted until the execution of the first instruction of the interrupt
+handler (not the ISR but the C routine it calls).  To simplify, assume
+that we are concerned with the level <i>i</i> interrupt, that
+interrupts at level <i>i</i> are enabled, and that no higher priority
+interrupts take place from the time interrupt <i>i</i> is asserted
+until its interrupt handler begins execution.  (In other words, ignore
+interrupt nesting for this measurement.)  This does <i>not</i> imply
+that interrupts are enabled (i.e., that IF in the flag register is set
+at the time of the interrupt.  This measurement is therefore the
+longest critical section above plus the length of your longest ISR (to
+the point of calling the handler).  For consistency, don't include the
+first instruction of the handler in your answer, just the instructions
+to that point.
+
+<li> <b> Overhead to post to a semaphore.</b> The maximum number of
+instructions that could be executed from the call to YKSemPost until
+it returns, assuming that no task is made ready and that no context
+switch takes place.  (Start counting immediately after the call
+instruction and stop counting with the return instruction at the end
+of YKSemPost.)  Assume no interrupts occur and that lab 5 application
+code is running.
+
+<li> <b> Overhead to pend on a semaphore.</B> The maximum number of
+instructions that could be executed from the call to YKSemPend until
+it returns, assuming that the semaphore is available at the time of
+the call.  (Start counting immediately after the call instruction and
+stop counting with the return instruction at the end of YKSemPend.)
+Assume no interrupts occur and that lab 5 application code is running.
+
+<li> <b> Overhead to switch contexts with YKDelayTask.</b> The maximum
+number of instructions that must be executed from the call to
+YKDelayTask until the first instruction of the newly dispatched task
+executes.  (Start counting after the call instruction and stop
+counting with the first instruction of the new task.)  Assume no
+interrupts occur.
+
+<li> <b> Size of YAK C source code. </b> Simply give the line count in
+all the .c and .h files for your kernel.  (This should include your
+interrupt handlers if written in C, but not the application code.)
+This admittedly isn't a terribly meaningful measure (or the sort of
+thing you want to maximize or minimize) but it is interesting to
+compare. You can use the wc command in Unix to count lines; note that
+it can handle wildcards and multiple filenames.
+
+<li> <b> Size of YAK assembly source code. </b> Simply count the lines
+of code in all your .s files that you wrote by hand (that were not
+automatically generated from C files).  Do not include clib.s in your
+total.  Make sure all kernel files are counted in this or the previous
+count as appropriate.
+
+<li> <b> Amount of memory required in bytes. </b> This is the amount
+of RAM and ROM required in a system to hold both the application code
+and your kernel. (This is easily obtained from the size of the .bin
+file.)
+
+</ol>
+
+<HR>
+
+<p>Submit your solutions to all of the above via Learning Suite before
+11:00pm on the due date. One submission per team is sufficient, but be
+sure to identify both team members in your submission notes.
+
+<hr>
+<ADDRESS>Last updated 26 August 2019</ADDRESS>
+<ADDRESS>James Archibald jka@ee.byu.edu</ADDRESS>
+
+</body>
+</html>

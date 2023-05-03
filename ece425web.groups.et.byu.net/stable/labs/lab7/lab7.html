@@ -1,0 +1,327 @@
+<html>
+
+<head>
+<title> ECEn 425 Lab #7</title>
+</head>
+
+<body>
+
+<center>
+<h2> ECEn 425</h2>
+<h2> Lab #7: Event Flags</h2>
+</center>
+
+<hr>
+<h3> Overview</h3>
+
+This lab is the final phase in the development of your YAK kernel.
+You are to add functions that create, pend on, set, and reset event
+flags so that you can correctly execute the application program <a
+href="lab7app.c">lab7app.c</a> without modification. You will also
+need the file <a href="lab7defs.h">lab7defs.h</a>.  You are expected
+to complete this lab with a partner.<p>
+
+<h3> Functionality </h3>
+
+You must add the following functions to your kernel. You should
+implement each function exactly according to the prototype given on
+the <a href="../kernel.html">YAK Kernel</a> webpage. Refer to that web
+page for additional details about these functions.
+
+<ul>
+
+<li> <samp>YKEventCreate -</samp> Create and initialize an event flag
+group
+
+<li> <samp>YKEventPend -</samp> Cause calling task to block until a
+combination of event flag bits occurs
+
+<li> <samp>YKEventSet -</samp> Set event flag bits (change to 1)
+
+<li> <samp>YKEventReset -</samp> Clear event flag bits (change to 0)
+
+</ul>
+<p>
+
+For this lab you will also need to change your tick and keyboard
+interrupt handlers.  For the tick handler, you need not generate any
+output -- this makes your output much easier to read.  You should
+replace the contents of your keyboard handler with the contents of
+sample function shown below.
+
+<blockquote>
+<pre>
+void KeyboardHandler(void)
+{
+    char c;
+    c = KeyBuffer;
+
+    if(c == 'a') YKEventSet(charEvent, EVENT_A_KEY);
+    else if(c == 'b') YKEventSet(charEvent, EVENT_B_KEY);
+    else if(c == 'c') YKEventSet(charEvent, EVENT_C_KEY);
+    else if(c == 'd') YKEventSet(charEvent, EVENT_A_KEY | EVENT_B_KEY | EVENT_C_KEY);
+    else if(c == '1') YKEventSet(numEvent, EVENT_1_KEY);
+    else if(c == '2') YKEventSet(numEvent, EVENT_2_KEY);
+    else if(c == '3') YKEventSet(numEvent, EVENT_3_KEY);
+    else {
+        print("\nKEYPRESS (", 11);
+        printChar(c);
+        print(") IGNORED\n", 10);
+    }
+}
+</pre>
+</blockquote>
+
+You will also need to #include the header file <a
+href="lab7defs.h">lab7defs.h</a> above your keyboard handler. This
+keyboard handler, in combination with the application code, will allow
+you to test the ability of your kernel to unblock one or multiple tasks
+in response to different events. Study the application code and
+keyboard handler carefully so that you understand what should happen
+when keys are pressed.
+<p>
+
+
+
+<h3>Requirements</h3>
+
+Implement the required functions and make sure that the application
+program runs correctly. As usual, the system should not crash when key
+presses occur in rapid succession, even with the timer tick frequency
+increased to <b>750</b> instructions per tick.  For full credit, your
+application code must run correctly at this high tick rate, including
+the generation of all output for any combination of keypresses.
+<p>
+
+The behavior of the code depends on which keys are pressed. To verify
+that your kernel is running correctly, check the following
+functionality:
+
+<ul>
+
+<li>Pressing keys 'a', 'b', <i>or</i> 'c' should set the EVENT_X_KEY
+event in the charEvent event flags group, where X is the key
+pressed. This will cause the CharTask task to become ready, run, then
+display
+
+<pre>
+CharTask     (X)
+</pre>
+
+<li>Pressing the 'd' key should set the EVENT_A_KEY, EVENT_B_KEY,
+<i>and</i> EVENT_C_KEY events in the charEvent event flags group. This
+should cause the CharTask task and the AllCharsTask task to become
+ready, run, then display (in the following order)
+
+<pre>
+CharTask     (A)
+CharTask     (B)
+CharTask     (C)
+AllCharsTask (D)
+</pre>
+
+<li>Pressing keys '1', '2', or '3', should post to the EVENT_N_KEY
+event in the numEvent event flags group, where N is the number key
+pressed. Nothing should happen until all three EVENT_N_KEY events are
+set. Therefore, pressing <i>all</i> the keys, in any order, should
+cause the AllNumsTask task to become ready, run, then display
+
+<pre>
+AllNumsTask  (123)
+</pre>
+
+</ul>
+
+If other keys are pressed, the usual "<samp>KEYPRESS (X)
+IGNORED</samp>" should be displayed. No other text or error messages
+should be displayed.
+
+<h3>Pass-off</h3>
+
+When the kernel runs the application code correctly, show and demonstrate your
+code to a TA. <b>Since you must demonstrate working code to a TA on or before the due date, please
+consider their lab schedule well in advance</b>.<p>
+
+In addition to the demonstration, you must a written summary of
+problems you encountered, if any, in completing this lab.  You should
+also include a report of the number of hours you spent on the lab,
+including coding and debugging. A realistic estimate is
+sufficient. Send a submission even if you didn't encounter any
+noteworthy bugs along the way. <b>You will not receive full credit for
+the lab unless you send a report.</b><p>
+
+<font color=red>New for Fall 2019: we want both your report and your
+source code for the lab.  The easiest way to do this is to create a
+report file (for consistency call it report.txt or report.pdf), to add
+it to the working directory for the lab, to create a compressed tar
+file (with all the files in your directory), and then to upload that
+file to Learning Suite. <p>
+
+To review, if 425/labx is your working directory for this lab, type
+the following in the 425 directory: 
+
+<blockquote><pre> tar -cvzf submission.tar.gz labx
+</pre></blockquote>
+
+and then upload the resulting compressed tar file (submission.tar.gz)
+to Learning Suite.</font>
+
+<h3>Important Notes </h3>
+
+<ul>
+
+<li><b>RTOS Differences.</b> Each RTOS handles event flags
+differently. Our YAK event functions are different from the event
+functions used by the AMX RTOS described in our text and they are
+different from those in uC/OS. One key difference is that our kernel
+only allows a task to block until events are set (become 1). Some
+other kernels, such as AMX, allow you to block until events are set or
+reset (become 1 or 0). However, even with our more limited features,
+the same functionality can be achieved, using additional event flags
+if necessary.
+<p>
+
+<li><b>Differences from the previous two labs.</b> In the previous two
+labs you only had to worry about unblocking one task when a pend or
+post function was called. In this lab, however, you may have to
+unblock several tasks at once. Make sure that all tasks become ready
+when they should and that they run in priority order. Fortunately, in
+our kernel, tasks can only be made ready in response to events when
+YKEventSet is called. Also keep in mind that any number of tasks can
+be blocked waiting for different conditions on the same event flags
+group. This means that the kernel must save information that says
+which event group and which flags each task is waiting for as well as
+which wait mode it is using. The TCB is a natural place to do this.
+<p>
+
+
+<li><b>Pacing yourself.</b> Here is a statistical summary of hours
+reported per team to complete this lab in Fall 2017:
+
+<ul>
+  <li> Low: 0.5 hours
+  <li> High: 6.0 hours
+  <li> Average: 3.9 hours
+</ul>
+<p>
+
+
+</ul>
+
+<h3> Debugging help </h3>
+
+Here are comments from student reports describing their problems on
+this lab and how they tracked them down.  As always, take them with a
+grain of salt.
+
+<ul>
+
+<li>After moving a task from the blocked list for an event group to
+the ready list, I would use the next pointer in the TCB I had moved in
+order to go to the next blocked task and check if that task also
+needed to be unblocked. Because I checked <i>after</i> the TCB had
+been moved to the ready list, the next pointer was actually pointing
+to the next task in my ready list instead of the next task blocked on
+the event group. To fix it, I needed a temporary TCB pointer that
+would be set to the next blocked task's TCB <i>before</i> I removed
+the TCB from the blocked list.
+
+<li>The logic that checked whether the event conditions were met for a
+given task wasn't quite right. I needed to be more careful in writing
+that logic.
+
+<li> We made a quick mistake on how test for the any event
+ condition. We didn't consider that when returning event group it had
+ to be latest copy (we were storing it in our TCB array and then
+ calling schedular which would result in an old value). We
+ accidentally deleted an important line of code in YKEventCreate when
+ fixing the above problem so that it actually returned a null pointer
+ and caused crazy things to happen.
+
+<li>The only problems we encountered involved masking the event
+ incorrectly (we had an & instead of an |) and we didn't loop through
+ our tasks correctly when blocking/unblocking.
+
+<li> I did not manage the pointers to the
+TCBs in the event pend list correctly at first.  You must save a
+pointer to the next TCB in the list before moving a TCB to the ready
+list.
+
+<li> The only problem we had in this lab was when a event was set, and
+tasks became unblocked, we would set the return value at this moment
+(when we moved it from the suspend list to the ready list).  However,
+this would return the wrong value.  We needed to return the value when
+the task was RUN, not changed to the ready list.
+
+<li> One main problem is that we were waking up tasks or making them
+ready for other events that wern't even being tested.  We had to make
+sure we were only checking tasks who were actually waiting for the
+event.  We also were checking set event value against the mask value
+passed in instead of the actual value from the event.  Once we fixed
+these it was pretty straightforward.
+
+<li> We had lots of compilation errors.  This was partly because we
+#included "lab7defs.h" in above #include "yakk.h" in our myinth.c
+file.
+
+<li> In our YKEventSet function, we were checking that a task was
+pending on an event, but we were not checking if it belonged to the
+event passed into the function.  This caused the AllCharsTask to print
+when all three number keys were pressed and vice versa.  It also
+caused the number key events to behave incorrectly.
+
+<li> The main problem that we had stemmed from the YKEventSet
+function.  We had three bugs in the function.  First, we didn't call
+the scheduler even though a new task was made ready.  This wasn't a
+big bug, and it seemed to work even without calling the scheduler.
+Second, we were checking the wrong bits in the event for a task when
+waitMode = EVENT_WAIT_ALL.  We were checking only the mask, which only
+has one bit set at a time unless 'd' is pressed.  We fixed that by
+checking to make sure the actual event value matched the value we were
+waiting on in the task.  The third problem was the trickiest.  When we
+were inserting our tasks back into the ready list, we weren't updating
+our blocked list correctly.  Because of this, our blocked list pointer
+ended up pointing to the ready list, and we could never take more than
+1 task off of the blocked list.  As a result, everything worked except
+when we pressed 'd', the 'AllCharsTask' didn't print out.  It never
+got removed from our blocked list.  It took us a while to connect the
+symptom to the problem, but one minor change fixed the problem once we
+realized what it was.
+
+<li> Our major problem was that we did not understand the lab and had
+trouble understanding exactly how the events should work.  Once we
+figured out that, it was apparent that certain information had to be
+saved externally when YKEventPend is called.  When we saved the
+waitMode and mask in the TCB of each task that had been associated
+with an event group, things worked as they should.
+
+<li> YKEventSet and YKEventPend are the two bulk functions to write in
+this lab.  Once we realized that YKEventPend didn't have to look for
+events that had already occured, it made the function very simple.
+This meant that all the logic in blocking and unblocking tasks occurs
+in YKEventSet.  We had 2 bugs.  Bug number 1 was we didn't return the
+flags, so the events were never cleared.  Bug number 2 was how we
+calculated the check for any_event.  It needed an initialized
+variable.
+
+<li> The only problems we encountered were with syntax errors.  When
+doing #define, we did #define var = 0; instead of #define var 0.
+This was our only major problem, and it took us about 20 minutes trying to find it.
+
+
+<li> We had several bugs in our code. The main problem was our pointer
+logic. We would get caught into an infinite loop when searching
+through our blocked list because the pointers never got to the end of
+the list. We also had a lot of trouble getting the right return value
+to the task code.
+
+</ul>
+
+
+<p>
+<br>
+<hr>
+<address>Last updated 26 August 2019</address>
+<p>
+</body>
+</html>

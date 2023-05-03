@@ -1,0 +1,882 @@
+<html>
+<head>
+<title> ECEn 425 Lab #8</title>
+</head>
+
+<body>
+<center>
+<h2>ECEn 425</h2>
+<h2>Lab #8: Simptris</h1>
+</center>
+
+</h2>
+
+<hr>
+<h3>Overview</h3>
+
+You are expected to complete this lab with a partner.  In this lab you
+will write application code that makes use of your YAK kernel and
+interacts with Simptris, a Tetris-like game with significant time
+constraints.  Conceptually, you are writing the code for an embedded,
+real-time system that will connect to and control another machine
+running the Simptris game.  Your system is notified via interrupts
+when new pieces appear on the screen and your code must call functions
+that shift and rotate each piece as it falls so that you continue to
+clear lines.  The shift and rotate functions have a fixed overhead
+that becomes the bottleneck; as the pieces come faster and fall
+faster, sooner or later you won't be able to move a piece before it
+touches down. <p>
+
+The purpose of this lab is to give you experience in writing
+time-critical application code that runs with your YAK kernel.  This
+is not a class in artificial intelligence, and you are not required to
+devise a complicated placement strategy.  A reasonably straightforward
+playing approach is sufficient to clear the number of lines required
+for this lab. (For those who are not content with just satisfying the
+minimum requirement, we will have a little contest near the end of the
+semester with Twinkies awarded to the high scores.)<p>
+
+<h3>Simptris Details</h3>
+
+Simptris is an extension of the simulator.  To run put the simulator
+into simptris mode, enter the command<b>
+</b>'<samp>simptris</samp>'. A new window entitled "Simptris" should
+appear. The box in this window is the game display. Normal text output
+from your program will still be displayed in the program output
+window.<p>
+
+With some exceptions, the basic rules of Tetris apply to this game.
+For simplicity, the game board is smaller and the pieces consist of
+three blocks instead of four.  There are only two possible shapes: a
+"straight" piece and a "corner" piece.  More than one piece may be
+falling at the same time, but they will never fall side by side or be
+close enough to run into each other as they are being turned.  As the
+number of lines increases, both the rate at which pieces fall and the
+frequency of their appearance increase as more lines are cleared.  The
+score is simply the number of lines cleared and is displayed at the
+bottom of the Simptris window; there is no bonus for clearing multiple
+lines with one piece.<p>
+
+The game board is 6 units wide and 16 units deep.  The upper three
+rows are a special buffer in which new pieces will appear.  You can
+move pieces as soon as they appear in this buffer, but the game ends
+when a piece touches down with any part of it still in the top three
+rows.  The columns are numbered 0-5 from left to right, and the rows
+are numbered 0-15 from bottom to top.<p>
+
+The type, placement, and orientation of each piece is generated
+randomly, but you can (and should) use the appropriate function to
+seed the random number generator, ensuring that you will see the same
+sequence of pieces to help with debugging.  (If you notice that the
+behavior of your code is not the same every time you execute with the
+same seed, please inform a TA or the instructor.)  When passing off
+the program you may use any seed you wish; for our friendly
+competition a particular seed will be selected at random.<p>
+
+To communicate with your application code, Simptris uses several
+different interrupts. You will need to write an ISR for every possible
+interrupt.  Normally, if you wanted to ignore a certain interrupt, you
+would disable it by appropriately setting the IMR in the PIC. However,
+for this lab, if your simptris code does not need to handle a certain
+interrupt, create an ISR for it that contains just the iret
+instruction.<p>
+
+<h4>Interrupts</h4>
+
+From a (simulated) hardware perspective, the reset, tick, and keypress
+interrupts are unchanged from previous labs.  However, you are free to
+modify your interrupt handlers for these interrupts in any way you
+wish, so long as the requirements for this lab are met.  (In other
+words, no specific output is required in the keypress or tick ISRs or
+handlers.)
+
+<p> Here is a table listing all possible interrupts that can be
+generated in Simptris:
+
+<p>
+<table border=3>
+<tr>
+<th colspan=2> Emu86 </th>
+<th colspan=2> Simptris  </th>
+</tr>
+
+<tr>
+<th width=35%> Name       </td>
+<th width=15%> Priority   </td>
+<th width=35%> Name       </td>
+<th width=15%> Priority   </td>
+</tr>
+
+<tr>
+<td             > Reset       </td>
+<td align=center> 0           </td>
+<td             > Game Over   </td>
+<td align=center> 3           </td>
+</tr>
+
+<tr>
+<td             > Tick                 </td>
+<td align=center> 1                    </td>
+<td             > New Piece     </td>
+<td align=center> 4                    </td>
+</tr>
+
+<tr>
+<td             > Keypress             </td>
+<td align=center> 2                    </td>
+<td             > Received Command   </td>
+<td align=center> 5                    </td>
+</tr>
+
+<tr>
+<td             >                     </td>
+<td align=center>                     </td>
+<td             > Touchdown    </td>
+<td align=center> 6                   </td>
+</tr>
+
+<tr>
+<td             >              </td>
+<td align=center>              </td>
+<td             > Line Clear    </td>
+<td align=center> 7            </td>
+</tr>
+
+</table>
+
+<p>
+
+Please note that you must write and set up an ISR for <i>all</i>
+interrupts. If you do not intend to use one of the interrupts, then
+the ISR for that interrupt should simply send the EOI command and then
+iret. Don't forget to save and restore the registers that are used by
+the EOI command (usually AX). Here is a brief description of the new
+interrupts:
+
+<ul>
+
+<li><b>Game Over (IRQ 3)</b>.  Indicates that the game is over.  No
+  new pieces will appear.
+
+<li><b>New Piece (IRQ 4)</b>. Indicates that a new piece has appeared
+  on the board. When this interrupt occurs, information can be
+  obtained about the pieces by reading variables declared in
+  clib.s. The ID of the new piece (required as a parameter in the
+  functions that move pieces) is stored in
+  <b><samp>NewPieceID</samp></b>, the type of piece is stored in
+  <b><samp>NewPieceType</samp></b>, its orientation is stored in
+  <b><samp>NewPieceOrientation</samp></b>, and its column (the corner
+  block on corner pieces and the center block on straight pieces) is
+  in <b><samp>NewPieceColumn</samp></b>.  The row for new pieces is
+  always row 14. More details on accessing and interpreting these
+  variables will be given shortly.&nbsp;
+
+<li><b>Received Command (IRQ 5)</b>.  This indicates that Simptris
+  <i>received</i> the last command that was sent and that a new
+  command (shift or rotate) can be sent.  This interrupt is generated
+  by the simulator after a fixed delay from the sending of the
+  previous command.  You should never send a command until this
+  interrupt has been received for the previous command; if you do,
+  your second command will overwrite the parameters of the first and
+  just generally mess things up. You should not interpret this
+  interrupt as an indication that the previous command was executed
+  successfully; for example, if you try to rotate a straight piece
+  that is against the side, nothing will happen, but you will still
+  get this interrupt after the specified delay indicating that the
+  "channel" is clear to send the next command.
+
+<li><b>Touchdown (IRQ 6)</b>.  This indicates that a piece has landed
+  on something and therefore stopped falling.  The ID of the piece is
+  found in the global variable <b><samp>TouchdownID</samp></b>. Each
+  time this interrupt occurs, a bitmap of the new screen after the
+  touchdown (ignoring pieces that are still falling) is contained in
+  the word sized variables <b><samp>ScreenBitMap0, ScreenBitMap1,
+  ScreenBitMap2, ScreenBitMap3, ScreenBitMap4,</samp></b> and
+  <b><samp>ScreenBitMap5</samp></b>.  Each of these represents (in order from
+  left to right) one column.  Of the 16-bits in each variable, the MSB
+  corresponds to the lowest row, and the LSB corresponds the highest
+  row.  A bit value of 1 means that the corresponding square on the
+  game board is occupied and a 0 means that the space is vacant.
+
+<li><b>Line Clear (IRQ 7)</b>. This indicates that a line has been
+  cleared in Simptris.  If a piece cleared more than one line, only
+  one interrupt is generated.
+
+</ul><p>
+
+<h4> Accessing and Interpreting the Variables </h4>
+
+All variables in the description above correspond to word-size
+locations reserved in the clib.s file.  You can easily access these
+variables in your C code by declaring each as an "<samp>extern
+unsigned</samp>" and then referencing it normally, just as you did
+with the <samp>KeyBuffer</samp> variable in previous labs. <P>
+
+Values of variables not fully explained above are interpreted as
+follows: <p>
+
+<ul>
+
+<li> <b><samp>NewPieceType</samp></b>.  This has value 1 for straight
+  pieces and value 0 for corner pieces.<p>
+
+<li> <b><samp>NewPieceOrientation</samp></b>.  The value is
+  interpreted as shown below.  The red block (<font
+  color=red>*</font>) shown here is the "center" block of the piece.
+  Remember that the value of <samp>NewPieceColumn</samp> is always
+  that of this center block, and a piece always rotates around its
+  center block.  (In other words, the center block doesn't move when
+  you rotate a piece).<p>
+
+Corner Pieces:
+<blockquote>
+<pre>0    1    2    3
+<font color=blue>
+*     *   *<font color=red>*   *</font>*
+<font color=red>*</font>*   *<font color=red>*</font>    *   *
+</pre>
+  </blockquote>
+</font><p>
+
+Straight Pieces:
+<blockquote>
+<pre>  0   1
+<font color=blue>
+      *
+ *<font color=red>*</font>*  <font color=red>*</font>
+      *</pre>
+  </blockquote>
+</font>
+<p>
+</ul><p>
+
+<h4>Control Functions</h4>
+
+These functions are used to move the pieces and actually play the
+game.  <b>In order to use these functions, you must include the file
+<a href="../library/simptris.s">simptris.s</a> which provides function
+declarations.</b> You may also include <a
+href="../library/simptris.h">simptris.h</a>, which provides headers
+for these functions. Consider the functions in simptris.s part of a
+"standard library" that is used to communicate with Simptris.  (You
+should not modify these functions for this lab.)<p>
+
+<ul>
+
+<li><samp>void <b>SlidePiece</b>(int ID, int direction)</samp>
+  <br>This will slide the piece specified by <em>ID</em> one space to
+  the right (<em>direction</em> = 1) or to the left
+  (<em>direction</em> = 0).  No action will be taken if the piece
+  cannot move in the specified direction without running into a wall
+  or fallen pieces or if the piece in question has already touched
+  down.
+
+<p><li><samp>void <b>RotatePiece</b>(int ID, int direction)</samp>
+  <br>This will rotate the piece specified by <em>ID</em> 90 degrees
+  in a clockwise direction (<em>direction</em> = 1) or a
+  counter-clockwise direction (<em>direction</em> = 0).  If the piece
+  cannot rotate without colliding with a wall or an occupied square,
+  no action will be taken.
+
+</ul>
+
+<p>Both of the above functions use software interrupts to pass the
+information to Simptris. The actual code that is executed for the
+software interrupts is hidden from you but you are free to look at
+simptris.s to see how the software interrupt routines are called.
+There is some delay between the time these functions are called and
+when Simptris actually performs the requested command. This simulates
+a transmission and execution delay and makes the game far more
+interesting for our purposes.  After the delay, Simptris will read the
+parameters from memory and respond with a <strong>received command
+(IRQ 5)</strong> interrupt.  Only at this point in time can the next
+command be sent.
+
+<ul>
+<p>
+
+<li><samp>void <b>SeedSimptris</b>(long seed)</samp> <br>This seeds
+  the random number generator.  There is no delay associated with this
+  function, and Simptris will <b>not</b> respond with a received
+  command interrupt when this function is called.  You should call
+  this function before calling StartSimptris(), and you may not call
+  it more than once in the execution of each program. Subsequent calls
+  will be ignored.<p>
+
+<li><samp>void <b>StartSimptris</b>(void)</samp> <br>This tells
+  Simptris to start the game.  Before this command is issued, no
+  pieces will fall in the Simptris window.  This will allow you to do
+  the needed "idle runs" in your application to track CPU usage before
+  you have to worry about moving pieces.  There is no delay associated
+  with this function, and Simptris will <b>not</b> respond with a
+  received command interrupt when it receives this command.
+
+</ul>
+
+<p>
+
+<h3>Requirements</h3>
+
+<p> Your application code must meet the following requirements:
+
+<ul>
+
+<li> It must make use of your YAK kernel, using the functions you have
+written for other labs.  You may optimize these functions, but they
+should not be customized to the point that they will not work with the
+application code of previous labs.
+
+<li> For full credit, your code must clear at least <b>200 lines</b>
+at the default tick frequency (a tick every 10,000 instructions).  For
+every 40 lines that you fall short of 200, the maximum credit you can
+receive is reduced by 10%. (You can receive up to 90% of the full
+points for this lab by clearing 160 lines; up to 80% by clearing 120
+lines, etc.) You may select any single seed you want to meet this
+requirement.
+
+<li> It must accurately report context switches and CPU utilization
+once every 20 clock ticks. These values <b>must</b> be displayed in
+decimal and <b>must</b> be displayed each time on a line by themselves
+<b>exactly in the form shown below</b>, where # is respectively the
+number of context switches and percent CPU usage.
+
+<b><pre>&lt;CS: #, CPU: #&gt;</pre></b>
+
+</ul>
+
+When the kernel runs the application code correctly, show and demonstrate your
+code to a TA. <b>Since you must demonstrate working code to a TA on or before the due date, please
+consider their lab schedule well in advance</b>.<p>
+
+In addition to the demonstration, you must a written summary of
+problems you encountered, if any, in completing this lab.  You should
+also include a report of the number of hours you spent on the lab,
+including coding and debugging. A realistic estimate is
+sufficient. Send a submission even if you didn't encounter any
+noteworthy bugs along the way. In your submission, include the number
+of lines your application code was able to clear. <b>You will not
+receive full credit for the lab unless you send a report.</b><p>
+
+<font color=red>New for Fall 2019: we want both your report and your
+source code for the lab.  The easiest way to do this is to create a
+report file (for consistency call it report.txt or report.pdf), to add
+it to the working directory for the lab, to create a compressed tar
+file (with all the files in your directory), and then to upload that
+file to Learning Suite. <p>
+
+To review, if 425/labx is your working directory for this lab, type
+the following in the 425 directory: 
+
+<blockquote><pre> tar -cvzf submission.tar.gz labx
+</pre></blockquote>
+
+and then upload the resulting compressed tar file (submission.tar.gz)
+to Learning Suite.</font>
+
+<p>
+
+<h3>Important Notes and Recommendations</h3>
+
+<p> You should study the application programs from previous labs for
+insight into how your code should be organized.  If you cannot think
+of an obviously better way of organizing your code, it is recommended
+that you organize your code as follows: Create multiple tasks; one
+will handle the arrival of new pieces and then call a placement
+function for new corner pieces and a different placement function for
+new straight pieces.  A second task is dedicated to communication with
+Simptris, and a third task tracks statistics.  After lab 6, you should
+see obvious benefits of using a queue to communicate between the tasks
+that handle new pieces and the task that communicates with Simptris.
+You could use semaphores, queues, or events to allow ISRs to
+communicate the new piece details with the task(s) handling piece
+placement.<p>
+
+Even if you want to maximize your score, start with a simple placement
+algorithm.  The approach described below is straightforward and works
+quite well.  As you code it up, you'll think of some optimizations you
+can make, but get the simpler approach working first.
+
+   <ul>
+   <li> Conceptually divide the 6 columns into two bins, each 3 wide.
+   <li> Always play straight pieces flat, and make sure that at least
+        one of your bins can handle a straight piece at all times.
+   <li> Play corner pieces in the outside columns when bins are flat.
+   <li> If a bin is not flat, even it up with the next corner piece.
+   <li> Even up the bins by playing on the low side when feasible.
+   </ul><p>
+
+The fastest placement algorithms are fairly simple. Don't spend an
+excessive amount of time writing and debugging an extremely complex
+algorithm for piece placement only to find that it performs poorly.<p>
+
+Don't put this lab off to the end. Here is a statistical summary of
+hours reported per team to complete this lab in Fall 2017:
+
+<ul>
+   <li> Low: 3.5
+   <li> High: 20.0
+   <li> Average: 9.0
+</ul>
+
+<p>
+
+<h3> Known bugs/features </h3>
+
+When you clear a line, the pieces above that line fall no further than
+the line that was cleared.  In other words, stuff above the line won't
+fall down into a hole and cause additional lines to be cleared.  If
+your playing algorithm relies on this functionality, you'd better
+rethink it. <p>
+
+The actual number of lines you clear depends to some extent on the
+load on the machine you are running on.  This is certainly less than
+ideal, and something you need to be aware of.  Run your code again,
+and try a machine that has fewer active processes on it.<P>
+
+<h3> Simptris Hall of Fame </h3>
+
+<table border cellspacing=5 cellpadding=5>
+  <tr>
+    <td colspan=2></td>
+    <th align=center>Lines cleared</th>
+    <th align=center>Team</th>
+    </tr>
+  <tr>
+    <th rowspan=5>Fall 2009<br> (Seed 37428)</th>
+    <th> 1st place </th>
+    <td align=center> 445 </th>
+    <td> Alex Sevey, Tyrie Vella </th>
+    </tr>
+  <tr>
+    <th> 2nd place </th>
+    <td align=center> 409 </td>
+    <td> Chase Johnson, Jared Havican </td>
+    </tr>
+  <tr>
+    <th> 3rd place </th>
+    <td align=center> 406 </td>
+    <td> Brett Gottula, Michael McCarty </td>
+    </tr>
+  <tr>
+    <th> Huxley award* </th>
+    <td align=center> 56 </td>
+    <td> Joel Rend&#243n, Drew Withers </td>
+    </tr>
+  <tr>
+    <th></th>
+    <td align=center> 443 </td>
+    <td> jka </td>
+    </tr>
+  <tr>
+    <th rowspan=5>Fall 2010<br> (Seed 75301)</th>
+    <th> 1st place </th>
+    <td align=center> 467 </th>
+    <td> Jack Quincy, Darren Turetzky </th>
+    </tr>
+  <tr>
+    <th> 2nd place </th>
+    <td align=center> 441 </td>
+    <td> Jeremy Mickelson </td>
+    </tr>
+  <tr>
+    <th> 3rd place </th>
+    <td align=center> 440 </td>
+    <td> David Gneiting, Aaron Nuzman </td>
+    </tr>
+  <tr>
+    <th> Huxley award* </th>
+    <td align=center> 27 </td>
+    <td> Daniel Larsen, Adeline Rhoton </td>
+    </tr>
+  <tr>
+    <th></th>
+    <td align=center> 451 </td>
+    <td> jka </td>
+    </tr>
+  <tr>
+    <th rowspan=5>Fall 2011<br> (Seed 77823)</th>
+    <th> 1st place </th>
+    <td align=center> 426 </th>
+    <td> Michael Chamberlain, Daniel Hansen </th>
+    </tr>
+  <tr>
+    <th> 2nd place </th>
+    <td align=center> 394 </td>
+    <td> Bryan Bryce, Brad White </td>
+    </tr>
+  <tr>
+    <th> 3rd place </th>
+    <td align=center> 389 </td>
+    <td> Richard Black, Luke Davidson </td>
+    </tr>
+  <tr>
+    <th> Huxley award* </th>
+    <td align=center> 50 </td>
+    <td> Colby Ballew, Alex Harding </td>
+    </tr>
+  <tr>
+    <th></th>
+    <td align=center> 439 </td>
+    <td> jka </td>
+    </tr>
+  <tr>
+    <th rowspan=5>Fall 2012<br> (Seed 40376)</th>
+    <th> 1st place </th>
+    <td align=center> 420 </th>
+    <td> Franklin Morley, Ricky Niemi </th>
+    </tr>
+  <tr>
+    <th> 2nd place </th>
+    <td align=center> 417 </td>
+    <td> Addison Floyd, Bradford Law </td>
+    </tr>
+  <tr>
+    <th> 3rd place </th>
+    <td align=center> 415 </td>
+    <td> Matt Abel, Shane Coles </td>
+    </tr>
+  <tr>
+    <th> Huxley award* </th>
+    <td align=center> 28 </td>
+    <td> Philip Erickson, Thomas Sheffield </td>
+    </tr>
+  <tr>
+    <th></th>
+    <td align=center> 444 </td>
+    <td> jka </td>
+    </tr>
+  <tr>
+    <th rowspan=5>Fall 2013<br> (Seed 99963)</th>
+    <th> 1st place </th>
+    <td align=center> 460 </th>
+    <td> Brandon Williams, Alex Wilson </th>
+    </tr>
+  <tr>
+    <th> 2nd place </th>
+    <td align=center> 407 </td>
+    <td> Colton Lee, Malcolm Plessinger, Michael Skeen </td>
+    </tr>
+  <tr>
+    <th> 3rd place </th>
+    <td align=center> 406 </td>
+    <td> Warren Kemmerer, Michael Reeder </td>
+    </tr>
+  <tr>
+    <th> Huxley award* </th>
+    <td align=center> 51 </td>
+    <td> Dayton Minor, Jared Moore </td>
+    </tr>
+  <tr>
+    <th></th>
+    <td align=center> 446 </td>
+    <td> jka </td>
+    </tr>
+  <tr>
+    <th rowspan=5>Fall 2014<br> (Seed 10947)</th>
+    <th> 1st place </th>
+    <td align=center> 446 </th>
+    <td> Luke Newmeyer, Joseph White </th>
+    </tr>
+  <tr>
+    <th> 2nd place </th>
+    <td align=center> 414 </td>
+    <td> Jonathan George, Andrew Keller </td>
+    </tr>
+  <tr>
+    <th> 3rd place </th>
+    <td align=center> 411 </td>
+    <td> Wyatt Hepler </td>
+    </tr>
+  <tr>
+    <th> Huxley award* </th>
+    <td align=center> 78 </td>
+    <td> Matthew James, Aaron Swenson </td>
+    </tr>
+  <tr>
+    <th></th>
+    <td align=center> 443 </td>
+    <td> jka </td>
+    </tr>
+  <tr>
+    <th rowspan=5>Fall 2015<br> (Seed 87532)</th>
+    <th> 1st place </th>
+    <td align=center> 405 </th>
+    <td> Troy Hinckley, Glade Snyder </th>
+    </tr>
+  <tr>
+    <th> 2nd place </th>
+    <td align=center> 390 </td>
+    <td> Rick Lyon, James Parker </td>
+    </tr>
+  <tr>
+    <th> 3rd place </th>
+    <td align=center> 365 </td>
+    <td> Travis Chambers, Parker Ridd </td>
+    </tr>
+  <tr>
+    <th> Huxley award* </th>
+    <td align=center> 34 </td>
+    <td> Kirstin Mickelson, Skylar Brown </td>
+    </tr>
+  <tr>
+    <th></th>
+    <td align=center> 444 </td>
+    <td> jka </td>
+    </tr>
+  <tr>
+    <th rowspan=5>Fall 2016<br> (Seed 87245)</th>
+    <th> 1st place </th>
+    <td align=center> 410 </th>
+    <td> Connor Anderson, Alec Crestani </th>
+    </tr>
+  <tr>
+    <th> 2nd place </th>
+    <td align=center> 401 </td>
+    <td> Sam Fuller, Seth Guthrie </td>
+    </tr>
+  <tr>
+    <th> 3rd place </th>
+    <td align=center> 391 </td>
+    <td> Ben Jacobson, Martin Sanchez </td>
+    </tr>
+  <tr>
+    <th> Huxley award* </th>
+    <td align=center> 56 </td>
+    <td> Taylor Welker, Jordan Anderson </td>
+    </tr>
+  <tr>
+    <th></th>
+    <td align=center> 430 </td>
+    <td> jka </td>
+    </tr>
+  <tr>
+    <th rowspan=5>Fall 2017<br> (Seed 73706)</th>
+    <th> 1st place </th>
+    <td align=center> 427 </th>
+    <td> Jared Anderson, Nick Bonner </th>
+    </tr>
+  <tr>
+    <th> 2nd place </th>
+    <td align=center> 403 </td>
+    <td> Evan Jones, Jacob Willis </td>
+    </tr>
+  <tr>
+    <th> 3rd place </th>
+    <td align=center> 394 </td>
+    <td> Josh Haertel, Alex McCown </td>
+    </tr>
+  <tr>
+    <th> Huxley award* </th>
+    <td align=center> 8 </td>
+    <td> Jonathan Hale, Peter Loderup </td>
+    </tr>
+  <tr>
+    <th></th>
+    <td align=center> 429 </td>
+    <td> jka </td>
+    </tr>
+  <tr>
+    <th rowspan=5>Fall 2018<br> (Seed 32773)</th>
+    <th> 1st place (tie) </th>
+    <td align=center> 429 </th>
+    <td> Benjamin James, Chuck Tolley </th>
+    </tr>
+  <tr>
+    <th> 1st place (tie) </th>
+    <td align=center> 429 </td>
+    <td> Sean Bates, Jonathan Meldrum</td>
+    </tr>
+  <tr>
+    <th> 3rd place </th>
+    <td align=center> 413 </td>
+    <td> Tyler Miller, Sterling Sleight </td>
+    </tr>
+  <tr>
+    <th> Huxley award* </th>
+    <td align=center> 108 </td>
+    <td> Ben Alexander, Tanner Gaskin </td>
+    </tr>
+  <tr>
+    <th></th>
+    <td align=center> 445 </td>
+    <td> jka </td>
+    </tr>
+  <tr>
+    <th rowspan=5>Fall 2019<br> (Seed 27495)</th>
+    <th> 1st place </th>
+    <td align=center> 433 </th>
+    <td> Peter Sawyer, Scott Tibbetts </th>
+    </tr>
+  <tr>
+    <th> 2nd place </th>
+    <td align=center> 409 </td>
+    <td> Ken McGuire, Sam Maxwell</td>
+    </tr>
+  <tr>
+    <th> 3rd place </th>
+    <td align=center> 399 </td>
+    <td> Christopher Krueger, Robert Williams</td>
+    </tr>
+  <tr>
+    <th> Huxley award* </th>
+    <td align=center> 33 </td>
+    <td> Ken McGuire, Sam Maxwell </td>
+    </tr>
+  <tr>
+    <th></th>
+    <td align=center> 440 </td>
+    <td> jka </td>
+    </tr>
+</table><p>
+
+*This is the lowest score by code that--without modification--cleared
+ 200+ lines on another seed.  Named after Aldous Huxley, who
+ said: "Consistency is contrary to nature, contrary to life. The only
+ completely consistent people are dead."
+
+
+<h3> Debugging help </h3>
+
+Here are comments from student reports describing their problems on
+this lab and how they tracked them down.  As always, take them with a
+grain of salt. Also, if you notice any problems or inconsistencies
+with Simptris or Emu86, please contact a TA immediately so that the
+problem can be fixed.
+
+<ul>
+
+<li>Our "clearToSend" semaphore initially started out as 0; the
+program never sent messages to simptris until we started it out as 1.
+
+<li>We weren't using the received command interrupt.  Because we
+weren't waiting for a command to finish, we sent commands that
+overwrote the previous ones.  Thus, some pieces would rotate or slide,
+while others would not.
+
+<li>We also did not take into account initially the column being 0 or
+5, which would require a slide before any rotation.
+
+
+<li> We encountered one big problem which caused simptris to only
+place one block into position before it crashed.  It took us quite a
+while to determine the problem.  We originally thought that the
+problem occurred in our YAK kernel, but we also felt that it worked.
+We finally tracked the problem down to where we initialized our first
+task in the main function of our application code.  We had two tasks
+using the same stack.  After we corrected this, we encountered a few
+minor errors, but nothing difficult to track down.
+
+<li> We had a kernel bug actually in YKQPost.  This was kind of weird
+because lab 6 didn't catch it at all.  It was simply an if statement
+where we accidentally put only one = instead of ==.  It took us a bit
+to track that down, but we found it.
+
+<li> We had some problems with our algorithm.  We had lots of bugs in
+it because we kind of coded it off the top of our heads, then tried to
+fix it when it didn't work.  Every time we'd fix one bug, we
+introduced another so that it took quite a bit of time to fix all the
+bugs.
+
+<li> We didn't mask unwanted interrupts correctly and occasionally one
+of these would cause crashes.
+
+<li> We had a delay statement in our piece solving algorithm which
+really slowed things down.
+
+<li> We weren't resetting some of the values in our messages so that
+when the queue was overwritten and we read some of the values in our
+communication task they were incorrect.  We had a problem with some of
+our logic and recognizing correctly the bitmap correspondence.  We
+fixed this bug and got it taken care of.  Our semaphore function had
+some problems.  It worked fine for lab5 but gave us problems in this
+lab. We fixed it.
+
+<li> Initially, we tried to minimize the number of moves required for
+any given piece. this invloved mixing straight and corner pieces on
+both sides of the board. This proved difficult to do, so we switched
+to a variation on the "straight on one side, corners on the other"
+approach. Now, all pieces would fit correctly, and we were limited
+only by the overhead of our kernel.
+
+<li> One of the major problems we had with this program was trying to
+find the lowest point in the graph.  I spent a long time trying to
+figure out the best way to do it.  I tried to reverse the order of the
+bits so I could do a simple compare on the values to see where the
+lowest point was on the board.  However Dr. Archibald suggested using
+a value that I set every time I placed A piece.  This turned out to
+work very well and only required me to change two lines to the code I
+had written previously.  The other problem I had was I was turning the
+pieces when they were against the edge and so I had to move them away
+from the edge first.  Another one of my problems was in finding steps
+to place my corners.  I simply had my compare values backwards.
+
+<li> We encountered some problems because we downloaded a fresh
+version of the clib.s file and we forgot to put the entries into the
+interrupt vector table.  We ended up trying to debug this error for
+about an hour.  We had some trouble with placing pieces and we tried
+to make our app code too smart.  When we "toned" it down a bit, things
+seemed to work a lot better.
+
+<li> One bug that took us a long time to find was that in our ISRs for
+the simptris interrupts, we weren't writing the EOI command before
+calling YKExitISR, which caused us to ignore all subsequent lower
+priority interrupts than the first one that did this (NewTask in our
+case). Also, we failed to save the stack pointer in the ISRs at the
+top of our context like we did in our other ISRs, so that took a while
+to track down.  The rest was just working out the details of our
+algorithm.
+
+<li> Our biggest bug was left over from last labs YKQPost!!  The
+compiler did not catch the fact that in one case it did not return a
+value!!  This meant we took as a return value whatever happened to be
+in register ax.  For last weeks lab it worked out, this week it did
+not though.  We got a return that we were overflowing even though we
+were not!!
+
+<li> The main problem I encountered was trying to rely on the bitmap
+for piece placement. This turned out to not work after about 39 lines
+on any seed because I had to wait until pieces touched down to make
+the decision on my next piece. After about 39 lines the pieces were
+falling to fast to effectively make the decisions and changes by
+waiting on the other piece to land. Also I found small bugs in my
+algorithm, mostly dealing with pieces against either of the side
+walls.
+
+<li> Since this was the first lab that we actually wrote yak
+application code, it was the first time I had used YKNewTask
+firsthand.  I set up my tasks and made stacks for them.  I gave them
+plenty of stack space, actually too much stack space.  I think I ran
+off the segment.  Things were really weird with the huge stacks but
+worked normally when I made my stacks smaller.
+
+<li> My original algorithm that would place pieces in a more random
+fashion. It was smart.  It would look for a suitable spot and place
+the piece. It worked great when there was enough time to maneuver the
+piece into place after the piece before had touched down.  The problem
+came when there were multiple pieces and close together.  Since the
+algorithm needed to know everything about the pieces that were played,
+it couldn't move two pieces at once.  Rather than make a complicated
+algorithm even more complicated, I just started fresh with left/right
+flat straight piece algorithm.  The second algorithm cleared 199
+lines.  Lesson learned: simple/dumb sometimes works better than
+complicated/smart.<p>
+
+Useful Seeds for testing fun piece placement and rotation
+issues:
+<ul>
+<li> Seed #1247 - straight piece on left wall
+<li> Seed #1251 - straight piece on right wall
+<li> Seed #1258 - corner piece 0 on left wall
+<li> Seed #1511 - corner piece 1 on right wall
+<li> Seed #1503 - corner piece 2 on right wall
+<li> Seed #1506 - corner piece 3 on left wall
+  </ul>
+
+</ul>
+
+<p>
+<hr>
+<address>Last updated 26 August 2019</address>
+<p>
+</body>
+</html>

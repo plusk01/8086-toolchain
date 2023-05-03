@@ -1,0 +1,454 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <title>8086 Instruction Set</title>
+</head>
+<body>
+<h2>Selected 8086 Instructions</h2>
+<hr>
+<h3>Quick Reference List</h3>
+<blockquote>
+
+<pre><a href="#adc">adc</a>	Add with carry flag
+<a href="#add">add</a>	Add two numbers
+<a href="#and">and</a>	Bitwise logical AND
+<a href="#call">call</a>	Call procedure or function
+<a href="#cbw">cbw</a>	Convert byte to word (signed)
+<a href="#cli">cli</a>	Clear interrupt flag (disable interrupts)
+<a href="#cwd">cwd</a>	Convert word to doubleword (signed)
+<a href="#cmp">cmp</a>	Compare two operands
+<a href="#dec">dec</a>	Decrement by 1
+<a href="#div">div</a>	Unsigned divide
+<a href="#idiv">idiv</a>	Signed divide
+<a href="#imul">imul</a>	Signed multiply
+<a href="#in">in</a>	Input (read) from port
+<a href="#inc">inc</a>	Increment by 1
+<a href="#int">int</a>	Call to interrupt procedure
+<a href="#iret">iret</a>	Interrupt return
+<a href="#jcc">j??</a>	Jump if ?? condition met
+<a href="#jmp">jmp</a>	Unconditional jump
+<a href="#lea">lea</a>	Load effective address offset
+<a href="#mov">mov</a>	Move data
+<a href="#mul">mul</a>	Unsigned multiply
+<a href="#neg">neg</a>	Two's complement negate
+<a href="#nop">nop</a>	No operation
+<a href="#not">not</a>	One's complement negate
+<a href="#or">or</a>	Bitwise logical OR
+<a href="#out">out</a>	Output (write) to port
+<a href="#pop">pop</a>	Pop word from stack
+<a href="#popf">popf</a>	Pop flags from stack
+<a href="#push">push</a>	Push word onto stack
+<a href="#pushf">pushf</a>	Push flags onto stack
+<a href="#ret">ret</a>	Return from procedure or function
+<a href="#sal">sal</a>	Bitwise arithmetic left shift (same as shl)
+<a href="#sar">sar</a>	Bitwise arithmetic right shift (signed)
+<a href="#sbb">sbb</a>	Subtract with borrow
+<a href="#shl">shl</a>	Bitwise left shift (same as sal)
+<a href="#shr">shr</a>	Bitwise right shift (unsigned)
+<a href="#sti">sti</a>	Set interrupt flag (enable interrupts)
+<a href="#sub">sub</a>	Subtract two numbers
+<a href="#test">test</a>	Bitwise logical compare
+<a href="#xor">xor</a>	Bitwise logical XOR
+</pre>
+
+</blockquote>
+
+<hr>
+
+<h3>Detailed Instruction List</h3>
+
+<p>A complete listing of all x86 instructions along with usage and encoding
+information can be found in the <a href="nasmmanual.pdf">NASM Manual</a> (852 KB).
+However, when using this manual, be careful to only use instructions compatible
+with the 8086. The <a href="Am186InstructionSet.pdf">Am186/Am188 Instruction Set Manual</a> (2,242 KB)
+contains a more detailed description of instruction
+behavior for instructions compatible with the 8086. However, these AMD
+processors also support the following x86 instructions which are not 8086
+compatible: bound, enter, ins, leave, outs, popa, and pusha.</p>
+
+<br>
+<b>Important Usage Notes:</b>
+<ol>
+  <li>The first operand of an instruction is also the destination if there is a resulting value. Divide and multiply instructions are common exceptions to this rule.</li>
+  <li>There can be <i>at most</i> one memory operand per instruction.</li>
+  <li>There can be <i>at most</i> one immediate operand per instruction.</li>
+  <li>Operands generally must be of the same size (i.e., byte or word).</li>
+  <li>Using a label is the same as using an immediate or constant value.</li>
+  <li>When BP is used in a memory reference, SS is assumed as the segment. Otherwise DS is assumed.</li>
+  <li>While an instruction is executing, IP refers to the next instruction.</li>
+  <li>Many instructions are smaller if you use the appropriate registers (usually AX or AL).</li>
+  <li>In NASM, all labels are case sensitive but instruction and register names are not.</li>
+</ol>
+
+<br>
+<b>Terminology Used:</b>
+<ul>
+  <li><b>memory</b> - Refers to an 8 or 16-bit memory location determined by an effective address.</li>
+  <li><b>register</b> - AX, BX, CX, DX, SI, DI, BP, or SP as well as the 8-bit derivatives of AX, BX, CX, and DX (other registers or flags are not allowed).</li>
+  <li><b>immediate</b> - A numeric constant or label.</li>
+  <li><b>REG1::REG2</b> - The concatenation of two registers (e.g., the 32-bit value DX::AX) A single colon is used for memory addresses.</li>
+  <li><b>XF</b> or <b>XF=b</b> - A flag's value after an instruction can be 0 or 1 and usually depends on the result of the instruction. A flag being set to '?' by an instruction indicates that the flag is undefined after the operation.</li>
+</ul>
+
+<br>
+<b>Instructions:</b>
+<pre><a name="adc"></a><b>
+adc	Add with carry flag</b>
+  Syntax: 	adc	dest, src
+  dest: memory or register
+  src:  memory, register, or immediate
+  Action: dest = dest + src + CF
+  Flags Affected: OF, SF, ZF, AF, PF, CF
+  Notes: This instruction is used to perform 32-bit addition.
+
+<a name="add"></a><b>
+add	Add two numbers</b>
+  Syntax: 	add	dest, src
+  dest: register or memory
+  src: register, memory, or immediate
+  Action: dest = dest + src
+  Flags Affected: OF, SF, ZF, AF, PF, CF
+  Notes: Works for both signed and unsigned numbers.
+
+<a name="and"></a><b>
+and	Bitwise logical AND</b>
+  Syntax:	and	dest, src
+  dest: register or memory
+  src: register, memory, or immediate
+  Action: dest = dest &amp; src
+  Flags Affected: OF=0, SF, ZF, AF=?, PF, CF=0
+
+<a name="call"></a><b>
+call	Call procedure or function</b>
+  Syntax:	call	addr
+  addr: register, memory, or immediate
+  Action: Push IP onto stack, set IP to addr.
+  Flags Affected: None
+
+<a name="cbw"></a><b>
+cbw	Convert byte to word (signed)</b>
+  Syntax:	cbw
+  Action: Sign extend AL to create a word in AX.
+  Flags Affected: None
+  Notes: For unsigned numbers use "mov ah, 0".
+
+<a name="cli"></a><b>
+cli	Clear interrupt flag (disable interrupts)</b>
+  Syntax:	cli
+  Action: Clear IF
+  Flags Affected: IF=0
+
+<a name="cmp"></a><b>
+cmp	Compare two operands</b>
+  Syntax:	cmp	op1, op2
+  op1: register or memory
+  op2: register, memory, or immediate
+  Action: Perform op1-op2, discarding the result but setting the flags.
+  Flags Affected: OF, SF, ZF, AF, PF, CF
+  Notes: Usually used before a conditional jump instruction.
+
+<a name="cwd"></a><b>
+cwd	Convert word to doubleword (signed)</b>
+  Syntax:	cwd
+  Action: Sign extend AX to fill DX, creating a dword contained in DX::AX.
+  Flags Affected: None
+  Notes: For unsigned numbers use "xor dx, dx" to clear DX.
+
+<a name="dec"></a><b>
+dec	Decrement by 1</b>
+  Syntax:	dec	op
+  op: register or memory
+  Action: op = op - 1
+  Flags Affected: OF, SF, ZF, AF, PF
+
+<a name="div"></a><b>
+div	Unsigned divide</b>
+  Syntax:	div	op8
+  		div	op16
+  op8: 8-bit register or memory
+  op16: 16-bit register or memory
+  Action: If operand is op8, unsigned AL = AX / op8  and  AH = AX % op8
+          If operand is op16, unsigned AX = DX::AX / op16  and  DX = DX::AX % op16
+  Flags Affected: OF=?, SF=?, ZF=?, AF=?, PF=?, CF=?
+  Notes: Performs both division and modulus operations in one instruction.
+
+<a name="idiv"></a><b>
+idiv	Signed divide</b>
+  Syntax:	idiv	op8
+  		idiv	op16
+  op8: 8-bit register or memory
+  op16: 16-bit register or memory
+  Action: If operand is op8, signed AL = AX / op8  and  AH = AX % op8
+          If operand is op16, signed AX = DX::AX / op16  and  DX = DX::AX % op16
+  Flags Affected: OF=?, SF=?, ZF=?, AF=?, PF=?, CF=?
+  Notes: Performs both division and modulus operations in one instruction.
+
+<a name="imul"></a><b>
+imul	Signed multiply</b>
+  Syntax:	imul	op8
+         	imul	op16
+  op8: 8-bit register or memory
+  op16: 16-bit register or memory
+  Action: If operand is op8, signed AX = AL * op8
+          If operand is op16, signed DX::AX = AX * op16
+  Flags Affected: OF, SF=?, ZF=?, AF=?, PF=?, CF
+
+<a name="in"></a><b>
+in	Input (read) from port</b>
+  Syntax:	in	AL, op8
+  		in	AX, op8
+  op8: 8-bit immediate or DX
+  Action: If destination is AL, read byte from 8-bit port op8.
+          If destination is AX, read word from 16-bit port op8.
+  Flags Affected: None
+
+<a name="inc"></a><b>
+inc	Increment by 1</b>
+  Syntax:	inc	op
+  op: register or memory
+  Action: op = op + 1
+  Flags Affected: OF, SF, ZF, AF, PF
+
+<a name="int"></a><b>
+int	Call to interrupt procedure</b>
+  Syntax:	int	imm8
+  imm8: 8-bit unsigned immediate
+  Action: Push flags, CS, and IP; clear IF and TF (disabling interrupts); load
+          word at address (imm8*4) into IP and word at (imm8*4 + 2) into CS.
+  Flags Affected: IF=0, TF=0
+  Notes: This instruction is usually used to call system routines.
+
+<a name="iret"></a><b>
+iret	Interrupt return</b>
+  Syntax:	iret
+  Action: Pop IP, CS, and flags (in that order).
+  Flags Affected: All
+  Notes: This instruction is used at the end of ISRs.
+
+<a name="jcc"></a><b>
+j??	Jump if ?? condition met</b>
+  Syntax:	j??	rel8
+  rel8: 8-bit signed immediate
+  Action: If condition ?? met, IP = IP + rel8 (sign extends rel8)
+  Flags Affected: None
+  Notes: Use the cmp instruction to compare two operands then j?? to jump
+         conditionally. The ?? of the instruction name represents the jump
+         condition, allowing for following instructions:
+
+         ja	jump if above, unsigned &gt;
+         jae    jump if above or equal, unsigned &gt;=
+         jb	jump if below, unsigned &lt;
+         jbe	jump if below or equal, unsigned &lt;=
+         je	jump if equal, ==
+         jne	jump if not equal, !=
+         jg	jump if greater than, signed &gt;
+         jge	jump if greater than or equal, signed &gt;=
+         jl	jump if less than, signed &lt;
+         jle	jump if less than or equal, signed &lt;=
+
+         All of the ?? suffixes can also be of the form n?? (e.g., jna for
+         jump if not above). See 8086 documentation for many more ?? conditions.
+
+         An assembler label should be used in place of the rel8 operand. The
+         assembler will then calculate the relative distance to jump.
+
+         Note also that rel8 operand greatly limits conditional jump distance
+         (-127 to +128 bytes from IP). Use the jmp instruction in combination
+         with j?? to overcome this barrier.
+
+<a name="jmp"></a><b>
+jmp	Unconditional jump</b>
+  Syntax:	jump	rel
+         	jump    op16
+         	jump	seg:off
+  rel: 8 or 16-bit signed immediate
+  op16: 16-bit register or memory
+  seg:off: Immediate 16-bit segment and 16-bit offset
+  Action: If operand is rel, IP = IP + rel
+          If operand is op16, IP = op16
+          If operand is seg:off, CS = seg, IP = off
+  Flags Affected: None
+  Notes: An assembler label should be used in place of the rel8 operand. The
+         assembler will then calculate the relative distance to jump.
+
+<a name="lea"></a><b>
+lea	Load effective address offset</b>
+  Syntax:	lea	reg16, memref
+  reg16: 16-bit register
+  memref: An effective memory address (e.g., [bx+2])
+  Action: reg16 = address offset of memref
+  Flags Affected: None
+  Notes: This instruction is used to easily calculate the address of data in 
+         memory. It does not actually access memory.
+
+<a name="mov"></a><b>
+mov	Move data</b>
+  Syntax:	mov	dest, src
+  dest: register or memory
+  src: register, memory, or immediate
+  Action: dest = src
+  Flags Affected: None
+
+<a name="mul"></a><b>
+mul	Unsigned multiply</b>
+  Syntax:	mul	op8
+         	mul	op16
+  op8: 8-bit register or memory
+  op16: 16-bit register or memory
+  Action: If operand is op8, unsigned AX = AL * op8
+          If operand is op16, unsigned DX::AX = AX * op16
+  Flags Affected: OF, SF=?, ZF=?, AF=?, PF=?, CF
+
+<a name="neg"></a><b>
+neg	Two's complement negate</b>
+  Syntax:	neg	op
+  op: register or memory
+  Action: op = 0 - op
+  Flags Affected: OF, SF, ZF, AF, PF, CF
+
+<a name="nop"></a><b>
+nop	No operation</b>
+  Syntax:	nop
+  Action: None
+  Flags Affected: None
+
+<a name="not"></a><b>
+not	One's complement negate</b>
+  Syntax:	not	op
+  op: register or memory
+  Action: op = ~op
+  Flags Affected: None
+
+<a name="or"></a><b>
+or	Bitwise logical OR</b>
+  Syntax:	or	dest, src
+  dest: register or memory
+  src: register, memory, or immediate
+  Action: dest = dest | src
+  Flags Affected: OF=0, SF, ZF, AF=?, PF, CF=0
+
+<a name="out"></a><b>
+out	Output (write) to port</b>
+  Syntax:	out	op, AL
+  		out	op, AX
+  op: 8-bit immediate or DX
+  Action: If source is AL, write byte in AL to 8-bit port op.
+          If source is AX, write word in AX to 16-bit port op.
+  Flags Affected: None
+
+<a name="pop"></a><b>
+pop	Pop word from stack</b>
+  Syntax:	pop	op16
+  reg16: 16-bit register or memory
+  Action: Pop word off the stack and place it in op16 (i.e., op16 = [SS:SP]
+          then SP = SP + 2).
+  Flags Affected: None
+  Notes: Pushing and popping of SS and SP are allowed but strongly discouraged.
+
+<a name="popf"></a><b>
+popf	Pop flags from stack</b>
+  Syntax:	popf
+  Action: Pop word from stack and place it in flags register.
+  Flags Affected: All
+
+<a name="push"></a><b>
+push	Push word onto stack</b>
+  Syntax:	push	op16
+  op16: 16-bit register or memory
+  Action: Push op16 onto the stack (i.e., SP = SP - 2 then [SS:SP] = op16).
+  Flags Affected: None
+  Notes: Pushing and popping of SS and SP are allowed but strongly discouraged.
+
+<a name="pushf"></a><b>
+pushf	Push flags onto stack</b>
+  Syntax:	pushf
+  Action: Push flags onto stack as a word.
+  Flags Affected: None
+
+<a name="ret"></a><b>
+ret	Return from procedure or function</b>
+  Syntax:	ret
+  Action: Pop word from stack and place it in IP.
+  Flags Affected: None
+
+<a name="sal"></a><b>
+sal	Bitwise arithmetic left shift (same as shl)</b>
+  Syntax:	sal	op, 1
+  		sal	op, CL
+  op: register or memory
+  Action: If operand is 1, op = op &lt;&lt; 1
+          If operand is CL, op = op &lt;&lt; CL
+  Flags Affected: OF, SF, ZF, AF=?, PF, CF
+  
+<a name="sar"></a><b>
+sar	Bitwise arithmetic right shift (signed)</b>
+  Syntax:	sar	op, 1
+  		sar	op, CL
+  op: register or memory
+  Action: If operand is 1, signed op = op &gt;&gt; 1 (sign extends op)
+          If operand is CL, signed op = op &gt;&gt; CL (sign extends op)
+  Flags Affected: OF, SF, ZF, AF=?, PF, CF
+
+<a name="sbb"></a><b>
+sbb	Subtract with borrow</b>
+  Syntax:	sbb	dest, src
+  dest: register or memory
+  src: register, memory, or immediate
+  Action: dest = dest - (src + CF)
+  Flags Affected: OF, SF, ZF, AF, PF, CF
+  Notes: This instruction is used to perform 32-bit subtraction.
+
+<a name="shl"></a><b>
+shl	Bitwise left shift (same as sal)</b>
+  Syntax:	shl	op, 1
+  		shl	op, CL
+  op: register or memory
+  Action: If operand is 1, op = op &lt;&lt; 1
+          If operand is CL, op = op &lt;&lt; CL
+  Flags Affected: OF, SF, ZF, AF=?, PF, CF
+
+<a name="shr"></a><b>
+shr	Bitwise right shift (unsigned)</b>
+  Syntax:	shr	op, 1
+  		shr	op, CL
+  op: register or memory
+  Action: If operand is 1, op = (unsigned)op &gt;&gt; 1
+          If operand is CL, op = (unsigned)op &gt;&gt; CL
+  Flags Affected: OF, SF, ZF, AF=?, PF, CF
+
+<a name="sti"></a><b>
+sti	Set interrupt flag (enable interrupts)</b>
+  Syntax:	sti
+  Action: Set IF
+  Flags Affected: IF=1
+
+<a name="sub"></a><b>
+sub	Subtract two numbers</b>
+  Syntax:	sub	dest, src
+  dest: regsiter or memory
+  src: register, memory, or immediate
+  Action: dest = dest - src
+  Flags Affected: OF, SF, ZF, AF, PF, CF
+  Notes: Works for both signed and unsigned numbers.
+
+<a name="test"></a><b>
+test	Bitwise logical compare</b>
+  Syntax:	test	op1, op2
+  op1: register, memory, or immediate
+  op2: register, memory, or immediate
+  Action: Perform op1 &amp; op2, discarding the result but setting the flags.
+  Flags Affected: OF=0, SF, ZF, AF=?, PF, CF=0
+  Notes: This instruction is used to test if bits of a value are set.
+
+<a name="xor"></a><b>
+xor	Bitwise logical XOR</b>
+  Syntax:	xor	dest, src
+  dest: register or memory
+  src: register, memory, or immediate
+  Action: dest = dest ^ src
+  Flags Affected: OF=0, SF, ZF, AF=?, PF, CF=0
+
+</pre>
+<hr>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<html>
+
+<head>
+<title> ECEn 425 Lab 4d</title>
+</head>
+
+<body>
+
+<center>
+<h2> ECEn 425</h2>
+<h2> Lab #4: Design and Implementation of Kernel Essentials<br>
+Part D</h2>
+</center>
+
+
+<hr>
+<h3> Overview </h3>
+
+In this lab you will use a more sophisticated application program to better
+stress test your kernel. Due to the increased complexity, new bugs may reveal
+themselves and your assignment will be to track down the bugs and fix
+them.  You are expected to complete this lab with a partner.
+
+<h3> Requirements </h3>
+
+To fully exercise your kernel's functions, your kernel will use the
+application code <a href="lab4d_app.c">lab4d_app.c</a>. You must
+support the reset, tick, and keyboard interrupts as in previous labs. Make sure you look at the
+application code so that you understand what it is supposed to do.
+<p>
+
+Unlike lab 4c, the application for this lab supports multiple tasks.
+Your kernel must be able to properly switch between them as
+<samp>YKDelayTask</samp> is called and interrupts occur. It must be
+able to run this application correctly with the default tick frequency
+and without crashing with a tick frequency of every <b>750</b>
+instructions. (At a high tick rate, there may not be enough time for
+all tasks to run to their next delay point as they otherwise would, so
+your output may differ from that shown below, but your code should not
+malfunction or otherwise fail to make progress.)
+<p>
+
+Below is a sample of what the application's output should look like:
+<blockquote><pre>
+Creating tasks...
+Starting kernel...
+Task A started.
+Task A, delaying 2.
+Task B started.
+Task B, delaying 3.
+Task C started.
+Task C, delaying 5.
+Task D started.
+Task D, delaying 10.
+
+TICK 1
+
+TICK 2
+Task A, delaying 2.
+
+TICK 3
+Task B, delaying 3.
+
+TICK 4
+Task A, delaying 2.
+
+TICK 5
+Task C, delaying 5.
+
+TICK 6
+Task A, delaying 2.
+Task B, delaying 3.
+
+TICK 7
+
+TICK 8
+Task A, delaying 2.
+
+TICK 9
+Task B, delaying 3.
+
+TICK 10
+Task A, delaying 2.
+Task C, delaying 5.
+Task D, delaying 10.
+
+TICK 11
+</pre></blockquote>
+Notice how the output shows that each task is delayed for the expected number
+of ticks. Also, note how task priority is enforced, even when multiple tasks
+become ready after the same tick interrupt. Your kernel's output should match
+this example unless your kernel cannot dispatch and run the four tasks before
+the first tick occurs.
+
+
+<h3>Pass-off</h3>
+When the kernel runs the application code correctly, show and demonstrate your
+code to a TA. <b>Since you must demonstrate working code to a TA on or before the due date, please
+consider their lab schedule well in advance</b>.<p>
+
+In addition to the demonstration, you must a written summary of
+problems you encountered, if any, in completing this lab.  You should
+also include a report of the number of hours you spent on the lab,
+including coding and debugging. A realistic estimate is
+sufficient. Send a submission even if you didn't encounter any
+noteworthy bugs along the way. <b>You will not receive full credit for
+the lab unless you send a report.</b><p>
+
+<font color=red>New for Fall 2019: we want both your report and your
+source code for the lab.  The easiest way to do this is to create a
+report file (for consistency call it report.txt or report.pdf), to add
+it to the working directory for the lab, to create a compressed tar
+file (with all the files in your directory), and then to upload that
+file to Learning Suite. <p>
+
+To review, if 425/labx is your working directory for this lab, type
+the following in the 425 directory: 
+
+<blockquote><pre> tar -cvzf submission.tar.gz labx
+</pre></blockquote>
+
+and then upload the resulting compressed tar file (submission.tar.gz)
+to Learning Suite.</font>
+
+<h3>Debugging Help</h3>
+
+Here is a statistical summary of the total time spent on part D in Fall 2017,
+according to the reports submitted by each group:
+<ul>
+  <li> Low: 0.0 hours
+  <li> High: 12.0 hours
+  <li> Average: 3.1 hours
+</ul>
+
+Make sure you change your <b>#define</b> for the maximum number of
+tasks, since the application code for part D has more tasks than the
+previous applications. You will need to adjust this #define for all
+future labs.
+<p>
+
+Once again, you may want to look at the problems students had in past semesters.
+The link below points to the list of comments from student reports for lab 4.
+<p>
+
+<a href="StudentProblems.html"><b>Student Problem List</b></a>
+
+<p>
+<br>
+<hr>
+<address>Last updated 26 August 2019</address>
+<br>
+</body>
+</html>

@@ -1,0 +1,266 @@
+<html>
+
+<head>
+<title>8086 Assembly Language</title>
+</head>
+
+<body>
+
+<h2>8086 Assembly Language</h2>
+<br>
+<h3>Six Things You Should Know About the 8086</h3>
+<p><b>1) The 8086 is a 16-bit processor.</b></p>
+<p>
+Because the word size is limited to 16-bits, many data types in C have different sizes then they do on the spice machines or modern PCs. Below is a list of C data types and their sizes.
+<pre>   Type          | Length  | Range
+  ---------------|---------|-----------------------------------------
+   unsigned char |  8 bits |                 0 to 255
+   char          |  8 bits |              -128 to 127
+   enum          | 16 bits |           -32,768 to 32,767
+   unsigned int  | 16 bits |                 0 to 65,535
+   short int     | 16 bits |           -32,768 to 32,767
+   int           | 16 bits |           -32,768 to 32,767
+   unsigned long | 32 bits |                 0 to 4,294,967,295
+   long          | 32 bits |    -2,147,483,648 to 2,147,483,647</pre>
+Most importantly, note the range limitation on the int data type. It is also important to realize that any operations on 32-bit data types (long and unsigned long) require from several to very many instructions to perform operations. 32-bit operations in C should be avoided unless absolutely necessary.
+<p>
+The following names are used to refer to data sizes on the 8086:
+<pre>   Length | Size Name
+  --------|-----------------------
+   4-bit  | nibble
+   8-bit  | byte
+   16-bit | word
+   32-bit | dword (or doubleword)</pre>
+
+<p>
+<br>
+<b>2) The 8086 uses little endian format.</b>
+
+<p>
+
+This means that the least significant byte of a value is stored first (i.e., at the low address) in memory. This gives the appearance of numbers being stored in memory backwards. For example, the 32-bit value 0x11223344 would be stored as bytes in the following order:
+<pre>  (low addr)              (high addr)
+     0x44    0x33    0x22    0x11</pre>
+This must be kept in mind when accessing different parts of data.
+
+<p>
+<br>
+<b>3) The 8086 uses segmented memory.</b>
+
+<p>
+A memory address on the 8086 consists of two numbers, usually written in hexadecimal and separated by a colon, representing the <i>segment</i> and the <i>offset</i>. This combination of segment and offset is referred to as a <i>logical address</i>. The segment number refers to a 64 KB block of memory and the offset is an index into the memory segment. For example the address AB10:1024 corresponds to the byte stored in segment 0xAB10 at offset 0x1024.
+<p>
+Both the segment and offset are represented by a 16-bit number, allowing each segment to be 2^16 bytes in size (i.e., 65536 bytes, or 64
+KB). This would seem to suggest that the 8086 can address up to 2^32 bytes, or 4 GB, since 32 bits are used for each address. This is NOT the case.
+<p>
+When the processor obtains a logical address (segment and offset), it performs a simple calculation to determine the 20-bit <i>physical address</i> in memory to which the logical address refers:
+<pre>	physical address = (segment &lt;&lt; 4) + offset</pre>
+This is equivalent to multiplying the segment by 16 and adding the offset (i.e., physical address = segment * 16 + offset). This means that the 64
+KB segments overlap, with a new segment starting every 16 bytes. This also means that there can be more than one address for the same memory location. For example, 0000:0100, 0001:00F0, and 0010:0000 all refer to physical address 0x100. There are even more examples we could give for that same memory location.
+<p>
+In this class, you will not usually need to worry about segments because your programs will only deal with the first segment of memory. In this case, you can think of memory as a single continuous piece of memory that is 64
+KB in size.
+
+<p>
+<br>
+<b>4) Registers in the 8086 have intended uses.</b>
+<p>
+The 8086 has four 16-bit general purpose registers, five 16-bit offset registers for accessing memory, four 16-bit segment registers also for memory access, and a 16-bit flags register. Nine bits of the flags register are accessible to the programmer and each of these bits is referred to as a flag. Each flag either indicates a condition or controls the behavior of certain instructions. For example, the cmp instruction compares two numbers and sets flags based on the relationship between these numbers. Other instructions, such as je (for jump if equal), can then be used, behaving differently depending on the state of the flags previously set by the cmp instruction.
+<p>
+
+Most instructions only allow certain registers to be used as operands
+and some instructions require specific registers to be
+used. Therefore, it is important to be familiar with the different
+registers and their intended purposes. However, there is still a lot
+of freedom in what registers can be used. Below is a list of the 8086
+registers. This listing can also be obtained in Emu86 by entering
+"regs". For each register the assembly symbol, name, and intended use
+are given.
+
+<pre>  General Purpose Registers (a.k.a. scratch registers)
+    AX (AH,AL)  Accumulator : Main arithmetic register
+    BX (BH,BL)  Base        : Generally used as a memory base or offset
+    CX (CH,CL)  Counter     : Generally used as a counter for loops
+    DX (DH,DL)  Data        : General 16-bit storage, division remainder
+
+  Offset Registers
+    IP  Instruction pointer : Current instruction offset
+    SP  Stack pointer       : Current stack offset
+    BP  Base pointer        : Base for referencing values stored on stack
+    SI  Source index        : General addressing, source offset in string ops
+    DI  Destination index   : General addressing, destination in string ops
+
+  Segment Registers
+    CS  Code segment   : Segment to which IP refers
+    SS  Stack segment  : Segment to which SP refers
+    DS  Data segment   : General addressing, usually for program's data area
+    ES  Extra segment  : General addressing, destination segment in string ops
+
+  Flags Register (Respectively bits 11,10,9,8,7,6,4,2,0)
+    OF  Overflow flag  : Indicates a signed arithmetic overflow occurred
+    DF  Direction flag : Controls incr. direction in string ops (0=inc, 1=dec)
+    IF  Interrupt flag : Controls whether interrupts are enabled
+    TF  Trap flag      : Controls debug interrupt generation after instructions
+    SF  Sign flag      : Indicates a negative result or comparison
+    ZF  Zero flag      : Indicates a zero result or an equal comparison
+    AF  Auxiliary flag : Indicates adjustment is needed after BCD arithmetic
+    PF  Parity flag    : Indicates an even number of 1 bits
+    CF  Carry flag     : Indicates an arithmetic carry occurred</pre>
+<p>
+The general purpose registers AX, BX, CX, and DX are 16-bit registers but each can also be used as two separate 8-bit registers. For example, the high (or upper) byte of AX is called AH and the low byte is called AL. The same H and L notation applies to the BX, CX, and DX. Most instructions allow these 8-bit registers as operands.
+<p>
+Registers AX, BX, CX, DX, SI, DI, BP, and SP can be used as operands for most instructions. However, only AX, BX, CX, and DX should be used for general purposes since SI, DI, BP, and SP are usually used for addressing.
+<p>
+<br>
+<b>5) The 8086 instructions can use register, immediate, and memory operands.</b>
+<p>
+The 8086 is not limited to immediate or register operands. Most instructions also allow memory operands to be used. For example, if a word sized variable were pointed to by the value stored in register BX, the number 3 could be added to it using the following instruction:
+<pre>	add	word [bx], 3</pre>
+The brackets indicate that BX is to be used as a pointer to a memory location. The only limitation is that there can be only one memory reference per instruction. For example, the following addition instruction is invalid:
+<pre>	add	word [bx], word [si]	; Bad instruction!</pre>
+Instead you would use two instructions:
+<pre>	mov	ax, [si]	; Load [si] into ax
+	add	[bx], ax	; Add to [bx]</pre>
+<p>
+<br>
+<b>6) The 8086 is the ancestor of modern Intel processors.</b>
+<p>
+8086 code runs fine on modern x86 processors, such as the Pentium processors. However, modern x86 code rarely runs on an 8086. When experimenting with 8086 assembly language code, be careful to check the processor on which instructions work. Many instructions have been added since the 8086 was first produced so instructions for newer processors must be avoided. The documentation for this class only covers 8086 instructions.
+<p>
+&nbsp;
+
+<h3>
+
+The 8086 Instruction Set</h3>
+<p>
+The 8086 supports many instructions, most of which you do not need to be familiar with. Refer to the documentation when using unfamiliar instructions since many instructions must use or indirectly assume the use of specific registers. A description of the 8086 instructions you should be familiar with can viewed from the following link:
+<a href="8086InstructionSet.html">8086 Instruction Set</a>
+<p>
+&nbsp;
+
+<h3>
+
+Referencing Memory
+</h3>
+<b>Segment and Offset</b>
+<p>
+Recall that the 8086 uses logical addresses composed of a <i>segment</i> and an <i>offset</i> to reference memory.
+Every memory reference on the 8086 will use one of the segment registers (i.e., DS, ES, SS, CS, or SS) as the segment
+combined with an offset (usually given in the instruction) to determine the physical address being referenced. The
+physical address referenced is always
+<p>
+<pre>	physical address = (segment &lt;&lt; 4) + offset.</pre>
+<p>
+
+<b>The Effective Address</b>
+<p>
+There are several ways to reference memory locations and specific registers that must be used.
+A memory reference is placed in brackets to distinguish it from a register or immediate value.
+In general, memory accesses take the form of the following example:
+<p>
+<pre>	mov	ax, [<i>baseReg</i> + <i>indexReg</i> + <i>constant</i>]</pre>
+<p>
+This example copies a word sized value into the register AX. Combined, the three parameters in brackets determine
+what is called the <i>effective address</i>, which is simply the offset referenced by the instruction. The following rules apply:
+<pre>   <i>baseReg</i> can be:  bp or bx
+  <i>indexReg</i> can be:  si or di
+  <i>constant</i> can be:  16-bit signed number if combined with registers, as in "mov ax,[bp+2]"
+                    16-bit unsigned number if by itself, as in "mov ax,[2]"</pre>
+Any one or two of the memory access parameters (i.e., <samp>constant</samp>, <samp>baseReg</samp>, or <samp>indexReg</samp>) can be omitted, allowing for several memory access modes.
+<p>
+It is important to realize that the effective address, or offset, does NOT give the complete address for the memory reference.
+A segment register is either implied or given in the instruction. This topic is discussed in
+the section <i>Segment Registers</i> below.
+<p>
+<b>Segment Registers</b>
+<p>
+One of the segment registers is always used as the segment when evaluating an address.
+The available segment registers are the <i>Data Segment</i> (DS), <i>Extra Segment</i> (ES), <i>Stack Segment</i> (SS), or <i>Code Segment</i> (CS).
+Therefore, you must be aware of which segment register is used when an address is evaluated as part of an instruction.
+When a memory reference is given in an instruction, the processor sums any <samp>baseReg</samp>, <samp>indexReg</samp>, and <samp>constant</samp> that are given and uses this sum as the offset into the segment.
+<p>
+Which segment register that is used in the address calculation depends on the register that is used for <samp>baseReg</samp>.
+The DS register is assumed for the segment unless <samp>baseReg</samp> is the register BP, in which case SS is assumed.
+However, any segment register can be explicitly specified using what is called a <i>segment override</i> prefix (discussed below). Also, some special instructions may assume other segment registers.
+<p>
+<b>Segment Overrides</b>
+<p>
+A segment override prefix allows any segment register (DS, ES, SS, or CS) to be used as the segment when evaluating addresses in an instruction.
+An override is made by adding the segment register plus a colon to the beginning of the memory reference of the instruction as in the following examples:
+<pre>	mov	ax, [es:60126]          ; Use es as the segment
+	mov	ax, [cs:bx]             ; Use cs as the segment
+	mov	ax, [ss:bp+si+3]        ; Use ss as the segment</pre>
+<p>
+<b>Operand Size</b>
+<p>
+A memory reference can be used as a source or destination operand for most 8086 instructions.
+Any time a memory reference is given as part of an instruction, the size of the memory operand is either implied or must be specified.
+For example consider the following instruction:
+<pre>	mov	ax, [bx]</pre>
+This instruction will move the word stored at DS:BX and put it into AX.
+The size of word is implied since the AX register is one word in size.
+In some cases the size of the operand must be given in order for the assembler to generate an instruction.
+For example, to increment a variable pointed to by BX, the assembler will not accept the following:
+<pre>	inc	[bx]		; WRONG!!</pre>
+This is because it does not know if [bx] addresses a byte or word sized value. So the size of [bx] must be specified, as in the following two examples:
+<pre>	inc	word [bx]	; Increment word at [bx]
+	inc	byte [bx]	; Increment byte at [bx]</pre>
+It is not necessary to specify the size if one of the operands has a known size, such as a register operand, as in:
+<pre>	add	al, [bx]	; Assembler knows al is a byte so "byte [bx]" is assumed</pre>
+<p>
+
+<b>Addressing Modes</b>
+<p>
+Here are some examples of the allowed addressing modes:
+<pre>	xor	cx, [59507]	 ; Direct mode (XOR CX with word at <b>DS:E873</b>)
+	push	word [bx]	 ; Register-indirect mode (Push word at <b>DS:BX</b> onto stack)
+	mov	ax, [bp-4]	 ; Base mode (Move word at <b>SS:(BP-4)</b> into AX)
+	sub	[si+2], bx	 ; Indexed mode (Subtract BX from word at <b>DS:(SI+2)</b>)
+	not	byte [bp+di]	 ; Base-indexed mode (Invert bits of byte at <b>SS:(BP+DI)</b>)	
+	add	[bx+si+2], dx	 ; Base-indexed mode with dispacement (Add DX to word at <b>DS:(BX+SI+2)</b>)</pre>
+The five addressing modes available are outlined more precisely
+for your reference below:
+<pre>  Direct Mode: [constant]
+    constant: 16-bit unsigned value
+
+  Register-Indirect Mode: [register]
+    register: bx, si, or di
+    Note: bp technically isn't allowed. If used, assembler will generate [bp+0] instead.
+  
+  Base Mode: [constant + baseReg]
+    constant: 8-bit or 16-bit signed value
+    baseReg: bp or bx
+  
+  Indexed Mode: [constant + indexReg]
+    constant: 8-bit or 16-bit signed value
+    indexReg: si or di
+
+  Base-Indexed Mode: [baseReg + indexReg]
+    baseReg: bp or bx
+    indexReg: si or di
+
+  Base-Indexed Mode with Displacement: [constant + baseReg + indexReg]
+    constant: 8-bit or 16-bit signed value
+    baseReg: bp or bx
+    indexReg: si or di</pre>
+    
+
+
+
+<h3>&nbsp;</h3>
+<h3>
+
+
+
+
+NASM Syntax</h3>
+<p>
+NASM, or the Netwide Assembler, is the assembler that will be used for this class.
+In order to use it fully, there are a few things you should now about it. Read 
+the document <a href="NASM.html">NASM Syntax</a> for essential information.
+<p>
+<br>
+<hr>
+</body>
+
+</html>

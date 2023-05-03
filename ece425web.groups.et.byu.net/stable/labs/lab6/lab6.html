@@ -1,0 +1,361 @@
+<html>
+
+<head>
+<title> ECEn 425 Lab #6</title>
+</head>
+
+<body>
+
+<center>
+<h2> ECEn 425</h2>
+<h2> Lab #6: Message Queues</h2>
+</center>
+
+<hr>
+<h3> Overview</h3>
+
+In this lab you are to add functions that create, pend on, and post to
+message queues so that you can correctly execute the application
+program <a href="lab6app.c">lab6app.c </a> without modification.  You
+are expected to complete this lab with a partner.<p>
+
+<h3> Functionality </h3>
+
+You must add these kernel functions to your kernel.  You should
+implement each function exactly according to the prototype given on the
+<a href="../kernel.html">YAK Kernel</a> webpage. Refer to that web page
+for additional details about these functions.
+
+<ul>
+<li> <samp>YKQCreate -</samp>  Create and initialize a message queue
+<li> <samp>YKQPend -</samp> Obtain the oldest message from a queue
+<li> <samp>YKQPost -</samp> Append a message to a queue
+</ul>
+<p>
+
+For this lab, you should modify your interrupt handlers in the
+following ways:
+
+<ul>
+
+<li> Your interrupt handler on a keypress should no longer generate
+output; its sole action should be to set GlobalFlag to 1.
+
+<li> Your reset handler requires no modification from the previous
+labs.
+
+<li> The user code tick handler should no longer output "TICK <i>n</i>" as in
+previous labs. Instead, it should be rewritten so that it posts a message to a
+message queue each time it runs.
+
+</ul><p>
+
+An example of the code required for your keypress and tick handlers
+can be found in the file <a href="lab6inth.c">lab6inth.c</a>. You will also need the file
+<a href="lab6defs.h">lab6defs.h</a>, which is used by the sample file lab6inth.c and the
+application code. The
+<samp>mytick()</samp> handler code in lab6inth.c should be called by your tick ISR <b>in addition
+to your kernel's YKTickHandler</b> code. Note that the sample tick handler code assumes the
+existence of the global variable YKTickNum, which should already be
+defined in your kernel code and is assumed to also be declared as extern in yakk.h.<p>
+
+The tick handler code in the sample file initializes objects of type
+"<samp>struct msg</samp>". This struct type is defined in lab6defs.h. The <samp>tick</samp> field in this struct is set to the current tick
+count and the <samp>data</samp> field is set to a pseudo-random number. A pointer
+to the object is then posted to the message queue. A task in the
+application code removes the pointers from the queue (i.e., pends on the queue)
+and reads the object pointed to by the pointer.
+The task then displays the <samp>tick</samp> field read from the object followed by the
+minimum data field value read so far and the maximum <samp>data</samp> field
+value read so far. A sample of what the program's output should look like
+is shown below.
+
+<h3>Requirements</h3>
+
+Implement the required functions and make sure that the application
+program runs correctly.  For full credit on this lab, the system
+should not crash when key presses occur in rapid succession, even with
+the timer tick frequency increased to <b>750</b> instructions. While
+your code should not <i>crash</i> at higher tick rates, it may not
+give exactly the same output because there may not be enough time
+between ticks for all tasks to finish what they would normally do for
+that tick.  For full credit, your kernel must be efficient enough to
+avoid dropping any messages at the default tick rate (1 tick every
+10,000 instructions).  At the default tick rate, the application's
+output should match the following (other than the CPU usage):
+
+<blockquote>
+<pre>
+Welcome to the YAK kernel
+Determining CPU capacity
+Ticks: 1        Min: 89 Max: 89
+Ticks: 2        Min: 78 Max: 89
+Ticks: 3        Min: 67 Max: 89
+Ticks: 4        Min: 56 Max: 89
+Ticks: 5        Min: 45 Max: 89
+Ticks: 6        Min: 34 Max: 89
+Ticks: 7        Min: 23 Max: 89
+Ticks: 8        Min: 12 Max: 89
+Ticks: 9        Min: 1  Max: 89
+Ticks: 10       Min: 1  Max: 90
+Ticks: 11       Min: 1  Max: 90
+Ticks: 12       Min: 1  Max: 90
+Ticks: 13       Min: 1  Max: 90
+Ticks: 14       Min: 1  Max: 90
+Ticks: 15       Min: 1  Max: 90
+Ticks: 16       Min: 1  Max: 90
+Ticks: 17       Min: 1  Max: 90
+Ticks: 18       Min: 1  Max: 90
+Ticks: 19       Min: 1  Max: 91
+Ticks: 20       Min: 1  Max: 91
+Ticks: 21       Min: 1  Max: 91
+Ticks: 22       Min: 1  Max: 91
+Ticks: 23       Min: 1  Max: 91
+Ticks: 24       Min: 1  Max: 91
+Ticks: 25       Min: 1  Max: 91
+Ticks: 26       Min: 1  Max: 91
+Ticks: 27       Min: 1  Max: 91
+<<<<< Context switches: 62, CPU usage: 11% >>>>>
+Ticks: 28       Min: 1  Max: 92
+Ticks: 29       Min: 1  Max: 92
+Ticks: 30       Min: 1  Max: 92
+</pre>
+</blockquote>
+
+Note that the <samp>Ticks</samp> column lists the tick numbers in
+sequential order, without skipping any numbers.
+The <samp>Min</samp> column gets smaller, eventually reaching 0, and the
+<samp>Max</samp> column gets larger, eventually reaching 99.
+<p>
+Eventually, as the tick frequency increases, messages will be dropped
+because the task that removes messages from the queue won't be able to
+keep up with all the entries posted to the queue by the tick handler.
+When this happens, you will see tick numbers being skipped and error
+messages indicating that messages have been dropped.  For full credit,
+at 750 instructions/tick, the task should still be able to
+occasionally remove an object from the queue and display the
+"<samp>Ticks: # Min: # Max: #</samp>" text, even if you are holding
+down a key and causing the CPU hog to run.
+<p>
+Pressing a key sets a global flag that causes a task to run. This
+task saturates the CPU for five clock ticks and causes a series
+of periods ('.') to be displayed.  This output must be generated when
+a key is pressed.
+
+
+<h3>Pass-off</h3>
+
+When the kernel runs the application code correctly, show and
+demonstrate your code to a TA. <b>Since you must demonstrate working
+code to a TA on or before the due date, please consider their lab
+schedule well in advance</b>.<p>
+
+In addition to the demonstration, you must a written summary of
+problems you encountered, if any, in completing this lab.  You should
+also include a report of the number of hours you spent on the lab,
+including coding and debugging. A realistic estimate is
+sufficient. Send a submission even if you didn't encounter any
+noteworthy bugs along the way. <b>You will not receive full credit for
+the lab unless you send a report.</b><p>
+
+<font color=red>New for Fall 2019: we want both your report and your
+source code for the lab.  The easiest way to do this is to create a
+report file (for consistency call it report.txt or report.pdf), to add
+it to the working directory for the lab, to create a compressed tar
+file (with all the files in your directory), and then to upload that
+file to Learning Suite. <p>
+
+To review, if 425/labx is your working directory for this lab, type
+the following in the 425 directory: 
+
+<blockquote><pre> tar -cvzf submission.tar.gz labx
+</pre></blockquote>
+
+and then upload the resulting compressed tar file (submission.tar.gz)
+to Learning Suite.</font>
+
+<h3>Important Notes </h3>
+
+<ul>
+
+<li> <b>This application code </b> illustrates the use of message
+queues.  A steady stream of messages is generated by the tick handler
+and sent to a specific queue emptied by a dedicated task (A).  If the
+queue is large enough, no data is lost even if the processing task is
+unable to run for several clock cycles.  Task B is a CPU hog that
+keeps task A from running.  Its busy bursts are triggered by the press
+of any key and last for five clock ticks.  Since additional keypresses
+do not increase this total, the size of the queue should be such that
+it does not overflow.  (It would be easy to tinker with the
+application source code and cause the queue to overflow, however.
+Feel free to experiment with this.)<p>
+
+<li> <b> Pacing yourself.</b> Here is a statistical summary of hours
+reported per team to complete this lab in Fall 2017:
+
+<ul>
+  <li> Low: 0.5 hours
+  <li> High: 6.0 hours
+  <li> Average: 3.6 hours
+</ul>
+<p>
+
+
+<li> <b> Amount of code to be written.</b> For comparison, here are
+the sizes of the source files for my lab6 code written for the 8086
+architecture:
+
+<ul>
+  <li> myinth.c: 28 lines
+  <li> myisr.s: 32 lines
+  <li> yaku.h: 5 lines
+  <li> yakk.h: 49 lines
+  <li> yakc.c: 388 lines
+  <li> yaks.s: 65 lines
+</ul><p>
+
+
+</ul>
+
+<h3> Debugging help </h3>
+
+Here are comments from student reports (edited only for length)
+describing their problems on this lab and how they tracked them down.
+As always, take them with a grain of salt.
+
+<ul>
+
+<li>We forgot to make sure that all global variables that are used in
+multiple modules are declared as an extern.
+
+<li>We didn't use Enter and Exit Mutex around the critical sections of
+YKQPend and YKQPost.
+
+<li>Didn't increment YKTickNum in modified interrupt handler. You need
+to remember to do that.
+
+<li>We'd re-enable interrupts right before we called the scheduler
+(after posting to a queue) and sometimes we'd return to an ISR or
+other function and the interrupts would be still be enabled when they
+really needed to be disabled.  A few Mutex() in the right places and
+our lab worked fine!
+
+<li> We forgot to return 1 from YKQPost so our interrupt handler kept
+printing "Message queue full".
+
+<li> We incremented our last parameter of the queue before assigning
+the first value to the queue, so it gave a wrong initial tick count.
+
+<li> We forgot to call YKDecrementDelay from the new tick handler,
+caused functions to be delayed indefinitely, also forgot to have
+YKQPend take tasks off the ready list when they were blocked, so some
+messages were nonsense data.
+
+<li> Problem: making sure that an ISR posting to a queue doesn't call
+the scheduler.  Fix: We used the ISR counter to determine that we were
+at depth zero before calling the scheduler.
+
+<li> We had a problem with a queue being stored to a void pointer at
+the beginning of our YKQPend function.  We did not check to see if
+there were any messages in the queue until after we had made the
+assignment.  This made the void pointer point to something that it
+should not have been pointing to.  The variable needed to be assigned
+after the delay of the queue becuase the queue was empty.  We just
+swapped a couple lines of code and then it worked fine.
+
+<li> Our only bug was forgetting to call YKTickHandler() in the tick
+ISR.
+
+<li> We had some logical errors in while checking to see which task
+was pending on a given message.  We had || instead of &&.  easy fix.
+
+<li> We didn't include everything from the tick isr when we copied it
+over from lab 5.  we assumed it was working fine when it wasn't.
+
+<li> The most significant bug was in the tick handler.  When the new
+tick handler added for this lab would be executed, then only the idle
+task would run after a few ticks.  I had a routine in the original
+tick handler that managed blocked tasks, and forgot to include that in
+the new tick handler.  When that was added to the new one, it worked
+fine.  Another bug I had was not making the pointer to the message in
+YKQ a ** instead of a *.
+
+<li> The only problem we encountered was that we were using the wrong
+number to wrap our messges around.
+
+<li> The bug that took some time to figure out was in our Dispatcher.
+The problem came because we were enabling interrupts the instruction
+before calling iret.  So the code was getting interrupted before it
+could pop the context off of the stack.  This caused the currently
+running task stack to overrun its bounds, overwrite some data, and
+cause the system to crash.  The thing we didn't know was that the iret
+instruction effectively re-enable's interrupts by popping the flags
+off the stack.  So, our re-enable interrupts was redundant anyway.
+The difficult thing about this bug was that it only occurred at high
+tick frequencies.  At low frequencies the interrupt didn't occur at
+the critical point.
+
+<li> The kernel bug had to do with our scheduler.  We would disable
+interrupts before calling it, but would not reenable them when
+returning from it.  This caused havoc with the lab 6 application code
+because whenever task B would execute the interrupts would be disabled
+(because the scheduler that placed task B in the running state never
+reenabled them).  Since task B depended on the ticker to know when to
+exit we got caught in an infinite loop.
+
+<li> The other bug was with our queue.  We initially accessed the
+queue using pointers.  We don't know what the bug was, but it had
+something to do with our pointers.  When we suspected this we just
+tossed out our whole message queue implementation and rewrote it using
+a queue pointer with indexes for accessing its members instead of
+pointers.  After this our kernel worked.
+
+<li> As soon as the queue functions were working properly, our main
+bug was that we had a critical section of code that was being
+interrupted.  As soon as we disabled interrupts for that critical
+section, our code worked fine.
+
+<li> We did not have a firm understanding of the "static" qualifier as
+used inside a function. We were re-initializing the 'next' and 'data'
+static variables to 0 every time we entered YKTickHandler. This caused
+dropped messages any time we hit a key to switch to the task that did
+the prime number calculations (the program actually printed out
+several times that the same tick was dropped), and the min and max
+values were always 89.  Fixing that problem was all we needed to do to
+get our code working properly.
+
+<li> We had problems designing our struct for the queue.  We tried to
+do it with pointers to the actual messages but when we changed it to
+indexs in an array it worked great.  We forgot to change the index for
+the oldest message that we want to remove in the case that there are
+no messages in the queue and we have to block it and call the
+Scheduler.  We needed to plan better at the begining too.
+
+<li> I only had one minor bug that gave me trouble, when YKPost is
+called from the interrupt handler it should not call YKScheduler.  I
+was getting some interesting errors, until I read about that on the
+web page.
+
+<li> A couple of the bugs that we spent some time on were not
+re-enabling interrupts after returning from a call to the scheduler.
+Another bug was not moving the tail if we returned from being blocked.
+
+<li> We were not keeping track of the front and rear of the queue
+properly. The head was sometimes moved 1 too many places. Sometimes we
+would return that the queue was empty when in fact there was 1 message
+in the queue.
+
+<li> We didn't originally disable interrupts in YKQPost. When this
+function was interrupted strange things would happen. Adding enter and
+exit mutexes so the whole function was a critical section solved the
+problem.
+
+</ul>
+
+<p>
+<br>
+<hr>
+<address>Last updated 26 August 2019</address>
+<p>
+</body>
+</html>
