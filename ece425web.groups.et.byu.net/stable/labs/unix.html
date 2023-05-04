@@ -1,0 +1,111 @@
+<title>User-friendly Linux hints</title>
+
+<h2>User-friendly Linux hints</h2>
+
+Once you've tried the following features, you won't be able to live
+without them.  They are typically not part of the default account.
+<b>You will definitely want to use these features these semester as
+you design and debug your code.</b>  The TAs will expect that you have
+followed these suggestions when they help you.<p>
+
+<ul>
+<li><b>Scroll bars in xterms</b>.  Tired of not being able to scroll
+back the screen in an xterm? Here's the fix.
+<ol>
+<li>Edit your .Xdefaults file located in your home directory. If this
+file doesn't exist, create it!
+<li> Add the following two lines to the end of this file:
+<pre>
+    xterm*scrollBar:        true
+    xterm*saveLines:        2048
+</pre>
+<li> Save the file and exit the text editor you used to edit the file.
+<li> Logout and log back in again to see the changes.
+</ol><p>
+
+<li><b>Command history and tab completion</b>.  Tired of typing in the
+same commands over and over again at the unix prompt? You need command
+history & tab complete.
+<ol>
+<li>rlogin to any et machine. Example- rlogin naples.et.byu.edu
+<li>execute the following command:
+<pre>
+    chsh <username> /usr/local/bin/tcsh
+</pre>
+
+<li>Exit your rlogin shell. After 5-10 minutes, if you relogin, all
+your xterm windows will be running tcsh. tcsh allows you use the arrow
+keys (or CTR-P for previous and CTR-N for next) to scroll through the
+list of all the past commands you have executed.  It also provides tab
+complete. By typing in a filename partway, hitting tab will
+automatically complete it for you. :) NICE!
+</ol><p>
+
+<li> <b>Display full path at command prompt</b>. Tired of the % as
+your command prompt? Wish you knew which directory you were in?  Do
+this:
+
+<ol>
+<li>open the .cshrc file located in your home directory in a text editor.
+<li>locate the following lines in your .cshrc file:
+<pre>
+## Set prompt
+if (`whoami` == root) then
+  set prompt            = "`hostname`# "
+else
+  set prompt            = "`hostname`% "
+endif
+</pre>
+
+<li> Change the above lines to match this:
+<pre>
+if (`whoami` == root) then
+   set prompt   = "`hostname`# "
+else
+   set prompt   = "`hostname`:`pwd`>"
+endif
+</pre>
+
+<li> Add the following line to the end of your .cshrc file:
+<pre>
+alias cd 'cd \!*;set prompt="`hostname`:`pwd`> "'
+</pre>
+
+<li> Save and exit the file.  Logout and log back in again to see the
+changes.
+</ol><p>
+
+<li> <b>Viewing files</b>. If the file is short, use <i>cat</i> to view the file.
+If the file is long, use <i>less</i> (or <i>more</i>) to view the file.<p>
+
+Examples:
+<pre>
+cat .login
+less .cshrc
+</pre><p>
+
+<li> <b>Adding your current directory to your PATH</b>.  When you
+compile any C program, it creates an executable you can run. If you
+are in the current directory where the executable is located, you
+should be able to just type in the name of the executable to get it to
+run. If this doesn't work in your environment, it is because your
+current working directory is not in your PATH. To add this to your
+path do the following:
+
+<ol>
+<li> edit your .cshrc file located in your home directory
+<li> at the bottom of the file, add this line:
+<pre>	
+    setenv PATH .:$PATH
+</pre>
+<li> logout and back in again to see the change, or type "source .cshrc"
+to see it immediately.
+</ol><p>
+
+<li> <b>Tips to stay organized</b>.  I'd recommend making a separate
+directory for each class you are writing labs for. Inside each
+directory, make another directory for each lab.  This will keep you
+organized and allow you to keep track of each lab for each class with
+ease. Use mkdir to make the directories, use cd to change directory to
+run and edit your files from inside these directories.
+</ul>

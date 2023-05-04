@@ -97,3 +97,38 @@ test:
 ```
 
 **Makefile error:** If you copy this directly and paste into a Makefile, the tabs will often be converted to spaces. You will get a "Missing separator" error from make. Just replace the indentions with two tabs and it should work.
+
+
+## Website ##
+
+The ECEn 425 website is stored in directory `ece425web.groups.et.byu.net/` and
+contains lab instructions, 8086 resources, homework assignments, and class
+slides.
+
+### Browsing the website ##
+
+You can open file `ece425web.groups.et.byu.net/index.html` locally with a web
+browser, and all the links should work.
+
+Another option is to host the website locally. In a terminal, do:
+
+```shell
+cd ece425web.groups.et.byu.net/
+python3 -m http.server 8000
+```
+Then, access the local website in your browser at `localhost:8000`.
+This option is nice because it allows Chrome extensions (like DarkReader) to
+work (Chrome extensions are not allowed to run on local file paths).
+
+### Website history
+
+After Dr. Archibald retired in August 2020, the BYU ECEn department
+discontinued ECEn 425. At some point in 2022, BYU also stopped hosting
+[the original class website][1]. Luckily,
+[the class website was archived by Wayback Machine][2], and the website was
+saved to this repo on 2023-05-03 using [this tool][3].
+
+
+[1]: http://ece425web.groups.et.byu.net/
+[2]: https://web.archive.org/web/20220126003933/http://ece425web.groups.et.byu.net/
+[3]: https://github.com/hartator/wayback-machine-downloader

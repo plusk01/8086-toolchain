@@ -1,0 +1,47 @@
+<html>
+<head>
+<title>Kernel Function Descriptions</title>
+</head>
+<body bgcolor="#ffffff">
+<h2>Kernel Function Descriptions</h2>
+The sample below is just an example of what you might submit for a few kernel
+functions. Your description may vary depending on your design.
+Make the description detailed enough to be very useful when you start writing
+code but you can still be general. You do not need to explain what every line
+of C code will eventually be doing.
+<pre>
+
+void YKEnterISR(void)
+{
+    /* Increment interrupt nesting level global variable */
+}
+
+void YKExitISR(void)
+{
+    /* Decrement interrupt nest level global variable */
+    
+    /* If nesting level is 0, call scheduler */
+}
+
+void YKRun(void)
+{
+    /* Set global flag to indicate kernel started */
+    
+    /* Call scheduler */
+}
+
+void YKIdleTask(void)
+{ 
+    while (1)
+    {
+        /* Increment idle count (within mutex!) */
+    }
+}
+
+</pre>
+<p>
+<hr>
+<address>Last updated 26 September, 2003</address>
+<br>
+</body>
+</html>

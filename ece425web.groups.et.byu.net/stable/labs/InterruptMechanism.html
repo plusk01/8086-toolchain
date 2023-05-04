@@ -1,0 +1,191 @@
+<html>
+
+<head>
+<title>8086 Interrupt Mechanism</title>
+</head>
+
+<body>
+<h2>The 8086 Interrupt Mechanism: The 8259A PIC</h2>
+
+<br>
+
+<h3>Introduction</h3>
+<p>
+The original 8088/8086 PCs used an Intel 8259A PIC (<i>Programmable Interrupt Controller</i>) to manage its eight hardware interrupts (also called <i>IRQs</i>,
+which is short for <i>Interrupt Requests</i>). This separate chip communicates with the processor and tells it when an interrupt needs to be serviced and which ISR
+(Interrupt Service Routine) to call. Therefore, any device that generates interrupts is connected to one the interrupt pins on the PIC, not to the CPU. The interrupt (or IRQ) pins on the PIC are numbered
+0 to 7 where IRQ 0 is the highest priority interrupt and IRQ 7 is the lowest priority. The PIC connects to the processor's single maskable interrupt pin.
+If an interrupt occurs, the PIC lets the processor know by asserting this interrupt pin.
+
+<br><br><br>
+
+<h3>
+
+The Interrupt Flag</h3>
+<p>One of the flags in the 8086 processor is the interrupt flag, usually
+referred to as IF. This flag can be set or cleared with the sti and cli
+instructions respectively. When set (1), the processor monitors its interrupt pin.
+When it is cleared (0), the processor ignores the signals on its interrupt pin.
+Therefore, interrupts can be enabled or disabled by setting and resetting the IF
+flag. However, this essentially disables communication between the PIC and the processor,
+disabling all external interrupts. To disable individual interrupts, a mask value can be
+written to the PIC instead. However, this will not be necessary for this class.
+
+<br><br><br>
+
+<h3>
+
+The 8259A's Registers</h3>
+<p>
+The 8259A has three 8-bit registers that determine its behavior: the IMR
+(<i>Interrupt Mask Register</i>), the ISR (<i>In-Service Register</i>), and the IRR (<i>Interrupt
+Request Register</i>). The bits of these registers are numbered 0 through 7, where 0 is
+the least significant and 7 is the most significant bit. Each bit of each of
+these registers corresponds to the respective interrupt pin on the PIC. That is,
+bit 7 corresponds to IRQ 7, bit 6 corresponds to IRQ 6, and so on.
+<p>
+<b>
+The IMR</b>. This register allows the programmer to disable or "mask"
+individual interrupts so that the PIC doesn't interrupt the processor when the
+corresponding interrupt is signaled. For an interrupt to be disabled, its
+corresponding bit in the IMR must be 1. To be enabled, its bit must be 0.
+Interrupts can be enabled or disabled by the programmer by reading the IMR,
+setting or clearing the appropriate bits, then writing the new value back to the
+IMR.
+<p>
+<b>
+The IRR</b>. This register indicates when an interrupt has been signaled by a
+device. As soon as a device signals an interrupt, the corresponding bit in the
+IRR is set to a 1. This register can only be modified by the PIC and its
+contents are usually not important to the programmer. However, it can be used to
+tell which interrupts are waiting for service.<p>
+<b>
+The ISR</b>. This register indicates which interrupts are currently being
+serviced (i.e., which ISRs have begun execution and have not yet finished). A 1
+bit indicates that the corresponding ISR is currently in-service. Several
+interrupts can be in-service at the same time because of interrupt nesting. The
+PIC uses this register to determine the highest priority of the interrupts
+currently being serviced. With this information, the PIC will only interrupt the
+processor if the highest priority set bit in the IRR has a higher priority than
+the highest priority set bit in the ISR. In other words, the PIC will never
+interrupt an in-service interrupt in order to service another interrupt of the
+same or lower priority. Before an ISR finishes executing, it must send to the
+PIC the <i>end of interrupt</i> command (<i>EOI</i>) so that the PIC knows that it can safely clear the highest
+priority bit in the ISR and signal any other pending interrupts. Be careful not to
+confuse "In-Service Register" with "Interrupt Service Routine", both of which use
+the "ISR" acronym.
+
+<br><br><br>
+
+<h3>
+
+Processor/PIC Actions</h3>
+<p>
+When an interrupt occurs, if the interrupt is enabled in the
+IMR (i.e., it's IMR bit is 0) and if the processor's IF flag is set (IF=1), then hardware does the following:
+<ol>
+  <li>The PIC informs the processor that an interrupt has occurred by asserting the processor's interrupt pin.</li>
+  <li>The processor finishes the currently executing instruction.</li>
+  <li>The processor sends an acknowledgement signal to the PIC.</li>
+  <li>The PIC then passes to the processor the vector number for the interrupt that occurred.</li>
+  <li>The processor uses this vector number to determine the address where the ISR
+    (interrupt service routine) is stored. The vector number is used as an index into the <i>interrupt vector table</i> (or interrupt descriptor table), which starts at address 0:0.
+    The corresponding entry in the interrupt vector table contains the address (segment and offset) for the ISR.</li>
+  <li>The processor pushes the flags, CS, and IP onto the stack (in that order).</li>
+  <li>The processor clears IF, disabling interrupts.</li>
+  <li>The processor then sets CS and IP to the segment and offset of the ISR that was read
+    from the vector table and begins execution.</li>
+</ol>
+<p>
+The vector number that is passed to the CPU by the PIC corresponds to the interrupt that
+occurs. IRQ 0 corresponds to vector number 8, IRQ 1 corresponds to vector number
+9, and so on.
+
+<br><br><br>
+
+<h3>
+
+ISR Actions</h3>
+<p>
+Once execution begins in the ISR, your code that makes up the ISR should do the following (in the order given):
+<ol>
+  <li>Save the context of whatever was running by pushing all registers onto the stack, except SP, SS, CS, IP, and the flags.</li>
+  <li>Enable interrupts to allow higher priority IRQs to interrupt.</li>
+  <li>Run the interrupt handler, which is usually a C function that does the work for this
+    interrupt.</li>
+  <li>Disable interrupts.</li>
+  <li>Send the EOI command to the PIC, informing it that the handler is finished.</li>
+  <li>Restore the context of what was running before the interrupt occurred by popping the registers saved in step 1 off the stack.</li>
+  <li>Execute the <samp>iret</samp> instruction. This restores in one atomic operation the values for IP, CS, and the flags, which were automatically saved on the stack by the processor when the interrupt occurred.
+    This effectively restores execution to the point where the interrupt occurred.</li>
+</ol>
+
+<p><b>Important note:</b> When using an RTOS (Real-Time Operating System) it is also usually necessary to call an OS function after
+step 1 to inform the OS that an ISR has begun execution. Then another OS
+function must be called after step 5 to inform the RTOS that the ISR is
+finished. In the RTOS you will build, these functions correspond to <samp>YKEnterISR()</samp> and <samp>YKExitISR()</samp>.
+This will allow the RTOS to know when execution is supposed to return to task code
+and allows the RTOS to return control to the highest prority ready
+task rather than the interrupted task.
+
+<p>Remember that the handling of the IRR and ISR registers in the PIC is done for you
+automatically as interrupts occur. Additionally, you do not need to read or set the IMR
+since the PIC will automatically ignore interrupts of the same or lower priority while
+an interrupt is being serviced. For the labs in this class, if you do not wish to use an interrupt, you should simply
+create an ISR that does not call an interrupt handler.
+
+<p>Do not push or pop the registers SP or SS when saving and restoring context! This is not necessary since SS and SP must already be correct before executing "<samp/>pop ss</samp>" or "<samp>pop sp</samp>". Also, the "<samp>push sp</samp>" instruction behaves differently on some 8086 clones. In an RTOS it will be necessary to save and restore SS and SP as part of a task's context, but this should be handled in a different way (e.g., the <samp>mov</samp> instruction).
+
+
+<br>
+
+<h3>
+
+The EOI Command:
+</h3>
+<p>
+In order for interrupts to work correctly, the PIC must be told when the end of an interrupt has occurred. To tell the PIC that the end of an interrupt has occurred we send it what is called a nonspecific
+EOI command (or unspecific EOI). To do this we simply write the value 0x20 to port 0x20, which is one of the PIC's ports.
+
+<pre>	mov	al, 0x20	; Load nonspecific EOI value (0x20) into register al
+	out	0x20, al	; Write EOI to PIC (port 0x20)</pre>
+
+This code should be executed by every ISR right before it restores the context and executes the iret instruction.
+
+<br><br><br>
+
+<!--  THE FOLLOWING SECTION WAS REMOVED SINCE READING AND WRITING TO THE IMR IN THIS WAY IS NOT COMPATIBLE WITH THE AMD AM186ES
+
+<h3>
+
+Reading from the IMR:
+</h3>
+<p>
+To read from the IMR a program simply reads from port 0x21, one of the PIC's ports. For example, the following instruction reads the IMR into register al.
+
+<pre>	in	al, 0x21    ; Read IMR value (port 0x21) into al</pre>
+
+At this point, the value in al can be modified to enable or disable different interrupts by clearing or setting respectively the appropriate bits. For example to modify the value so that IRQ 2 is disabled, one could use the following instruction.
+
+<pre>	or	al, 4       ; Or al with 00000100b</pre>
+
+The value in al could then be written back to the IMR (see below).
+
+<br><br><br>
+
+<h3>
+
+Writing to the IMR:
+</h3>
+<p>
+To write to the IMR a program simply writes the mask value back to port 0x21. For example, the following instruction writes the value in al to the IMR register.
+
+<pre>	out	0x21, al    ; Write value in al to IMR (port 0x21)</pre>
+
+-->
+
+<br>
+<hr>
+</body>
+
+</html>

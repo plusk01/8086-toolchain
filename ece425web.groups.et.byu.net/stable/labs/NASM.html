@@ -1,0 +1,72 @@
+<html>
+
+<head>
+<title>NASM Syntax</title>
+</head>
+
+<body>
+
+<h2>NASM Syntax</h2>
+<p>
+NASM, or the Netwide Assembler, is the assembler that will be used to convert 
+your assembly language code to binary executables. Below is a description of a
+few NASM features you will find useful. For more detailed information on these 
+or other NASM features see the <a href="nasmmanual.pdf">NASM Manual</a> (852 KB, requires Acrobat Reader; use "<samp>acroread</samp>" in UNIX and Linux).
+<p>
+<br>
+<h3>Layout of a NASM Source Line</h3>
+In general, each line of assembly source code has the following form:
+<pre>label:    instruction   operands      ; comment</pre>
+For example you may have the following lines in a piece of assembly:
+<pre>MyFunction:
+	add	ax, bx		; add bx to ax</pre>
+As this example shows, labels do not have to be typed on the same line as an instruction. The address of the next instruction will be assumed for the label.
+Also, with NASM, only the labels are case sensitive.
+<p>
+<br>
+<h3>Numbers</h3>
+When entering numbers in an assembly program, the following forms are allowed:
+<blockquote>
+<pre>decimal:      100
+hexadecimal:  0a2h  (The 0 is needed before numbers beginning with letter)
+hexadecimal:  0xa2
+octal:        777q
+binary:       10010011b</pre>
+</blockquote>
+<p>
+<br>
+<h3>Declaring Data</h3>
+To declare data in an assembly program the <b><samp>db</samp></b>, <b><samp>dw</samp></b>, and <b><samp>dd</samp></b> pseudo-instructions are used:
+<pre>	db	value		; Allocate a byte sized value
+	dw	value		; Allocate a word sized value
+	dd	value		; Allocate a dword sized value</pre>
+For example, to allocate a word sized value initialized to the value 3 that can be referred to by the name
+MyValue, one could use the following lines of assembly:
+<pre>MyValue:
+	dw	3</pre>
+This value could then be accessed with instructions like:
+<pre>	mov	ax, [MyValue]		; Load MyValue into ax
+	mov	[MyValue], 2		; Store 2 into MyValue</pre>
+The <samp><b>times</b></samp> pseudo-instruction causes the assembler to repeat an instruction or pseudo-instruction. Its syntax is:
+<pre>	times	numRep instruction operands</pre>
+For example, to declare 20 bytes of data, initialized to 0, you could use the following line of assembly:
+<pre>	times	20	db	0</pre>
+<b>Strings</b> can be declared in several ways. The following are valid NASM examples:
+<pre>	db	"abcd",0				; Same as "abcd" in C (with NULL termination)
+	db	'a',"b",'cd',0				; Same as previous
+	db	'"quotes"',"and 'apostrophes'.",0	; The string: "quotes" and 'apostrophes'.</pre>
+<p>
+<br>
+<h3>Other NASM Directives</h3>
+Other useful NASM directives include the <b><samp>org</samp></b> and the <b><samp>align</samp></b> directives. Org allows you to specify the program origin (i.e., the address offset at which you intend the program to be loaded). If not given, NASM assumes that the origin is 0. This information is needed in order to convert label names to address offsets during assembly. For example, to set the origin to 0x100 one could place the following line at the beginning of an assembly file:
+<pre>	org	0x100</pre>
+The align directive allows programmers to align their code to word, dword, or larger boundaries in memory. To align to a word boundary, the following line of assembly could be used:
+<pre>	align	2	; Align to nearest 2-byte boundary</pre>
+This will cause an unused byte to be inserted if the address of the next instruction or data would have been odd. The parameter given to align must be a power of 2. Code and data alignment are important in ensuring memory performance.
+<p>
+
+<br>
+<hr>
+</body>
+
+</html>

@@ -1,0 +1,797 @@
+<html>
+
+<head>
+<title>The YAK Kernel</title>
+</head>
+
+<body>
+
+<center>
+<h2> ECEn 425 </h2>
+<h2> The YAK Kernel </h2>
+</center>
+
+<HR>
+
+<h3> Overview </h3>
+
+The main focus of the ECEn 425 labs is the creation of a
+fully-functional real-time kernel called YAK.  A <i>real-time
+kernel</i> is a simple operating system that provides basic support to
+create and execute independent units of computation called
+<i>tasks</i>.  The YAK kernel also provides support for communication
+between tasks in the form of semaphores and message queues. <p>
+
+Through a series of labs, you will design and implement kernel
+routines that add to the functionality of the kernel until you have
+achieved the full functionality described in this document. There are
+many different ways to implement these routines, but some are much
+more painful than others.  It is <u>highly</u> recommended that you
+thoroughly consider implementation issues of all routines and all
+required functionality early in the design phase so that later
+extensions can be made in a straightforward way without breaking your
+code.<p>
+
+<hr>
+
+<h3> General Kernel Operation </h3>
+
+Real-time applications require both kernel code and
+application-specific code (also referred to as <i>user code</i>). The
+kernel provides a library of C routines that can be called as desired
+by a specific application. To achieve the desired functionality, the
+user code must call the kernel routines according to prescribed
+conventions.<p>
+
+Real-time kernels rely on CPU interrupt mechanisms to respond in a
+timely way to critical events.  The <i>ISR</i>s (<i>Interrupt Service
+Routines</i>), code to which control is automatically transferred when
+interrupts occur, are part of the kernel.  However, they must be
+modified by the application programmer so that they call the
+<i>interrupt handler</i> functions that do the actual work associated
+with each interrupt-causing event.  Each ISR and the interrupt
+handlers it calls therefore constitute a separate runnable entity that
+is scheduled and dispatched (caused to execute) by hardware, in
+contrast with tasks which are runnable entities scheduled and
+dispatched by the kernel.  It is vital to understand and differentiate
+between these two runnable entities.  Both may call kernel functions,
+and the kernel supports communication between interrupt handlers and
+tasks, but there are significant constraints on the kernel functions
+that interrupt routines may call.<p>
+
+The YAK kernel supports nested interrupts.  You are <b>required</b> to
+make ISRs and interrupt handlers interruptible by higher priority
+interrupts.  You are advised to consider carefully early in the design
+phase the implications of implementing nested interrupts. <p>
+
+It is important to note that a mix of C and assembly routines will be
+required to implement the kernel.  In general you should code
+everything you can in C and <b>use assembly only when you must</b>.
+Routines that access specific registers (e.g., to save or restore
+program state) or execute specific instructions (e.g., to enable or
+disable interrupts) must be written in assembly.  One might be tempted
+to code more in assembly to make it more efficient than compiled C
+code, but code written in C is much easier to modify and debug, and in
+the long run, this is much more significant than shaving a bit of
+run-time overhead.  Moreover, the labs for this class will not include
+any application code in which timing is so critical that compiled C
+code is inadequate.  Since your kernel requires both C and assembly
+routines, you will need to understand calling and parameter passing
+conventions used in compiler-generated code so that your C code can
+call assembly functions and your assembly code can call C functions.
+<p>
+
+It is the responsibility of the application programmer to partition
+the work required into tasks, to specify all communication between
+those tasks, to assign priorities to each task, and to write one or
+more C functions to represent each task.  For maximum flexibility in
+task scheduling, YAK requires that each task have its own stack space;
+the responsibility of declaring and sizing the stack belongs to the
+application programmer and takes place in the user code.  A task
+typically performs work, then delays its execution for a specified
+period of time or until a particular signal is received indicating it
+should run again.  (The details depend on which kernel routines the
+task calls.)  The kernel manages requested changes in the state or
+status of each task.  Internally the YAK kernel uses a data structure
+called a <i>task control block</i> (TCB) to keep track of all relevant
+information for each task.
+<p>
+
+Because an RTOS is intended to manage time-critical, prioritized code,
+the kernel must be designed with performance in mind. Think carefully
+about how you organize the kernel's internal data structures and code
+so as to avoid unnecessary overhead. Your grade may be adversely
+affected if your kernel does not meet certain performance
+requirements.
+<p>
+
+<hr>
+
+<h3> The Kernel Interface </h3>
+
+The kernel consists of C functions, variables, and data structures
+that are used in combination to provide a variety of services. So that
+we can readily distinguish kernel code and data from that of the
+application, names of user-visible YAK routines and variables
+should begin with YK. Following this convention will keep your kernel
+reasonably compatible with others and make it easier to debug.
+<p>
+
+Here is a list of C functions that you must implement in your YAK
+kernel. <p>
+
+<ul>
+<li> <b>YKInitialize</b>. Prototype: void YKInitialize(void)<br> This
+function must be called from main in the application code before any
+other YAK functions are called.  It provides the kernel an opportunity
+to take care of any bookkeeping or initialization that is necessary
+before it is ready to provide other services. (The exact set of things
+to perform is implementation specific so the actions required in your
+kernel will depend on your design decisions.)
+<p>
+One action that YKInitialize must perform is the creation of the <i>
+idle task</i> (YKIdleTask), the lowest priority task in the
+system. See the description of YKIdleTask for more information on this
+task. Since the kernel creates the idle task, it is responsible for
+allocating its stack space. Since the maximum stack size depends on
+application-specific information that only the application programmer
+could supply (such as the maximum interrupt nesting level), you should
+have a #define in a kernel header file that the application programmer
+can modify to set the idle task stack size.<p>
+
+<li> <b>YKEnterMutex</b>. Prototype: void YKEnterMutex(void)<br> This
+function disables interrupts. It may be called from application or
+system code. <p>
+
+<li> <b>YKExitMutex</b>. Prototype: void YKExitMutex(void)<br> This
+function enables interrupts.  It may be called from application or
+system code. <p>
+
+<li> <b>YKIdleTask</b>. Prototype: void YKIdleTask(void)<br> This is
+the kernel's idle task, which is always the lowest priority task in
+the system. This task should be created by YKInitialize(). The idle
+task is very simple and just spins in a while(1) loop without ever
+calling a function that could cause it to be delayed or
+suspended. Because the idle task is always ready to run, the kernel
+can be simplified; there will always be a ready task to run. The idle
+task is only referenced by kernel code and, like all tasks, is never
+explicitly called. The only thing that YKIdleTask must do is
+increment the global variable YKIdleCount, in an atomic way, once per
+iteration of its while(1) loop.
+<p>
+Some care must be taken when writing the idle task. The global
+variable YKIdleCount will be used to determine how much time the
+kernel spends idle, waiting for the next event to occur. This in turn
+tells us the CPU utilization. However, since YKIdleCount is only a
+16-bit unsigned number it is prone to overflow. Increasing its size to
+32 bits requires us to use 32-bit division to calculate CPU
+utilization, which is not supported by the 8086.
+<p>
+For this class, we will test our labs with a tick frequency of 10,000
+instructions per tick and we will report CPU utilization every 20
+ticks. To be safe, we must assume that the CPU can be completely idle
+for 20 ticks. This means that YKIdleCount should not be able to
+overflow in <br>
+
+<pre>    (10,000 instructions/tick) * (20 ticks) = 200,000 instructions</pre>
+
+Since the maximum value of a 16-bit unsigned number is 65,535, the
+while(1) loop in YKIdleTask must take at least
+
+<pre>    (200,000 instructions) / (65,535 iterations) = 3.05 instructions/iteration</pre>
+
+Therefore, to prevent overflow, your while(1) loop in YKIdleTask
+should take at least <b>4 instructions per iteration</b> to prevent
+overflow of YKIdlecount at the default tick rate. Ideally, you want
+YKIdleTask to take exactly 4 instructions per iteration. After writing
+your idle task, disassemble it to make sure its while(1) loop is at
+least 4 instructions per iteration (including the jmp instruction).
+<p>
+
+<li> <b>YKNewTask</b>. Prototype: void YKNewTask(void (* task)(void),
+void *taskStack, unsigned char priority)<br> This function registers a
+task with the kernel, causing the allocation and initialization of
+whatever data structures the kernel uses to represent tasks.  It must
+be called exactly once for every task in the system.  The first
+parameter is a function pointer to the C function that corresponds to
+the code of the task.  The second parameter is a pointer to the top of
+the stack space reserved for this task. Note that the actual address
+passed is one word <i>beyond</i> the top of the stack; this ensures
+that the first word actually used on the stack will be the word at the
+top of the stack.  Note also that the stack space should be aligned on
+word boundaries.  The third parameter is the priority of the task
+which can range from 0 to 100; the lower the number the higher the
+priority of the task.<P>
+
+At least one user-defined task must be created with a call to
+YKNewTask before YKRun is called. The function may be called from
+another task's code (that is, tasks can create other tasks), but it
+can never be called by an interrupt handler. YKNewTask calls the
+scheduler so that if a task creates a higher priority task, the higher
+priority task will execute immediately after the function
+completes.<p>
+
+<li> <b>YKRun</b>. Prototype: void YKRun(void)<br> This function is
+called from main in the application code, and it never returns.  It
+tells the kernel to begin the execution of the tasks in the
+application code.  It therefore marks the transition from the initial
+setup period (during which tasks, semaphores, and message queues may
+be created) to the actual execution period (during which tasks and
+ISRs will run as specified by the application programmer).  This
+routine causes the scheduler to run for the first time (which then
+calls the dispatcher). This causes the first task to run, so at least
+one user-defined task must be created before it is called.<p>
+
+<li> <b>YKDelayTask</b>. Prototype: void YKDelayTask(unsigned
+count)<br> This function delays a task for the specified number of
+clock ticks.  After taking care of all required bookkeeping to mark
+the change of state for the currently running task, this function
+calls the scheduler.  After the specified number of ticks, the kernel
+will mark the task ready.  If the function is called with a count
+argument of 0 then it should not delay and should simply return. This
+function is called only by tasks, and never by interrupt handlers or
+ISRs. <p>
+
+<li> <b>YKEnterISR</b>. Prototype: void YKEnterISR(void)<br> This
+function must be called near the beginning of each ISR just before
+interrupts are re-enabled. This simply increments a counter
+representing the ISR call depth.<p>
+
+<li> <b>YKExitISR</b>. Prototype: void YKExitISR(void)<br> This
+function must be called near the end of each ISR after all handlers
+are called and while interrupts are disabled.  It decrements the
+counter representing ISR call depth and calls the scheduler if the
+counter is zero. In the case of nested interrupts, the counter is zero
+only when exiting the last ISR, so it indicates when control will
+return to task code rather than another ISR. If it is the last ISR
+then control should return to the highest priority ready task.  This
+may not be the task that was interrupted by this ISR if the actions of
+the interrupt handler made a higher priority task ready. <p>
+
+<li> <b>YKScheduler</b>. Prototype: void YKScheduler(void)<br> This
+function determines the highest priority ready task, then calls the
+dispatcher to cause that task to execute.  An easily implemented
+optimization is to call the dispatcher only if the "current task" (the
+task that ran most recently) differs from the highest priority ready
+task; if they are the same, the scheduler simply returns. <p>
+
+Note: Since the scheduler is called directly only in kernel code and
+never in user code, you need not implement the function exactly
+according to the prototype. In particular, you may find it helpful to
+pass a parameter to the scheduler.<p>
+
+<li> <b>YKDispatcher</b>. Prototype: void YKDispatcher(void)<br> This
+function causes the execution of the task identified by the scheduler.
+The task may be running for the first time, or it may be resuming
+execution.  Either way, the context of the task is reloaded and
+execution begins (or resumes) at the appropriate instruction in that
+task's code.<p>
+
+Note: Since the dispatcher is called directly only in kernel code and
+never in user code, you need not implement the function exactly
+according to the prototype. In particular, you may find it helpful to
+pass a parameter to the function. You could even create different
+versions of the function for each case it must handle. <p>
+
+<li> <b>YKTickHandler</b>. Prototype: void YKTickHandler(void)<br>
+This function must be called from the tick ISR each time it runs.
+YKTickHandler is responsible for the bookkeeping required to support
+the timely reawakening of delayed tasks.  (If the specified number of
+clock ticks has occurred, a delayed task is made ready.)  The tick ISR
+may also call a user tick handler if the user code requires actions to
+be taken on each clock tick.  <p>
+
+<li> <b>YKSemCreate</b>. Prototype: YKSEM* YKSemCreate(int
+initialValue)<br> This function creates and initializes a semaphore
+and must be called exactly once per semaphore. This call is typically
+in main in the user code. The initialization value must be
+non-negative.  The value returned is a pointer to the data structure
+used by the kernel to represent the semaphore.  YKSEM is a
+<samp>typedef</samp> defined in a kernel header file that must be
+included in any user file that uses semaphores.  Despite having a
+pointer to this struct, user code never needs to know implementation
+details of semaphores; they are simply created, posted to, and pended
+on, using the functions provided.<p>
+
+<li> <b>YKSemPend</b>. Prototype: void YKSemPend(YKSEM *semaphore)<br>
+This function tests the value of the indicated semaphore then
+decrements it.  If the value before decrementing was greater than
+zero, the code returns to the caller.  If the value before
+decrementing was less than or equal to zero, the calling task is
+suspended by the kernel until the semaphore is available, and the
+scheduler is called.  This function is called only by tasks, and never
+by ISRs or interrupt handlers. <p>
+
+<li> <b>YKSemPost</b>. Prototype: void YKSemPost(YKSEM *semaphore)<br>
+This function increments the value of the indicated semaphore.  If any
+suspended tasks are waiting for this semaphore, the waiting task with
+the highest priority is made ready.  Unlike YKSemPend, this function
+may be called from both task code and interrupt handlers.  If called
+from task code (easily determined by the value of the ISR call depth
+counter) then the function should call the scheduler so that newly
+awakened high-priority tasks can resume right away.  If the function
+is called from an interrupt handler, the scheduler should not be
+called within the function.  It will be called shortly in YKExitISR
+after all ISR actions are completed.<p>
+
+<li> <b>YKQCreate</b>.  Prototype: YKQ *YKQCreate(void **start,
+unsigned size)<br> This function creates and initializes a message
+queue and returns a pointer to the kernel's data structure used to
+maintain that queue.  YKQ is a <samp>typedef</samp> defined in a
+kernel header file that must be included in any user file that uses
+message queues. The structure it defines will be used to keep track of
+the number of entries in the queue, the next empty slot to use, the
+next message to remove, etc.  The function must be called exactly once
+per message queue, and that call is typically done in main in the user
+code.  The first parameter specifies the base address of the queue
+itself which is an array of void pointers.  The size parameter informs
+the kernel of the number of entries in the queue, which is the size of
+the array.<p>
+
+A queue consists of pointers to messages rather than the messages
+themselves so that the kernel's queue routines do not have to
+manipulate directly user-defined data structures.  It would be very
+difficult to write kernel routines to insert and remove messages that
+would work for all message types and sizes.  Void pointers are used so
+that arbitrary messages may be defined and used in the application
+code.  These pointers are a generic pointer type in C and must be
+explicitly cast before being de-referenced.  The allocation and
+declaration of the actual messages and the queue itself (an array of
+void pointers) are the responsibility of the application code. <p>
+
+<li> <b>YKQPend</b>. Prototype: void *YKQPend(YKQ *queue)<br> This
+function removes the oldest message from the indicated message queue
+if it is non-empty.  If the message queue is empty, the calling task
+is suspended by the kernel until a message becomes available. The
+function returns the oldest message in the queue (cast to C's generic
+"void pointer" type).  This function is called only by tasks and never
+by interrupt handlers or ISRs.<p>
+
+<li> <b>YKQPost</b>. Prototype: int YKQPost(YKQ *queue, void *msg)<br>
+This function places a message in a message queue.  The first
+parameter is the queue in which the message is to be placed and the
+second parameter is a pointer to the message (cast as a void pointer).
+If space was available in the queue and the message was successfully
+inserted, the function returns the value 1.  If the queue is full, no
+message is inserted and the value 0 is returned.  If any suspended
+tasks are waiting for a message from this queue, the highest priority
+task is made ready to run.  This function may be called from both task
+code and interrupt handlers.  If called from task code, the function
+should call the scheduler so newly awakened high-priority tasks have
+an opportunity to run immediately.  If called from an interrupt
+handler, the scheduler should not be called in YKQPost.  It will be
+called shortly in YKExitISR after all ISR actions are completed.<p>
+
+<li> <b>YKEventCreate</b>. Prototype: YKEVENT *YKEventCreate(unsigned
+initialValue)<br> This function creates and initializes an event flags
+group and returns a pointer to the kernel's data structure used to
+maintain that flags group. YKEVENT is a <samp>typedef</samp> defined
+in a kernel header file that must be included in any user file that
+uses event flags. The structure it defines will be used to keep track
+of the event flags. The function must be called exactly once for each
+event group, and that call is typically done in main in the user
+code. The parameter <samp>initialValue</samp> gives the initial value
+that the flags group is to have. A one bit means that the event is set
+and a zero bit means that it is not set. Each event flags group is
+represented by a 16-bit value, allowing for 16 events in a single
+flags group.<p>
+
+<li> <b>YKEventPend</b>. Prototype: unsigned YKEventPend(YKEVENT
+*event, unsigned eventMask, int waitMode)<br> This function tests the
+value of the given event flags group against the mask and mode given
+in the <samp>eventMask</samp> and <samp>waitMode</samp> parameters. If
+the conditions for the event flags are met then the function should
+return immediately.  Otherwise the calling task is suspended by the
+kernel until the conditions are met and the scheduler is called.
+The two wait modes supported are EVENT_WAIT_ALL, where the task should
+block until <i>all</i> the bits set in <samp>eventMask</samp> are also
+set in the event flags group, and EVENT_WAIT_ANY, where the task
+should block until <i>any</i> of the bits set in
+<samp>eventMask</samp> are also set in the event flags group.
+EVENT_WAIT_ANY and EVENT_WAIT_ALL should each be defined in your
+kernel header file using #define.  (Their actual values are not
+important as long as they are distinct.)  The value returned by the
+function is always the value of the event flags group at the time the
+function returns -- when the calling task resumes execution.  (Note
+that other function calls to set or reset event flags may have
+executed between this point in time and when the task was unblocked.)
+This function is called only by tasks and never by ISRs or interrupt
+handlers. <p>
+
+<li> <b>YKEventSet</b>. Prototype: void YKEventSet(YKEVENT *event,
+unsigned eventMask)<br> This function is similar to a post
+function. It causes all the bits that are set in the parameter
+<samp>eventMask</samp> to be set in the given event flags group. Any
+tasks waiting on this event flags group need to have their wait
+conditions checked against the new values of the flags. Any task whose
+conditions are met should be made ready. This function can be called
+from both task code and interrupt handlers. If one or more tasks was
+made ready and the function is called from task code then the
+scheduler should be called at the end of the function. If called from
+an interrupt handler then the scheduler should not be called. It will
+be called shortly in YKExitISR after all ISR actions are completed.<p>
+
+<li> <b>YKEventReset</b>. Prototype: void YKEventReset(YKEVENT *event,
+unsigned eventMask)<br> This function simply causes all the bits that
+are set in the parameter <samp>eventMask</samp> to be reset (made 0)
+in the given event flags group. Since our kernel does not allow tasks
+to block until events are reset, there is no reason to unblock any
+tasks or call the scheduler in this function. This function can be
+called from task code and interrupt handlers.<p>
+
+</ul>
+
+The kernel should also define and maintain the following global
+variables which are part of the YAK API and can therefore be
+referenced as desired by the user code.<p>
+
+<ul>
+<li> <b>YKCtxSwCount</b>. Type: unsigned int<br> This is an unsigned
+int that must be incremented each time a context switch occurs,
+defined as the dispatching of a task other than the task that ran most
+recently.<P>
+
+<li> <b>YKIdleCount</b>.  Type: unsigned int<br> This is an unsigned
+int that must be incremented by the idle task in its while(1) loop. If
+desired, the user code can use this value to determine CPU
+utilization. See the section on YKIdleTask, above, to see how to
+prevent overflow of YKIdleCount.<P>
+
+<li> <b>YKTickNum</b>.  Type: unsigned int<br> This is an unsigned int
+that must be incremented each time the kernel's tick handler runs.<p>
+</ul>
+
+The correct operation of any application code built on YAK requires
+strict adherence to a number of conventions.  Many of these are
+mentioned in this document.  One worth noting here is that there are
+significant constraints on the structure of code used to represent
+tasks in application code.  Each task has a corresponding C function
+(passed as a parameter to YKNewTask) that simply loops forever and
+never terminates.  These C functions are never called in the
+conventional way, nor will they ever return.  (Executing task code
+that returns from the task function will result in rather strange
+errors that might be unique to your implementation of the kernel.)  If
+we were to add a YKDeleteTask to our kernel, task code could also end
+with a call to that function, but the application code we will run
+this semester will not require this functionality.  (It would be
+pretty easy to add, however.) <p>
+
+<hr>
+<h3> Design and Implementation Issues </h3>
+
+There are a number of issues you should think through carefully before
+settling on a specific implementation.  The following points are not
+exhaustive in this respect, but they should serve as a good starting
+point. <p>
+
+<ul>
+
+<li> <b> How are tasks represented?</b> The YAK kernel requires a TCB
+struct to be defined and initialized for each task.  Changes in the
+state of a task (such as delaying it or suspending it) are reflected
+at least in part by changing the contents of the TCB.  You will need
+to decide what your TCB should contain in your implementation.
+Possibilities you want to consider include:
+
+<ul>
+<li> Task name or ID.
+<li> Task priority.
+<li> Stack pointer (top of stack) for this task.
+<li> Program counter (address of next instruction of task to execute).
+<li> Task state (such as running, delayed, or suspended).
+<li> Space to store task's context.
+<li> Pointers to link TCBs in lists.
+</ul>
+<p>
+
+How you organize and search through your TCBs will probably have the
+greatest impact on the performance of your kernel. Using sorted linked
+lists of TCBs will generally give you much better performance than
+using an array of TCBs. If you do use arrays, keep in mind that
+because task priorities aren't required to be sequential, using a
+task's priority as an index into the array of TCBs shouldn't even be
+considered.
+<p>
+
+<li> <b> How do you allocate TCBs?</b> Each time YKNewTask is called,
+you will want to allocate and initialize a new TCB.  For purposes of
+efficiency you should avoid dynamic allocation (e.g., malloc);
+instead, think about declaring an array of TCB structs in your code
+and doing your own allocation from the array. <p>
+
+<li> <b> What do ISRs look like?</b> They must first save the context
+(all register contents except sp, ss, ip, cs, and flags) of whatever
+happened to be running when the interrupt occurred (either a task or a
+lower priority ISR).  In order to support nested interrupts as YAK
+requires, each ISR should save context on the stack. YKEnterISR should
+then be called and then interrupts may be re-enabled.  At that point
+interrupt handlers may be called to do the actual work associated with
+the interrupt.  The code to leave the ISR depends on how you implement
+your RTOS but should include disabling interrupts, sending the EOI
+command, calling YKExitISR and restoring the context of whatever is
+supposed to run next (i.e., a task or lower priority interrupt).
+Because they directly access specific registers, ISRs must be written
+in assembly language, but the handler routines they call may be normal
+C functions. <p>
+
+<li> <b> How many contexts may be on a stack at a time?</b> In the
+worst case, each level of nested interrupts could result in another
+context saved on the stack.  Thus, stack sizes must be chosen
+carefully to include consideration of the size of each context and the
+maximum possible interrupt nesting depth.<p>
+
+<li> <b> Where do you save task contexts and how do you restore
+them?</b> Determining the precise details of storing and restoring
+contexts is perhaps the most critical design decision in your kernel.
+ISRs will save the context of whatever they interrupted on the current
+stack, but one can also use the TCB to store task context.  Regardless
+of how you decide to save contexts, you need to think through the
+details carefully.  You should consider all the places in YAK code
+that a context must be saved.  (This happens at the beginning of each
+ISR and on every context switch.)  You must also consider all the
+places in the code when a context must be restored.  (This happens at
+the end of each ISR and on every context switch.)  Be sure you have
+identified all the possible sequences of events during execution that
+can result in a context switch.  (This can happen any time a function
+is called that calls the scheduler.)<p>
+
+Here is an example of the kind of issues to consider.  Suppose the
+first task that runs is task X.  Task X will run until it delays
+itself, is suspended, creates a higher-priority task, or is
+interrupted by an ISR.  At the end of the code to delay it, suspend
+it, create another task, or exit the ISR, the scheduler will be
+called, which will in turn call the dispatcher if a context switch to
+task Y is to occur.  The dispatcher must restore the context of Y and
+cause it to resume execution, but the context of X must be saved
+first.  In some cases, the context of X will already be saved when the
+dispatcher runs.  In others, it will still have to be saved.  You
+could write separate dispatchers for these different scenarios. <p>
+
+You must define a consistent way to save contexts so that all sections
+of your code that save and restore will be consistent.  Rather than
+replicate similar code many times through your kernel and run the risk
+of an obscure inconsistency, you might consider writing helper
+functions that save and restore contexts in a consistent way and that
+are called whenever needed.  Since they directly access registers,
+routines that save and restore context must be written in assembly.<p>
+
+Be sure to also consider the case of nested interrupts. In this case
+you do not want to overwrite values in the TCB for the current task
+when saving the context. Instead, the TCB should have already been
+updated by the lowest priority ISR that has occurred when it saved
+context. In other words, you will have to check the interrupt nesting
+level to decide if the TCB should be updated.<p>
+
+<li> <b> How do you save return addresses when tasks are delayed or
+suspended?</b> This is one of the trickiest issues you have to deal
+with, and if you don't get the details quite right your kernel will
+not operate reliably.  Naturally you should save the return address at
+the same point in time that you save the rest of the context.  How you
+get the return address depends on the architecture and system
+conventions.  In some cases, you will want the return address from an
+ISR (the address saved on entry to the ISR); in others you will want
+the return address from a function call.  In some cases, the only
+return address you can get is one or two levels of function calls away
+from the precise point in the code you'd like to return to, but this
+can still be made to work.  For each YAK function you implement that
+can cause a context switch, you should think about the point to which
+control should be returned when the task runs again.  In general, you
+should think through all issues relating to return addresses very
+carefully before deciding on an implementation.  Time invested in the
+design to understand the details can pay big dividends in reduced
+debugging time later on. <P>
+
+<li> <b> How does the dispatcher transfer control to tasks?</b> Part
+of the context stored should be the address of the next instruction to
+be executed. This could be any instruction not in a critical section,
+since the task might have been interrupted at any other point in its
+execution. Use the <samp>iret</samp> instruction to restore CS, IP,
+and the processor flags with the appropriate values in one atomic
+operation.
+<p>
+
+<li> <b> How is a task dispatched for the very first time?</b> If you
+have a single dispatcher that always expects to find the task's
+previous context stored in a particular way, how can the context be
+found if the task never ran before?  It would appear that you have two
+main options here: either store an initial context on the task's stack
+when the task is created in YKNewTask so it can be "restored" (just as
+if it had run before) when it runs for the first time or have the
+dispatcher treat this case differently.  You can implement the latter
+case by having multiple dispatchers or by having a single dispatcher
+that you pass a parameter to. For parameter passing, make sure you
+understand how to write assembly language routines that are called by
+C functions and that use the same parameter passing conventions.  In
+either case, make sure that an appropriate value for the flags is used
+when a task is dispatched for the first time (i.e., with the interrupt
+flag set).<p>
+
+<li> <b> Why aren't more parameters used in the YAK function
+prototypes?</b> In real-time systems, it is often faster and simpler
+to use global variables than to pass parameters via the stack, but
+this often means we have to use critical sections to prevent other
+tasks or ISRs from changing those globals while we access them.  As an
+example of how a global variable might be used, you could code up the
+scheduler so that it sets a global pointer to the next task to be
+dispatched, and then you could code the dispatcher so that it accesses
+this global variable.  <p>
+
+<li> <b> How does the delay mechanism work?</b> You will need to give
+some thought to the delay mechanism.  After the specified number of
+clock ticks has occurred, the state of the task should be changed.
+What makes this happen?  You need to write the kernel's tick handler
+in such a way that it performs the required actions. <p>
+
+<li> <b> How are semaphores and message queues represented, and how
+are they allocated?</b> Like TCBs, you will have structs for each of
+these that are allocated statically and initialized later when the
+entity is created.  Plan on allocating them in a similar way (by
+declaring arrays and using them as needed).  Think about the entries
+you need in each struct to provide the desired functionality.  At a
+minimum, you need a value for each semaphore, and for each queue you
+will need enough information to maintain the queue as a circular
+buffer (such as a head pointer, a tail pointer, and a size).  Your
+kernel also needs a way to indicate that a task is suspended while
+waiting for a particular semaphore or a message from a particular
+queue.  This is something you need to consider in the internal
+representation of tasks, semaphores, and message queues.<p>
+
+<li> <b> What does the code representing each application task look
+like?</b> You get some idea of this from looking at the application
+code for each lab.  Basically, the actions of each task must be
+defined in a C function, but not just any C function.  To run with the
+YAK kernel, C code corresponding to an application task should loop
+forever without terminating.  (As an alternative, the function could
+end by calling a system routine that terminated it, but YAK does not
+include such a function.  It could easily be added, however.)  Note
+that control is never transferred to the task code using a normal
+function call, so it should not return.  (It is, in fact, an
+interesting thought experiment to determine just what would happen if
+the task function did end with a return in your implementation of the
+YAK kernel.)<p>
+
+</ul>
+
+<hr>
+
+<h3> Recommended File Organization </h3>
+
+It is strongly recommended that you create a separate directory for
+each lab that contains all YAK and application files.  As you add
+files or modify the structure in any way, make sure you update your
+make file.  (Not recompiling an old file with a new data structure is
+a sure-fire way to generate a failure.)<p>
+
+Within each directory, it is highly recommended that you follow
+certain conventions for file organization.  (Do not, for example, just
+toss everything into a single assembly language file and a single C
+file!)  Your files should reflect the logical distinction between
+application and kernel.  A suggested organization is given below.
+I've indicated the file names I used in my code to suggest that you
+adopt consistent and meaningful names that will help you remember
+where to find the routines and data structures you want.<p>
+
+<table border>
+<tr>
+  <td> &nbsp;
+  <td> <b>My file name</b>
+  <td> <b>File contents</b>
+<tr>
+  <td> 1
+  <td> lab#_app.c
+  <td> C code for application (# is lab number)
+<tr>
+  <td> 2
+  <td> myinth.c
+  <td> C code for interrupt handlers
+<tr>
+  <td> 3
+  <td> myisr.s
+  <td> Assembly code for ISRs
+<tr>
+  <td> 4
+  <td> clib.s 
+  <td> The clib.s file containing library code and the interrupt vector table
+<tr>
+  <td> 5
+  <td> yaku.h
+  <td> A .h file for kernel code, to be modified by the user. It
+       should include things such as the #define statements for idle
+       task's stack size, the maximum numbers of tasks, semaphores,
+       and message queues, etc.
+<tr> 
+  <td> 6
+  <td> yakk.h
+  <td> A .h file for kernel code, not modified by user. It should include
+       declarations such as the TCB, YKSEM, and YKQ, as well as prototypes
+	   for the kernel functions. Global variables shared by kernel and 
+	   application code should be declared as extern in this file.
+<tr>
+  <td> 7
+  <td> yakc.c
+  <td> Kernel routines written in C. Global variables used by kernel code
+       or shared by kernel and application code should also be
+       defined in this file.
+<tr>
+  <td> 8
+  <td> yaks.s
+  <td> Kernel routines written in assembly
+</table><p>
+
+If you were developing an application and had purchased YAK off the
+shelf (a real bargain, to be sure) to build your system around, your
+application code would go into files 1 and 2.  You would need to make
+slight modifications to system files 3-5 for your application.  You
+would modify the ISR code in file 3 to call your interrupt handlers,
+you would modify the code in file 4 so the jump table got initialized
+correctly, and you would modify file 5 to tell the kernel such things
+as how many tasks your application code creates. (As you design your
+kernel, you will need to modify these files to make them work with the
+application code we give you for your labs.) As an application
+programmer, you would NOT need to modify system files 6-8 in any way
+since they are application independent. I hope you can see the benefit
+of organizing files in this way.<P>
+
+<!-- Redundant information, much of which applies to the SIMP architecture
+
+<hr>
+<h3> Debugging Hints </h3>
+
+<ul>
+
+<li> Be familiar with the simulation tools.  Know what each can do for
+you and think about how to get the information you need.<p>
+
+<li> If you are having problems with nested interrupts, check the
+following: <p>
+
+  <ul>
+
+  <li> Make sure that each ISR calls YKEnterISR before interrupts are
+  enabled upon entry.  Similarly, make sure that interrupts are never
+  enabled after calling YKExitISR but before leaving the ISR.  (In
+  either case, the counter of ISR call depth can be wrong upon leaving
+  a nested interrupt, in which case you call the scheduler and
+  generally mess everything up.) <p>
+
+  <li> Make sure that each ISR revises the IMR to disable all
+  interrupts at the current priority level and lower before interrupts
+  are enabled within the interrupt handler.<p>
+
+  <li> The restoration of the IMR upon exit from each ISR deserves
+  some careful thought.  Are you saving the IMR as part of the
+  context?  If you are not, chances are that each ISR reenables all
+  interrupts at current and lower priority, <i>but this is not
+  necessarily what the IMR was upon entry to the ISR.</i>  If you have
+  nested interrupts, for example, and the ISR at level i is
+  interrupted by the ISR at level i+1, you don't want to reenable
+  interrupts at level i upon leaving i+1 because you have unfinished
+  business in the interrupt handler at that level and your ISR is
+  almost certainly not reentrant.  <b>Solution: store the IMR as part
+  of the context upon entry to each ISR, restore its value upon
+  leaving each ISR.</b><p>
+
+  <li> Are you saving the stack pointer in the TCB on entry to every
+  ISR?  If you are, this will cause problems when interrupts are
+  nested.  If this ISR interrupted another ISR, then you did not
+  interrupt task code and DO NOT want to set the current task's stack
+  pointer to the current stack frame.  <b>Solution: update the stack
+  pointer in the TCB only after testing the interrupt nesting count
+  and ensuring that task code was interrupted, not ISR code.</b><p>
+
+  </ul>
+
+<li> Here is a slick little idea that you can consider: if you would
+like to track changes to some value in your code, you can add an
+instruction in your assembly code at an appropriate point that will
+copy that variable to an otherwise unused register.  Then you can
+track changes to the value of interest by executing blocks of
+instructions and simply checking the register contents. <p>
+
+</ul>
+
+-->
+
+<hr>
+</body>
+</html>

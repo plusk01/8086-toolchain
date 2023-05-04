@@ -1,0 +1,117 @@
+<html>
+
+<head>
+<title>Midterm #2 Review Topics</title>
+</head>
+
+<h2 align=center> Midterm #2 Review Topics </h2>
+
+The following list is intended as a general guide of new topics to
+review.  The exam may cover topics not explicitly listed here.  In
+particular, we may revisit topics listed on the first midterm review
+on which additional light has since been shed. <p>
+
+<ul>
+<li> Book and lecture topics (mostly Chapters 7-10)
+  <ul>
+    <li> semaphores in an RTOS
+    <li> queues in an RTOS
+    <li> other queue-like things: pipes and mailboxes
+    <li> delaying tasks
+    <li> the heartbeat timer
+    <li> clock jitter, challenges of accurate timing
+    <li> time-out functionality in RTOS function calls
+    <li> timer callback functions
+    <li> events, event management in an RTOS
+    <li> tradeoffs between semaphores, queues, and events
+    <li> using malloc/free vs fixed-size buffer management
+    <li> problems with RTOS function calls from ISRs, alternatives
+    <li> spotting bugs in code (problems at end of Chapter 7)
+    <li> bug frequency in typical code; added challenges of developing, debugging real-time code
+    <li> increasing customer confidence: process quality standards (ISO 9000, CMM)
+    <li> Therac-25: case history of problematic software, lessons learned
+    <li> application code design principles (8.1, 8.2)
+    <li> supplemental design example: USB driver for HP Inkjet printers
+    <li> problems with too many or too few tasks
+    <li> preferred task structure (single blocking point, etc.)
+    <li> relative overhead of task creation, task switching, other RTOS services
+    <li> design principles reflected in detailed example in 8.3
+    <li> encapsulating semaphores and queues
+    <li> hard real-time scheduling issues
+    <li> academic contributions: principally rate monotonic scheduling
+    <li> jitter, variability in task periods
+    <li> uC/OS scheduling approach with constant overhead
+    <li> saving memory space, considerations for code and data
+    <li> power saving modes commonly found in microprocessors, design implications
+    <li> terminology: cross-compilers, cross-assemblers, linkers, loaders, locators
+    <li> address resolution: mapping variables and functions to addresses
+    <li> mechanisms to map code and data to ROM and RAM
+    <li> segments, what they are and why they are important
+    <li> assigning segments to memory address ranges
+    <li> special cases: initialized data, constant strings, executing out of RAM
+    <li> techniques of getting embedded software into the target system
+    <li> terminology: ROM emulators
+    <li> writing flash-resident code that can load new updates of itself
+    <li> organizing code to facilitate testing and debugging
+    <li> limitations and advantages of host-based testing
+    <li> terminology: test scaffold code, script file parsers
+    <li> limitations and advantages of instruction set simulators
+    <li> "assert" macros: usefulness, implementation
+    <li> useful tools: scopes, logic analyzers, in-circuit emulators,
+         software-only monitors
+    <li> challenges in extracting the data you want: signal pins very
+    close together, ASICs, on-chip caches
+  </ul>
+<li> Lab and HW topics
+  <ul> 
+    <li> synchronization and mutual exclusion: implementing <b>acquire</b>
+         and <b>release</b>
+       <ul>
+       <li> special hardware support: test&set and swap instructions
+       <li> software solutions 
+       </ul> 
+    <li> C topics
+       <ul>
+       <li> arrays and structs
+       <li> pointers (to ints, arrays, structs, functions, pointers, ...)
+       <li> linked lists
+       <li> debugging code: common cases
+       </ul>
+    <li> mapping of C constructs to assembly 
+       <ul> 
+       <li> function calls, parameter passing, function return values
+       <li> switch statements
+       <li> global, local, and static local variables
+       </ul> 
+    <li> YAK structure and organization
+       <ul>
+       <li> functional specifications
+       <li> operational characteristics
+       <li> organization of application code
+       <li> required conventions in application code
+       <li> execution details of application code
+       <li> saving and restoring state in context switches
+          <ul>
+	  <li> tradeoffs of alternatives to storing on stack vs ISR
+	  <li> tradeoffs of saving at different points in call sequence
+	  <li> stack frame and return address consistency 
+	  </ul>
+       <li> using semaphores, queues and events in application code
+       <li> implementing semaphores, queues, and events; kernel internals
+       <li> potential problems in using queues, semaphores, and events
+       <li> general understanding of how to add new features and functions
+       </ul>
+  </ul>
+<li> Assigned case studies (from supplemental reading)
+  <ul>
+    <li> Operational details of underlying technology
+    <li> Facts of specific case study (what happened, why important?)
+    <li> Implications (technological, social, political, etc.)
+  </ul>
+</ul>
+<p>
+<hr>
+<p>
+<ADDRESS>Last updated 26 August 2019</ADDRESS>
+
+</html>

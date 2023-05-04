@@ -1,0 +1,19 @@
+######################################################################
+# Sample EE425 Makefile
+
+execname.bin:	finalfile.s
+		nasm finalfile.s -o execname.bin -l execname.lst  # Step 4, Assemble
+
+finalfile.s:	clib.s myasm1.s myasm2.s cfile1.s cfile2.s
+		cat clib.s cfile1.s cfile2.s > finalfile.s        # Step 3, Concatenate
+
+cfile1.s:	cfile1.c
+		cpp cfile1.c cfile1.i      # Step 1, Preprocess
+		c86 -g cfile1.i cfile1.s   # Step 2, Compile
+
+cfile2.s:	cfile2.c
+		cpp cfile2.c cfile2.i      # Step 1, Preprocess
+		c86 -g cfile2.i cfile2.s   # Step 2, Compile
+
+clean:	
+		rm execname.bin execname.lst finalfile.s cfile1.s cfile1.i cfile2.s cfile2.

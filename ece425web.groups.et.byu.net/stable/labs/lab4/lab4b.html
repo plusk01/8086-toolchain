@@ -1,0 +1,289 @@
+<html>
+
+<head>
+<title> ECEn 425 Lab 4b</title>
+</head>
+
+<body>
+
+<center>
+<h2> ECEn 425</h2>
+<h2> Lab #4: Design and Implementation of Kernel Essentials<br>
+Part B</h2>
+</center>
+
+
+<hr>
+<h3> Overview </h3>
+
+In this lab, you begin writing the actual code for your implementation
+of the YAK kernel. You will be required to implement a small number of
+the kernel functions in order to run a very basic application
+program.  You are expected to complete this lab with a partner.
+
+<h3> Instructions </h3>
+Start by creating a directory with all the source files necessary for your
+kernel, including the makefile. Suggested filenames and their purposes are given in the
+<a href="../kernel.html">YAK Specification</a> document. Make sure you
+<font color="#ff0000"><b>backup often</b></font> so that you never
+accidentally lose any of your source files! It is also recommended that
+you make a new copy of your code in a new folder for each lab.
+Once you have your files set up, you can begin writing your kernel according
+to the implementation decisions you made in the last lab.
+
+<h3> Requirements </h3>
+
+For this lab you only need to implement a small subset of YAK's overall
+specification. The kernel features you must implement are listed below:
+
+<ul>
+<li> <samp>YKInitialize -</samp> Initializes all required kernel data structures
+<li> <samp>YKEnterMutex -</samp> Disables interrupts
+<li> <samp>YKExitMutex -</samp> Enables interrupts
+<li> <samp>YKIdleTask -</samp> Kernel's idle task
+<li> <samp>YKNewTask -</samp> Creates a new task
+<li> <samp>YKRun -</samp> Starts actual execution of user code
+<li> <samp>YKScheduler -</samp> Determines the highest priority ready task
+<li> <samp>YKDispatcher -</samp> Begins or resumes execution of the next task
+<li> <samp>YKCtxSwCount -</samp> Global variable that tracks context switches
+<li> <samp>YKIdleCount -</samp> Global variable incremented by idle task
+</ul>
+
+In addition to these required functions, you must have ISRs and
+interrupt handlers that function exactly as in lab 3.  Keep in mind
+all the other YAK functions that will be added to your code in later
+labs.  If you are not careful or if you take shortcuts then you may
+need to rewrite and re-debug parts of your code in later labs.  <em>In
+particular, think about what functions must be reentrant in your
+kernel, and be sure to recognize and address critical sections in the
+code you write.</em> This can save you many hours of added work down
+the road.  <p>
+
+The application code you will use for this lab, <a
+ href="lab4b_app.c">lab4b_app.c</a>, creates a total of three
+tasks. The first task, task A, is created in <samp>main()</samp>
+before <samp>YKRun()</samp> is called. Task B is then created within
+task A, but has a lower priority than task A, and therefore should not
+run. Next, task C is created within task A and task C has a higher
+priority than task A, and should therefore run immediately. This will
+help verify that your kernel can properly create, schedule, and
+dispatch tasks.  <p>
+
+Once you have implemented these functions, your kernel must be able to run the
+application code correctly without
+crashing. As before, your code must work correctly even when a key is held down
+or when any key sequence is typed in rapid succession. It must also support a
+tick frequency of every <b>750</b> instructions.
+
+When your kernel runs correctly, the application program's output should closely
+resemble the following after it starts running:
+<blockquote><pre>
+Creating task A...
+Starting kernel...
+Task A started!
+Creating low priority task B...
+Creating task C...
+Task C started after 2 context switches!
+Executing in task C.
+
+TICK 1
+Executing in task C.
+
+TICK 2
+
+TICK 3
+Executing in task C.
+
+TICK 4
+Executing in task C.
+</pre></blockquote>
+The only thing that may differ when run with your kernel is the position of the
+"TICK <i>n</i>" lines relative to the other lines of output.
+
+
+<h3>Pass-off</h3>
+
+When your kernel runs the given application code correctly, show and
+demonstrate your code to a TA. <b>Since you must demonstrate working
+code to a TA, please consider their lab schedule well in advance</b>.
+If you complete the lab after the last TA hours on the due date, you
+can still get full credit based on the time stamps on the relevant
+files. <p>
+
+In addition to the demonstration, you must a written summary of
+problems you encountered, if any, in completing this lab.  You should
+also include a report of the number of hours you spent on the lab,
+including coding and debugging. A realistic estimate is
+sufficient. Send a submission even if you didn't encounter any
+noteworthy bugs along the way. <b>You will not receive full credit for
+the lab unless you send a report.</b><p>
+
+<font color=red>New for Fall 2019: we want both your report and your
+source code for the lab.  The easiest way to do this is to create a
+report file (for consistency call it report.txt or report.pdf), to add
+it to the working directory for the lab, to create a compressed tar
+file (with all the files in your directory), and then to upload that
+file to Learning Suite. <p>
+
+To review, if 425/labx is your working directory for this lab, type
+the following in the 425 directory: 
+
+<blockquote><pre> tar -cvzf submission.tar.gz labx
+</pre></blockquote>
+
+and then upload the resulting compressed tar file (submission.tar.gz)
+to Learning Suite.</font>
+
+
+
+
+<h3>Important Notes and Recommendations </h3>
+
+<ul>
+<li><b>Known tool problems.</b> There are some bugs with the tools that you should be aware of.
+It is strongly recommended that you take a good
+look at the <a href="../tool_issues.html">Known Tool Problems</a> page so that you don't waste any time
+trying to figure out bugs that aren't yours.<p>
+
+<li><b><samp>yakk.h</samp> and <samp>yaku.h</samp>.</b> You should start
+writing the files <samp>yakk.h</samp> and <samp>yaku.h</samp> (or whatever
+you have chosen to name them)
+as part of this lab. The file <samp>yakk.h</samp> should include the things
+that the application code may need access too. For example, it should include
+extern declarations for things defined in yakc.c, such as <samp>YKCtxSwCount</samp> and <samp>YKIdleCount</samp>,
+as well as the prototypes for the kernel functions. This file should not include
+any code or definitions that the application programmer might need to modify.
+Anything that the application programmer might need to modify should be part
+of the file <samp>yaku.h</samp>. This will include the
+#define statements for the maximum number of tasks, the maximum number of semaphores,
+and the maximum number of message queues (semaphores and queues will be
+added in later labs). Ask a TA for clarification if any of this is unclear to you.<p>
+
+<li><b>Saving and restoring context.</b> When saving or restoring the context do not push or pop
+the registers SP or SS. When it is needed, use other methods to save and restore
+SS and SP as part of a task's context (e.g., the mov instruction). You can use the <samp>pushf</samp>
+instruction to save flags, but keep in mind that CS, IP, and the flags are saved automatically by the CPU when an interrupt occurs.
+When leaving an ISR or dispatching a
+task, <samp>iret</samp> should always be the last
+instruction executed. This is important since it is the only way to restore CS, IP,
+and the processor flags in one atomic operation. Also, keep in mind that restoring the flags restores the interrupt flag (IF),
+which enables or disables interrupts.<p>
+
+<li> <b> Pointers, lists, and TCBs in C. </b> For those new to C and
+not entirely comfortable with pointers and the creation and
+manipulation of linked lists, please note that some code
+fragments of interest have been posted.  Check out the <a href="../ptrs.c"> Code Sample </a>
+here, or by going to the main lab page and clicking on the code
+example link under "C Help".  The code gives a sample TCB struct definition
+and gives examples of insertion in and deletion from a doubly linked
+list.
+<p>You will also need to define <samp>NULL</samp> in one of your header files
+if you intend to use it. Normally
+<samp>NULL</samp> is defined in the library .h files you include, since it is often used with library
+functions. However, since none of our library functions use <samp>NULL</samp>, it has not yet
+been defined. It is often defined in the following way:
+<blockquote><pre>#define NULL 0</pre></blockquote>
+<p>
+
+<li> <b> Setting up the environment for development and
+debugging. </b>Make sure you are using scroll bars, a decent file
+organization, and make files.  Command
+completion and a prompt with the full current path can also be useful.
+Links to information about
+all of these are readily found on the class lab page.  Take the time
+to make the changes up front.<p>
+
+<li> <b> Designing for debugging.</b> For most of you it will prove
+extremely useful to create routines that dump internal kernel state in
+an organized way that can be called at any point in your code as
+needed when debugging.  For example, you will probably need to see
+everything that is on the ready list, and/or see the state of all
+current tasks.  Taking the time to write this code up front can save
+you many hours over the long haul. To keep the code size small when
+debug statements are not needed, you can use <samp> #ifdef</samp> to avoid allocating space
+for these routines when you don't need them. You should also
+avoid writing code in assembly language except where absolutely necessary.
+Assembly code is much more difficult to debug and maintain. You are also
+strongly encouraged to avoid all inline assembly.
+Here is the key point:
+as you design and implement your kernel, think about how you will
+debug it, and don't hesitate to build some infrastructure to make
+testing and debugging easier.<p>
+
+<li> <b> Test as you go.</b> Don't fall into the trap of writing your entire
+kernel then running it for the first time to find that it doesn't work. Try to test your
+code as you progress so that you know the parts you have written work the way
+you expect. Doing so can save you debugging time in the long run.
+This is especially important for tricky pieces of code such as
+inserting into and searching linked lists and queues.<p>
+
+<li> <b> Thorough design. </b> How can you ensure that you have
+considered everything you need in the design stage?  You should
+carefully consider all the information on the YAK description page as well
+as the questions from the lab 4a.
+Beyond that, there is no sure-fire way to avoid all problems, but you
+are encouraged to think about the sequence of events in the
+execution of the application program provided with this lab.
+YKInitialize first sets up kernel data structures, then a task is created.
+No task should begin execution until
+the call to YKRun is made, which ends the initialization
+phase and begins the execution phase.  During initialization,
+interrupts should be ignored and the scheduler and dispatcher should
+never run, even though routines will be called (such as YKNewTask) which
+would normally call the scheduler, which could then call the dispatcher.
+How might you implement this?  You could, for example,
+use a global flag of some type that is initialized to one value, then
+set to a second value by YKRun. Certain routines will need to test
+this flag to make sure that the application is running. After setting
+the flag, YKRun must call the scheduler, which then calls the dispatcher, to fire up the highest
+priority ready task.  Note that this is NOT a normal function call;
+execution will never return to this main function once YKRun is
+called.<p>
+
+<li> <b> Pacing yourself. </b> Plan on starting each part of this lab early and allocating plenty
+of time. Debugging this type of code is very difficult
+and can be very time consuming.
+<p>
+Here is a statistical summary of the total time spent on part B in Fall 2017,
+according to the reports submitted by each group:
+<ul>
+  <li> Low: 5.0 hours
+  <li> High: 21.0 hours
+  <li> Average: 11.4 hours
+</ul>
+<p>
+
+<li> <b> Amount of code to be written.</b>  The kernel web page
+recommends a particular file organization for your source code.  As a
+general indication of the effort required, here are the sizes of
+Dr. Archibald's source files for all of lab 4 (parts b, c, and d, not counting
+comments, documentation, and debugging code):
+
+<ul>
+  <li> myinth.c: 21 lines
+  <li> myisr.s: 32 lines
+  <li> yaku.h: 3 lines
+  <li> yakk.h: 12 lines
+  <li> yakc.c: 158 lines
+  <li> yaks.s: 65 lines
+</ul><p>
+
+</ul>
+
+<h3>Debugging Help</h3>
+
+The link below points to a list of comments from student reports for lab 4
+(parts B, C, and D) describing specific problems they encountered.
+You are strongly encouraged to read the list. However, take all these
+with a grain of salt; the submitters may have made very
+different design decisions than you have. However, you can glean a
+great deal of useful information by reading them carefully. <p>
+
+<a href="StudentProblems.html"><b>Student Problem List</b></a>
+<p>
+<br>
+<hr>
+<address>Last updated 4 September 2019</address>
+<br>
+</body>
+</html>

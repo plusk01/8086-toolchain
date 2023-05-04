@@ -1,0 +1,210 @@
+<html>
+<head>
+<title>ECEn 425 Lab #1</title>
+</head>
+
+<center>
+<h2>ECEn 425 </h2>
+<h2>Lab #1: Class Tools and the 8086 Architecture</h2>
+</center>
+
+<hr>
+
+<h3>Overview</h3>
+
+This lab is to be completed individually; you must work alone. This lab is an introduction to the 8086 architecture and the tools that will be used to complete the remaining labs this semester. In this lab, use the tools to compile, assemble, and execute a simple program written in C and assembly language. Then you will write a function in assembly language that is called from the C source code. You will learn about the tools, the 8086 instruction set, and the C function calling convention.
+
+<h3>Reading</h3>
+<p>Start by familiarizing yourself with the topics of this lab by doing the following reading:
+<ul>
+<li>Read thoroughly the document <a href="../8086Assembly.html">8086 Assembly Language</a>
+<li>Read thoroughly the document <a href="../NASM.html">NASM Syntax</a>
+<li>Review the document <a href="../8086InstructionSet.html">8086 Instruction Set</a>
+<li>Read the section on <i>near calls</i> in the document <a href="../StackFrame.html">C
+Calling Convention</a> (the <i>Quick Reference</i> section may also be useful). The term <i> C calling
+convention</i> refers to how a C compiler generates functions in assembly language,
+including how function calls are made, how function arguments are passed to functions, and how
+values are returned. This document also discusses how to access local variables in assembly language.
+<li>Read thoroughly the document <a href="../BuildProcess.html">Building Programs with the Tools</a>
+</ul>
+All of the above documents can also be found on the <a
+href="../../resources.html">425 Online Resources</a> page for future
+reference.
+
+http://ece425web.groups.et.byu.net/stable/resources.html
+
+Once you feel comfortable with the build process, follow the instructions below to
+build the program for this lab.
+
+<h3>Instructions</h3>
+
+<p>The tools for this class run on the department's Linux machines in
+425 CB. (If you want to explore the possibility of running the tools
+on another platform, the source code is available at
+/ee2/ee425/src/dist. /ee2 is a drive mounted on linux machines in the
+lab. You are on your own getting the code to compile and run on your
+own machine.)  Use one of the available machines to perform the
+following steps:
+
+<ol>
+
+<li> Create a directory to contain all your work for this class. You must
+  maintain access privileges appropriately so that only you have access to the files and directories it contains. Once this is done, create a subdirectory to contain the files for this lab.
+
+<li> Add <samp>/ee2/ee425/bin</samp> to your path. This is necessary to run the
+  compiler and assembler. See <a href="../path.html">setting
+  your path</a> for more details.
+
+<li> Copy the class library file <a href="../library/clib.s"><samp>clib.s</samp></a>
+  and its C header file <a href="../library/clib.h"><samp>clib.h</samp></a> to your
+  lab directory. These files are needed for all programs you build to run in
+  the simulator.
+
+<li> Copy the assembly file <a href="lab1asm.s"><samp>lab1asm.s</samp></a> and
+  the C file <A HREF="lab1.c" ><samp>lab1.c</samp></A>  to your lab directory.
+
+<li> Use cpp to preprocess <samp>lab1.c</samp>, the C file for this lab, by changing to your lab
+  directory and typing "<samp>cpp lab1.c lab1.i</samp>".
+  This will produce a version of <samp>lab1.c</samp> named <samp>lab1.i</samp>
+  that is ready to be compiled.
+
+<li> Compile <samp>lab1.i</samp> using
+  c86 by typing "<samp>c86 -g lab1.i lab1.s</samp>". This will produce
+  an assembly language file named
+  <samp>lab1.s</samp>.
+
+<li> Concatenate your files together by typing "<samp>cat clib.s lab1asm.s lab1.s &gt;
+  lab1final.s</samp>". The file <samp>clib.s</samp> contains output functions
+  used by <samp>lab1.c</samp> and must be included as the first file when you concatenate
+  your assembly files together.
+
+<li> Assemble the final assembly file using NASM to produce an 8086 executable named <samp>lab1.bin</samp>. To assemble the file,
+  type "<samp>nasm lab1final.s -o lab1.bin
+  -l lab1.lst</samp>". This also creates a listing file named <samp>lab1.lst</samp>.
+
+<li> Start the instruction level emulator for the
+  8086, by typing "<samp>emu86</samp>".  Notice that the simulator
+uses two separate windows: one for the output of the program executing
+on the simulator and another for interacting with the simulator
+itself.
+
+<li> Load the executable into Emu86 by typing "<samp>l lab1.bin</samp>"
+  at the "<samp>Emu86&gt;</samp>" prompt.
+
+<li> Execute the program by typing "<samp>e</samp>". The program's output should
+  appear in the output window. It should output the following text:
+<pre>Hello, world!
+Result 1 is: 0
+Result 2 is: 0
+Result 3 is: 0</pre>
+
+<li> Quit the simulator by entering "<samp>q</samp>".
+
+</ol>
+
+<p> You now know how to build programs to run on Emu86. In
+future labs you will use a Makefile to make this process as simple as typing
+"<samp>make</samp>". Now your task is to modify the file <samp> lab1asm.s</samp> to change its
+functionality. To do this you will need to have a basic understanding of the
+8086 instruction set as well as the C calling convention on the 8086.</p>
+
+<p>The file <samp>lab1asm.s</samp> contains the assembly routine "<samp>AsmFunction</samp>". This function is called a few times from the file <samp>lab1.c</samp> with different
+function arguments based on the prototype:
+<blockquote>
+  <p><samp>int AsmFunction(int a, char b, char c, int d, int e);</samp>
+</blockquote>
+<p>
+
+Your assignment is to edit <samp>lab1asm.s</samp> and modify the assembly routine
+<samp>AsmFunction</samp>  so that it returns the result of the calculation&nbsp;</p>
+
+<blockquote>
+  <p> <samp>gvar+((a*(b+c))/(d-e))</samp></p>
+
+</blockquote>
+<p>where a, b, c, d, and e are the arguments passed to the function and <samp>gvar</samp>
+is a global variable declared in <samp>lab1.c</samp>. You may look at the source code for <samp>lab1.c</samp> but you are not allowed to modify it in any way.
+After <samp> lab1asm.s</samp>  has been modified to include your
+assembly function contents, you must again go through the steps of
+concatenation and assembly by entering "<samp>cat clib.s lab1asm.s lab1.s
+&gt; lab1final.s</samp>" followed by "<samp>nasm lab1final.s -o
+lab1.bin -l lab1.lst</samp>". Then run the simulator as explained
+previously. When <samp> AsmFunction</samp> is correct, your program's output should look like this:</p>
+
+<blockquote>
+
+<pre>Hello, world!
+Result 1 is: 16
+Result 2 is: 111
+Result 3 is: -34</pre>
+
+</blockquote>
+<h3>Pass-off</h3>
+<ul>
+<li>You must complete all the reading described in the <b>Reading</b> section.
+<li>Implement your AsmFunction() in <b>20
+instructions or less</b>. This does not include labels, assembly directives,
+comments, etc.
+<li>Your function must use the push/pop instructions to save any registers it uses
+and restore them to their original values before it returns (You may not use the pusha/popa
+instructions). Note that this does not apply
+to the register being used for the return value.
+<li>When you have completed your function and the output of your program is correct,
+demonstrate your program and show your assembly code to a TA.
+</ul>
+<b>Please consider the TA lab schedule well in
+advance</b>. <font color=red> New for Fall 2019: after passing off to the TA, upload
+your lab1asm.s file on Learning Suite. (We need to collect examples of
+student work for our department's ABET review next fall, but TAs may also review
+your submission to double check that all requirements were met.)</font>
+
+<h3> Tips and Hints</h3>
+<ul>
+  <li>Whether or not it is necessary to save and restore registers you
+  use when writing in assembly depends on the registers in question
+  and the convention used by the compiler.  For this class we will
+  assume the <i>callee save</i> convention (as opposed to <i>caller
+  save</i>), which means that you must save any registers you use at
+  the beginning of a function (using
+  <samp>push</samp> instructions) and restore them at the end (using
+  <samp>pop</samp> instructions), unless the register is being used to return a value.
+  This will ensure that you don't overwrite a register the compiler expects to be unchanged
+  after the function call.</li>
+  <li>The global variable <samp>gvar</samp> can be accessed from
+the assembly file <samp>lab1.s</samp> without any new declarations using the
+label "<samp>gvar</samp>".</li>
+  <li>Make sure you take into account the fact that the <samp>b</samp> and <samp>c</samp>
+    arguments passed to <samp>AsmFunction</samp> are of type char (a signed
+    byte), not int like the other arguments. Byte values must be properly
+    converted to words before being used in arithmetic with other word sized
+    values.</li>
+  <li>Start your function by setting up your stack frame and saving any registers you intend
+  to use. At the end of the function, restore all registers that were saved and undo the stack frame.
+  Remember, however, that you should not save or restore any register being used for the return value.</li>
+  <li>Make sure you understand how to access the function arguments on the stack. Refer
+    to the <a href="../StackFrame.html">C Calling Convention</a> page as needed.</li>
+  <li>Don't forget to specify the size of memory operands where needed.</li>
+  <li> You can use the 's' simulator command to "step" through or execute the
+program one instruction at a time and you can use the 'r' command to examine the
+8086 register contents. This will allow you to see exactly what your code is
+doing and will help you track down errors in your function. Use
+the 'o' command to step "over" the calls to <samp>printString()</samp>, <samp>print()</samp>,
+    <samp>printInt()</samp>, and <samp>printNewLine()</samp> since you do not need
+to concern yourself with their contents. Refer to the <a href="../Emu86.html">Emu86 Simulator</a> webpage
+    or the '?' command for more information on commands. You will learn more about these commands in the
+    next lab.</li>
+  <li>You may want to look at the file <samp>lab1.s</samp> or <samp>lab1.lst</samp>
+    to see the code that is executing when your run the program. This will make it more clear what
+    part of your program is being executed as you step
+through the code.</li>
+  <li>The function should take about 20 instructions, but can be written in as few as 15, assuming you
+  properly save and restore your registers. If you take the time to look at the capabilities of the different
+    instructions and understand how the function arguments can be accessed
+    on the stack then writing the function should not be too difficult.
+    </li>
+</ul>
+<p>&nbsp;</p>
+
+<HR>
+<ADDRESS>Last updated 4 September 2019</ADDRESS>
+</html>

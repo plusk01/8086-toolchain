@@ -1,0 +1,122 @@
+<html>
+<head>
+<TITLE>ECEn 425 Set #2</TITLE>
+</head>
+
+<body bgcolor="#ffffff">
+
+<center>
+<h2> Homework Set #2 </h2>
+</center>
+<HR>
+
+<OL>
+<LI> By experimentation, determine how the following code is
+viewed by the compiler.  In particular, which <b> if </b> statement
+is the <b> else </b> statement paired with?  With your answer, include
+the C code you write to answer the question.
+<p>
+<blockquote><pre>
+if (a != b)
+    if (a < b)
+        statement;
+else
+    statement;
+</pre></blockquote><p>
+
+<li> Write a short C program that declares an array and modifies the
+elements of that array.  Change the loop bounds so that locations are
+modified beyond the actual length of the array.  Does the compiler
+give you any indication that something is wrong?  Does the program
+execute without any indication that something is wrong?  Determine the
+memory layout of the variables in the executable; you can print the
+addresses of variables using the & operator in C and the %p argument
+in printf.  Try to add at least one variable that is stored
+immediately after the array and modify your program to show that the
+value of this variable is changed when the array elements are changed
+even though it is never explicitly modified. (Depending on the version
+of the compiler you are using, this can get a bit tricky. Try doing
+it with both global and local variables. You can also try using the
+"static" keyword with the variables.)  Include the output and source
+code of your final program in your solution to show that you were
+successful. <p>
+
+<li>
+<ol type="a">
+<li>You would hope that a good compiler would alert you to
+inconsistencies between function definitions and actual function
+calls, either in the type or number of parameters. By
+experimentation, determine what your favorite C compiler
+(cc<!--<sup>1</sup>-->, gcc, etc.) does if compiling code with such
+mismatches.  At a minimum, write a short C program with
+inconsistencies in both type and number of arguments and submit both
+the code and the error or warning messages from the compiler (if any).
+In your submission, identify the compiler you are using and the type
+of machine you are running on.<p>
+<!--
+b. Try running <i>lint</i><sup>1</sup> on your C program written for (a)
+above.  (Run <b>man lint</b><sup>2</sup> for more details.)  Does lint catch the
+same problems?  Does it provide more or less information than your
+compiler? <p>
+-->
+<li>It is much harder for compilers to catch problems with functions
+such as <b> printf </b> and <b> scanf </b> that have a variable number
+of arguments.  By experimenting with some simple C programs, see
+what happens (during both compilation and execution) when the
+conversion specifications contained in a format string are
+inconsistent with the remaining parameters, either in number or type.
+In your tests, be sure to consider this problem:<p>
+<blockquote><pre>
+int i;
+scanf("%d", i);  /* The '&' was "accidentally" left out before the i */
+</pre></blockquote><p>
+Include code in your response that demonstrates three such problems.
+Does the compiler <!--or lint--> help to catch these problems? Describe any
+indication the compiler <!--or lint--> gives you that there
+might be a problem.  In light of our discussion in class on the
+implementation details of function calls and parameter passing,
+explain what actually happens when your code executes. <p>
+</ol>
+
+<li>
+Below is a memory dump from an 8086 machine. Each value in the table
+represents a byte. Addresses increase sequentially from left to right,
+top to bottom. For example, the byte at logical address 0000:002B has value 0x2B.
+<blockquote><pre>
+<b> Seg:Off</b>  |  <b>0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F</b>
+----------|------------------------------------------------
+<b>0000:0000</b> | 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F
+<b>0000:0010</b> | 10 11 12 13 14 15 16 17 18 19 1A 1B 1C 1D 1E 1F
+<b>0000:0020</b> | 20 21 22 23 24 25 26 27 28 29 2A 2B 2C 2D 2E 2F
+<b>0000:0030</b> | 30 31 32 33 34 35 36 37 38 39 3A 3B 3C 3D 3E 3F
+</pre></blockquote>
+Assume the CPU registers have the following hexadecimal values:
+<blockquote><pre>
+AX:0000 BX:0002 CX:0000 DX:0000 SI:0001 DI:0000 BP:0002
+DS:0001 ES:0002 SS:0000 CS:0000 SP:FFFE IP:0100
+</pre></blockquote>
+What will the values for registers ax, bx, cx, and dx be in hexadecimal
+after executing the following sequence of memory referencing instructions?
+(Hint: This can be very tricky, so watch out! Pay attention to segment
+registers, endian behavior, and operand sizes. Review the section
+<i>Referencing Memory</i> in the document <a href="../labs/8086Assembly.html">8086 Assembly Language</a>
+for help.)
+<pre>
+	mov	ax, [bx+2]
+	dec	word [bx+2]
+	mov	bh, [bx+3]
+	mov	cx, [bp+si-3]
+	mov	dx, [es:bp+2]
+</pre>
+</ol>
+
+<p>
+
+<HR>
+Turn in your typed solution for this assignment via LearningSuite by 11:00pm on the due date.
+<hr>
+<address>Last updated 26 August 2019</address>
+<address>James Archibald jka@ee.byu.edu</address>
+
+</body>
+</html>

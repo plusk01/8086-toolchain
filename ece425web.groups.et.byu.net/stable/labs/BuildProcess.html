@@ -1,0 +1,151 @@
+<html>
+
+<head>
+<title>How to Build a Program</title>
+</head>
+
+<body>
+<h2> Building Programs with the Tools</h2>
+<p>
+Several steps must be taken in order to build a program to run on the Emu86 simulator. These steps will take the C and 8086 assembly source files and combine them into an executable program.
+<p>
+There are essentially four steps:
+<ol>
+  <li><b>Preprocess</b>  (using cpp)</li>
+  <li><b>Compile</b>     (using c86)</li>
+  <li><b>Concatenate</b> (using cat)</li>
+  <li><b>Assemble</b>    (using nasm)</li>
+</ol>
+<p>Before you will be able to perform some of these steps you must set your
+path. See the document <a href="path.html">Setting Your Path</a> for more
+information.
+<p>
+<br>
+<b>
+
+1) Preprocess</b>
+<p>
+This step applies only to C source code files. In C, in order to include files using #include, use #define, or other preprocessor directives, the code must be preprocessed. Many compilers today perform this automatically. However, c86 requires that this step be done separately. We will use the C language preprocessor called cpp. The syntax that should be used is as follows:
+
+<blockquote>
+  <pre>cpp filename.c filename.i</pre>
+
+</blockquote>
+
+This takes the C source file "filename.c" and creates a preprocessed version named "filename.i". The ".i" extension is used instead of the ".c" extension to distinguish the original C file from the preprocessed version. The cpp program should be executed once for each C source file that needs preprocessing. Preprocessing may be skipped for a file if no preprocessor directives (e.g., #include, #define, #ifdef, etc.) are used in that file.
+
+<p>
+<br>
+<b>
+2) Compile</b>
+<p>
+This step applies only to C source code files. Once a C file has been preprocessed it can then be compiled using the c86 compiler. The syntax that should be used is as follows:
+
+<blockquote>
+
+<pre>c86 filename.i filename.s</pre>
+
+</blockquote>
+
+This creates an assembly version of your source code named "filename.s" (where the ".s" extension is used to indicate an assembly language file). If there are errors in your C source code then the errors will most likely be reported in this step. The c86 compiler should be executed once for each C file.
+<p>
+<b>WARNING:</b> Be careful that you do not overwrite any of your custom assembly files when compiling. C86 automatically overwrites any existing .s file of the same name when generating its output. Therefore, it is not wise to use the same names for both C and assembly files.
+
+<p>
+<br>
+<b>
+
+3) Concatenate</b>
+<p>
+The assembler, NASM (The Netwide Assembler), must be given a single assembly file in order to output a binary executable (otherwise a linker must be used). This means that all the assembly files must be concatenated or joined into one single file before assembly. For this we will use the UNIX cat command. The syntax that should be used is as follows:
+
+<blockquote>
+
+<pre>cat clib.s filenam1.s filenam2.s ... &gt; finalfile.s</pre>
+
+</blockquote>
+
+In the above example the "..." represents all other assembly files that are part of your program. This example will create a file named "finalfile.s" that includes the contents (in the order given) of all the files listed to the left of the '>' character. Note that the library file clib.s is the first file listed. If you want the library file clib.s to be part of your program then it must be listed first. Also, don't forget to add to this list any custom assembly files that you wrote.
+
+<p>
+<br>
+<b>
+
+4) Assemble</b>
+<p>
+The final step is performed by NASM (the Netwide Assembler). NASM will convert your final assembly file into a single binary executable. The syntax that you should use is as follows:
+
+<blockquote>
+  <pre>nasm finalfile.s -o execname.bin -l execname.lst</pre>
+
+</blockquote>
+
+This will take the final assembly file "finalfile.s" and create from it an executable named "execname.bin". It will also generate a listing file named "execname.lst". The listing file gives detailed information about how execname.bin was generated. It includes the address and hexadecimal disassembly of each instruction generated in columns on the left and the actual assembly source code (with original comments) in a column on the right. This listing file will be extremely useful in debugging your programs.
+<p>&nbsp;</p>
+
+<h3>
+
+Using Make</h3>
+<p>
+
+Makefiles and the UNIX make command should be used in order to make
+rebuilding your program quick and easy. Once a makefile has been
+created for a project, recompiling your project is as simple as typing
+"make" in a terminal window. To use make, put a makefile (name the file
+"Makefile") in the directory of your project. This file tells make how
+to build your project. Below is a simple makefile example. See make's
+man page for more detailed information by typing "man make" in a
+terminal window.
+<p>
+
+In the example, the project to be built is made up of the library file
+(clib.s), two custom assembly files (asmfile1.s and asmfile2.s), as
+well as two C files (cfile1.c and cfile2.c). Makefile comments are
+marked with the '#' character.
+<p>
+
+The last line deserves some discussion.  With this line in place, if
+you type "make clean", essentially all important files produced during
+previous makes will be deleted.  The next time you type "make" they
+will all be rebuilt from the latest source.  Of course, a good
+makefile will ensure that this happens each time, but it is easy to
+accidentally leave out a dependence for a file or two.  More
+problematic, our compiler does not delete its partially written .s
+output file when it encounters an error.  Thus, the next time you run
+make, it will use the partial file to build your program (not
+realizing it is incomplete) and you may get an error message from the
+assembler about missing labels corresponding to functions or variables
+that you know full well are declared in your C code.  Bottom line:
+update this line to include all appropriate files (never .c files or
+the .s files of assembly source such as ISRs!) and run it when
+anything strange occurs just to make sure you are using your latest
+source code.<p>
+
+<a href="Makefile">Use this link to download the sample Makefile</a>
+
+<pre>
+######################################################################
+# Sample ECEn 425 Makefile
+
+execname.bin:	finalfile.s
+		nasm finalfile.s -o execname.bin -l execname.lst  # Step 4, Assemble
+
+finalfile.s:	clib.s myasm1.s myasm2.s cfile1.s cfile2.s
+		cat clib.s cfile1.s cfile2.s > finalfile.s        # Step 3, Concatenate
+
+cfile1.s:	cfile1.c
+		cpp cfile1.c cfile1.i      # Step 1, Preprocess
+		c86 -g cfile1.i cfile1.s   # Step 2, Compile
+
+cfile2.s:	cfile2.c
+		cpp cfile2.c cfile2.i      # Step 1, Preprocess
+		c86 -g cfile2.i cfile2.s   # Step 2, Compile
+
+clean:	
+		rm execname.bin execname.lst finalfile.s cfile1.s cfile1.i cfile2.s cfile2.i
+</pre>
+<br>
+<hr>
+</body>
+
+</html>

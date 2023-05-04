@@ -1,0 +1,121 @@
+<html>
+
+<head>
+<title>ECEn 425 Set #7</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+<center>
+<h2> Homework Set #7 </h2>
+</center>
+<HR>
+
+<ol>
+
+<li> Problem 6.7 from the text. <p>
+
+<li> Problem 6.9 from the text. Explain your answer.<p>
+
+<li>
+Suppose mutual exclusion in a simple operating system is provided by
+calling the synchronization primitives <strong> acquire </strong> and
+<strong> release</strong>, corresponding to routines that our text
+refers to as wait (pend) and signal (post) respectively.  Both are
+called with a single binary semaphore as argument.  The acquire
+function, when called, will return only when the specified semaphore
+is available and was successfully acquired; it busy-waits until the
+semaphore is available.  The release routine simply updates the
+semaphore to indicate that it is now available.  <p>
+
+Any implementation of acquire and release should provide the desired
+operation for even for the most pathological sequences and timings of
+events. An incorrect implementation may be manifest in a variety of
+ways, including deadlock of multiple tasks, calls to acquire never
+returning, semaphore values becoming inconsistent, etc.  <p>
+
+Suppose further that the operating system is intended to run on both
+uniprocessor and multiprocessor platforms, so mutual exclusion must be
+supported in some way other than disabling interrupts.  This problem
+explores two alternative implementations. <p>
+<ol type="a">
+<li> Most instruction sets include special instructions that can be
+used for synchronization.  Example instructions include
+<em>test-and-set</em> and other <em>read-modify-write</em>
+operations.  In general, suitable instructions combine a read of
+a memory location with a modification to that location as
+an <em>atomic</em> or indivisible operation.  <p>
+
+Identify one instruction implemented in any processor in the x86
+family that could be used for synchronization.  (Feel free to use any
+documentation you have access to, online or otherwise.)  Describe how
+you could use this instruction to implement efficient acquire and
+release routines.<p>
+
+<li>Suppose you are targeting a CPU with no special instructions for
+synchronization.  The following code has been proposed as a software
+implementation of acquire and release:<p>
+
+<pre>
+struct semaphore
+{
+    int val[NUMPROCS];    /* 1 entry for each processor */
+    int lastid;           /* ID of last processor to get semaphore */
+};
+
+int procid;               /* processor ID, unique per processor */
+
+void init(struct semaphore *sem)
+{                         /* called once at beginning of execution */
+    int i;
+    for (i = 0; i < NUMPROCS; i++)
+        sem->val[i] = 0;
+    sem->lastid = 0;
+}
+
+void acquire(struct semaphore *sem)
+{
+    /* assume procid holds ID of processor running this code */
+    int i, j, first;
+  loop:
+    first = sem->lastid;
+    sem->val[procid] = 1;
+  forloop:
+    for (i = first; i < NUMPROCS; i++)
+    {
+        if (i == procid)
+	{
+	    sem->val[i] = 2;
+	    for (j = 0; j < NUMPROCS; j++)
+	        if (sem->val[j] == 2 && j != procid)
+		    goto loop;
+	    sem->lastid = procid;
+	    return;      /* success!  */
+	}
+	else if (sem->val[i])
+	    goto loop;
+    }
+    first = 0;
+    goto forloop;
+}
+
+void release(struct semaphore *sem)
+{
+    sem->lastid = (procid+1) % NUMPROCS;    /* reset to next processor */
+    sem->val[procid] = 0;
+}
+</pre>
+<p>
+
+Does this implementation of acquire and release actually work? If not,
+show a situation in which it malfunctions.  If it does work, describe
+the approach taken by the algorithm to guarantee mutual exclusion.<p>
+</ol>
+</OL>
+<HR>
+Turn in your typed solution for this assignment via LearningSuite by 11:00pm on the due date.
+<hr>
+<ADDRESS>Last updated 26 August 2019</ADDRESS>
+<ADDRESS>James Archibald jka@ee.byu.edu</ADDRESS>
+</body>
+</html>

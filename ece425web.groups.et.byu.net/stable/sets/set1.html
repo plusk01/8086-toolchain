@@ -1,0 +1,88 @@
+<html>
+<head>
+<title>ECEn 425 Set #1</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+<CENTER>
+<h2> Homework set #1 </h2>
+</CENTER>
+<HR>
+
+<br>
+Some of the following questions ask you to provide code. You are
+expected to compile and run the code and make sure it works before you
+submit it.  You may use the C compiler and machine of your choice.  <OL>
+
+<LI> Write a short C function named IsLeapYear() to determine if a
+given year (passed into the function as an int parameter) is a leap
+year; if it is, the value 1 is to be returned, otherwise the function
+should return zero. A year is a leap year if it is divisible by 4 but
+not by 100, with the exception that years divisible by 400 are leap
+years.<p>
+
+<LI> Consider the following code fragment:<p>
+
+<pre>
+int x = 10;
+int y = 3;
+float result;
+
+result = x / y;
+</pre><p>
+
+By inspection, what value do you expect <b> result </b> to have after
+the assignment? Add what you need to compile and run this code and to
+output the value of <b>result</b> after the assignment (use the
+compiler of your choice).  Does <b> result </b> actually end up with
+the value you expected?  Explain why <b> result </b> is assigned this
+value.<p>
+
+<LI> Assume t1 and t2 are defined to be 32-bit ints and that t1 has
+been assigned an arbitrary value.  Write a single line of C code which
+assigns t2 a value determined from t1 as described below. (The single
+line of code should set all four bytes of t2 as specified below.)
+Assume that bytes are 8 bits, that byte1 refers to the highest-order
+byte, byte2 to the next highest byte, etc.  Run your code to make sure
+it actually works before you submit it.<p>
+
+<ul>
+<li> byte1 of t2 is to be set to byte2 of t1
+<li> byte2 of t2 is to be set to the bitwise complement of byte1 of t1
+<li> byte3 of t2 is to be set to byte4 of t1
+<li> byte4 of t2 is to be set to byte3 of t1
+</ul><p>
+
+<LI> In the expressions given below, assume that <b> x</b>, <b> y</b>,
+and <b> z</b> are integers with the values 0, 1, and 2 respectively.
+For each expression, give the resulting value of the expression and
+show how it is evaluated.  To show how it is evaluated, add
+parentheses to the original expression until all ambiguity is
+eliminated (e.g., "<samp>a+b/c-d</samp>" would become
+"<samp>((a+(b/c))-d)</samp>").  Be sure to give the final value of
+each expression.
+<p>
+
+<pre>
+a. x + y * z
+b. x == 0 && y != 4
+c. y < x < z
+d. y+-z
+e. !z||y
+f. y ? x : z
+g. x - y < z
+h. x = 0 || z <= y  <!--Old: x = 1 && z >= y --> (Give value of expression and final value of x)
+i. z & 3 == 2
+</pre>
+
+
+</OL>
+
+<HR>
+Turn in your typed solution for this assignment via LearningSuite by 11:00pm on the due date.
+<hr>
+<ADDRESS>Last updated 26 August 2019</ADDRESS>
+<ADDRESS>James Archibald jka@ee.byu.edu</ADDRESS>
+</body>
+</html>

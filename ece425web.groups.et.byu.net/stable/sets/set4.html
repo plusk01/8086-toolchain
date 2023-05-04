@@ -1,0 +1,110 @@
+<html>
+
+<head>
+<title>ECEn 425 Set #4</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+<center>
+<h2> Homework Set #4 </h2>
+</center>
+<HR>
+
+<OL>
+<li> Problem 5.1 from the text. <P>
+
+<li> Problem 5.3 from the text. Explain your answer.<p>
+
+<li> C allows the definition of macros with arguments.  For example,
+consider the following macro:
+<pre>
+     #define max(A,B)  ((A) > (B) ? (A) : (B))
+</pre>
+
+<ol type="a">
+<li>What does this macro do?  (Verify by experimentation.)
+<li>What are the advantages and disadvantages of using a macro rather than a
+function that accomplishes the same thing?
+<li>If I call the macro in the following way, what happens?  (Again,
+experiment and verify.)
+<blockquote><pre>max(i++,j++)</pre></blockquote>
+<p>
+</ol>
+
+Now consider another macro:<p>
+<pre>
+     #define square(x)  x * x
+</pre>
+<ol type="a" start="4">
+<li>What happens when I call <samp>square(y+1)</samp>?
+<li>What change must be made to the macro definition to make it work correctly?
+</ol>
+<p>
+<li>Consider the following C function in which the function body has been omitted:
+<blockquote><pre>
+int MyFunction(int argWord, char argByte)
+{
+    int localWord;
+    char localByte;
+
+    ...
+    ...
+    ...
+
+    return localWord;
+}
+</pre></blockquote>
+
+Suppose that <samp>MyFunction()</samp> is called in a program and a
+debugger is used to display the contents of the stack while the body
+of the function is executing.  Shown below is the stack dump that a
+debugger might give, and is very similar to the output given by the
+"<samp>ds</samp>" or "dump stack" command in Emu86. In the left column
+are the addresses of stack locations and in the right column are the
+16-bit values stored at those locations.  For example, we see from the
+table below that the number 0x1243 (4,660 in decimal) is stored at
+address 0000:FFF0. Since the 8086 is little endian, this means that
+the byte value 0x43 is stored at address 0000:FFF0 and the byte value
+0x12 is stored at 0000:FFF1.
+
+<blockquote><pre>
+Address   | Value
+------------------
+0000:FFF2 | 0xF320
+0000:FFF0 | 0x1243
+0000:FFEE | 0x02EA
+0000:FFEC | 0xFFF6
+0000:FFEA | 0x0321
+0000:FFE8 | 0x02B9
+</pre></blockquote>
+
+Assume that SS is 0, SP is 0xFFE8 and BP is 0xFFEC. Also, assume that
+the C calling convention is followed and that a standard stack frame
+is used (refer to the document <a href="../labs/StackFrame.html">C
+Calling Convention and the 8086</a> if necessary).
+<p>
+
+<ol type="a">
+
+<li>What are the current values for <samp>argWord</samp>,
+<samp>argByte</samp>, <samp>localWord</samp>, and
+<samp>localByte</samp> in hexadecimal?
+
+<li>What return address was saved on the stack when the function was
+called?
+
+<li>What value for BP was saved on the stack?
+
+</ol>
+
+</OL>
+
+<p>
+<HR>
+Turn in your typed solution for this assignment via LearningSuite by 11:00pm on the due date.
+<hr>
+<ADDRESS>Last updated 26 August 2019</ADDRESS>
+<ADDRESS>James Archibald jka@ee.byu.edu</ADDRESS>
+</body>
+</html>

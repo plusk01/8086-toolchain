@@ -1,0 +1,102 @@
+<html>
+
+<head>
+<title>Midterm #1 Review Topics</title>
+</head>
+
+<center>
+<h2 align=center> Midterm #1 Review Topics </h2>
+</center>
+The following list is intended as a general guide of topics to
+review.  The exam may cover topics not explicitly listed here. <p>
+
+<ul>
+<li> Book and lecture topics (Preface, Chapters 1-6)
+  <ul>
+    <li> the perversities of embedded systems
+    <li> design and development challenges in embedded real-time
+    systems (from examples in Chapter 1)
+    <li> typical hardware found in embedded systems
+    <li> software control of tri-state devices
+    <li> types of memory: characteristics and tradeoffs
+    <li> wait states
+    <li> memory address space conventions
+    <li> watchdog timers
+    <li> typical microprocessor built-ins
+    <li> interrupt mechanisms, hardware and software
+    <li> saving and restoring context
+    <li> the shared data problem
+    <li> atomicity and critical sections
+    <li> interrupt latency
+    <li> alternatives to disabling interrupts
+    <li> software architectures: alternatives and tradeoffs
+      <ul> 
+        <li> round robin or polled-loop architectures
+        <li> round robin with interrupts
+	<li> function-queue scheduling
+	<li> real-time operating system
+      </ul>
+    <li> tasks, task states and transitions, multitasking
+    <li> typical RTOS functions
+      <ul> 
+        <li> creation
+        <li> deletion
+	<li> delaying
+	<li> changing priority
+	<li> inter-task communication and synchronization
+      </ul>
+    <li> RTOS data structures: task control blocks (TCBs)
+    <li> scheduling, alternative scheduling policies
+    <li> priorities among tasks, ISR relative to tasks
+    <li> preemption, how it is accomplished
+    <li> shared data problem, reentrant code
+    <li> C variable storage
+    <li> semaphores, typical functionality, potential problems 
+    <li> semaphores: signaling vs protecting shared data
+    <li> semaphore variants
+    <li> deadlock
+    <li> livelock
+    <li> starvation
+    <li> priority inversion, priority inheritance
+    <li> context switching, saving, restoring 
+    <li> role and functionality of dispatcher
+    <li> challenges of designing and debugging real-time system code
+  </ul>
+<li> Lab and HW basics
+  <ul> 
+    <li> essential C topics
+    <li> implementation of C constructs in assembly
+    <li> stacks, stack frames, conventions in compiled C code
+    <li> make files
+    <li> ISR essentials
+    <li> YAK functions and conventions
+    <li> saving, restoring context in YAK
+    <li> 8086-based tools (compiler, assembler): general usage
+    <li> emu86 simulator: usage, debugging features
+    <li> conventions in compiled C: stack frames, parameters, return values
+    <li> 8086 instructions, operations
+      <ul>
+	<li> enabling, disabling interrupts (IMR and flag register)
+	<li> CPU actions on interrupt, iret
+	<li> interrupt jump table
+	<li> supporting nested interrupts
+      </ul>
+  </ul>
+<li> Assigned case studies (from supplemental reading)
+  <ul>
+    <li> Operational details of underlying technology
+    <li> Facts of specific case study (what happened, why important?)
+    <li> Implications (technological, social, political, etc.)
+  </ul>
+</ul>
+<p>
+<hr>
+<p>
+<ADDRESS>Last updated 26 August 2019</ADDRESS>
+<ADDRESS>James Archibald jka@ee.byu.edu</ADDRESS>
+
+</html>
+
+
+
+

@@ -1,0 +1,236 @@
+<html>
+
+<head>
+<title> ECEn 425 Lab 4a</title>
+</head>
+
+<body>
+
+<center>
+<h2> ECEn 425</h2>
+<h2> Lab #4: Design and Implementation of Kernel Essentials<br>
+Part A</h2>
+</center>
+
+
+<hr>
+<h3> Overview </h3>
+
+In this lab you will begin to create a rudimentary real-time operating system, or <i>real-time kernel</i>, referred to as YAK. In labs 4a through 4d you will design only the most fundamental parts of the RTOS. In labs 5, 6, and 7 you will add features and functionality to make the RTOS useful. For each lab, your RTOS will be required to correctly run increasingly complex application programs. For the final lab, Lab 8, you will write your own application program.
+<p>
+Designing a real-time operating system is a non-trivial exercise. A great number of details must be considered in the design to ensure stability. You are encouraged to think long and hard about the design and to code things as carefully as you can using good programming style, organization, and commenting.
+<p>
+This lab and future labs <b>must</b> be completed in teams of two people. Any exceptions must be approved in advance by the instructor. Having two minds to think through the design and monitor the development of the code helps to ensure a good design and helps you identify problems earlier.
+
+<h3>Instructions</h3>
+The YAK kernel is described in detail on the <a href="../kernel.html">YAK Kernel
+</a>webpage, also accessible from the YAK Info links on the class lab page.
+Your first step should be to <b>read and understand</b> that information. It won't all be clear in a single
+pass; chances are you'll have to read it multiple times and discuss it
+before it all makes sense. The majority of the specification defines the
+interface that your RTOS must have (i.e., function purposes, names arguments, global variables, etc.).
+Your design must conform to the specifications given in order for it to work
+with the application programs we provide. However, the implementation is up to you.
+<p>
+In order to ensure that you properly account for all the functionality
+that your RTOS will support, you must consider a large number of the functions
+in the design phase. For now the kernel features you must consider are the following:
+<ul>
+<li> <samp>YKInitialize -</samp> Initializes all required kernel data structures
+<li> <samp>YKNewTask -</samp> Creates a new task
+<li> <samp>YKRun -</samp> Starts actual execution of user code
+<li> <samp>YKDelayTask -</samp> Delays a task for specified number of clock ticks
+<li> <samp>YKEnterMutex -</samp> Disables interrupts
+<li> <samp>YKExitMutex -</samp> Enables interrupts
+<li> <samp>YKEnterISR -</samp> Called on entry to ISR
+<li> <samp>YKExitISR -</samp> Called on exit from ISR
+<li> <samp>YKScheduler -</samp> Determines the highest priority ready task
+<li> <samp>YKDispatcher -</samp> Begins or resumes execution of the next task
+<li> <samp>YKTickHandler -</samp> The kernel's timer tick interrupt handler
+<li> <samp>YKCtxSwCount -</samp> Global variable tracking context switches
+<li> <samp>YKIdleCount -</samp> Global variable used by idle task
+<li> <samp>YKTickNum -</samp> Global variable incremented by tick handler
+</ul>
+<p>
+To help you think through what these functions should do, consider the
+application code for Lab 4d, available here: <a href="lab4d_app.c">lab4d_app.c</a>.
+Examine the code carefully so that you understand how these basic kernel functions
+might be used. However, note that only a subset of the functions is called
+directly by the application program.  Those not called directly will
+be called by other functions that you write.  With two exceptions, it
+is required that you implement each function exactly according to the
+C prototype specified in the YAK documentation so that your kernel will
+be able to run the supplied application code without modification.  The two exceptions are the scheduler
+and the dispatcher. Since these are not called directly from user
+code, you do not need to have the exact declarations given. In particular,
+you may add parameters if you desire.
+<p>
+In addition to these required functions, each lab will include ISRs and
+interrupt handlers to handle the reset, tick, and keypress interrupts.
+<p>
+Once you have an understanding of what the kernel should do, carefully consider
+how each function should be implemented. Be sure to consider how the
+implementation of one function affects another. For example, how you implement
+YKDispatcher will influence how you implement YKNewTask.
+
+<h3>Requirements</h3>
+In order to ensure you have thought through the necessary details, answer the
+questions below about your implementation of the kernel. Note, however, that
+there is not necessarily a right or wrong answer for each question.<p>
+
+In conjunction with these questions, you should write a description of
+the actions that must be performed by each kernel function in the list above.
+<b>Some form of pseudo-code is acceptable</b>. This pseudo-code will be submitted
+with your answers to the questions. This will help you to think through the
+details and the sequence of events that must take place for each function.
+For an example of an acceptable description, refer to this link:
+<a href="FunctionDescriptions.html">Kernel Function Descriptions</a>.<p>
+
+Many of these questions will not make sense at first because they address issues
+that students sometimes overlook until after it is found that their kernel doesn't work.
+Be sure to refer to the YAK specification and the helps on that page to guide
+you. The TAs can also help you to understand the questions and address the issues that the
+questions describe. <b>Make sure you understand each question before giving a final answer.</b>
+Since some of these questions may cause you to consider new things
+and change your design, you should consider all of them before answering any
+of them formally.
+
+<ol>
+
+<b>Saving Context:</b><p>
+
+<li>Where in memory will contexts be saved (i.e., on stack, in TCBs, other
+data structures)? Consider carefully where different parts of the context should be
+saved. For example, you may want to save context on the stack but some
+things should still go in the TCB. To make sure your answer is complete, be sure to consider the following
+cases:
+	<ol type="a">
+	<li>Saving context at the beginning of ISRs
+	<li>Saving context in blocking functions (e.g., YKDelayTask or YKNewTask). Keep in mind
+	that some functions may or may not
+	block when called, and therefore may or may not need to save context.
+	</ol>
+
+<li>How will the context be saved at the beginning of an ISR? (i.e., what instructions will be used to save register contents, how
+will information necessary for restoring the context be stored in the TCB.)
+
+<li>How will the context be saved when a kernel function, such as YKDelayTask or YKNewTask, causes
+the current task to block? (i.e., what instructions will be used to save register
+contents, how will information necessary for restoring the context be stored in
+the TCB.) Where will this code reside? (i.e., will it be duplicated in every function
+that needs to save context, will it be in a function, or will it be somewhere better?
+Consider this carefully since it can greatly simplify your design.) (See related question 7)
+
+<li>If your dispatcher will be designed to save context, how will it know
+whether or not it needs to save context and how will it know which TCB to use?
+Keep in mind that when YKDispatcher is called from an ISR (via YKExitISR and YKScheduler)
+the context should have already been saved somewhere by the ISR. (See question 13)
+
+
+<p><b>Restoring Context (Dispatching):</b><p>
+
+<li>How will a task's context be restored by the dispatcher on a context switch? Specifically,
+consider how the dispatcher will restore the stack pointer (SS and SP), the
+general registers, and finally CS, IP, and the flags. Remember that the
+<samp>iret</samp> instruction should always be used in the final step. This is trickier than
+it sounds because you may be inclined to use the very registers you are trying to restore in
+order to restore the registers.
+
+<li>When an interrupt occurs, the ISR must save context. How will this context be restored when
+the ISR later calls the scheduler (via YKExitISR) but no task switch needs to take place? Keep in mind
+that nested ISRs will not call the scheduler at all.
+
+<li>When a function, such as YKDelayTask or YKNewTask, is called and causes a task to block,
+how will you ensure that execution correctly returns to the task code that called the function when the context is eventually
+restored? In other words, how do you save and restore context for a blocking function is such a way
+that it won't restore to a point that will cause
+the blocking function, the scheduler, and/or the dispatcher to run all over again?
+(See related question 3)
+
+<li>Once the scheduler determines which task should run, what information will
+the dispatcher need so that it can dispatch the task and perform whatever else
+it needs to do in your design? How will it get this information? (See question 13)
+
+<li>Should the dispatcher be called directly from any code other than the
+scheduler?
+
+<li>How will a task be dispatched for the very first time? In your design, will it be any different than for
+a task that has already run? What special handling in YKNewTask, YKScheduler, and YKDispatcher
+will you need perform in your design (if any)?
+
+
+<p><b>Scheduling:</b><p>
+
+<li>How will the scheduler know which tasks are ready to run? Keep in mind that in the
+final kernel, tasks can be blocked on
+a semaphore, a message queue, or because they have been delayed, but they can only
+be blocked on one thing at a time.
+
+<li>How will the scheduler determine which task is the highest priority ready
+task? How will it know when to run the idle task? (Hint: deciding to run the idle task
+does not need to require any special handling.)
+
+<li>What information will the scheduler pass to the dispatcher
+and how will it pass that information (e.g., global variables or parameter passing)? Consider
+this in conjunction with questions 4 and 8.
+
+
+<p><b>Interrupts:</b><p>
+
+<li>What special action will YKExitISR take if the ISR call depth is zero? What
+do you have to do in YKEnterISR and YKExitISR to ensure that the ISR call depth is
+accurate?
+
+<li>If a <i>nested</i> interrupt occurs, how will your code know to restore the
+context of the lower priority interrupt and not call the scheduler?
+
+<li>If a <i>nested</i> interrupt occurs, how will you prevent information in
+the TCB from being overwritten when the context is saved in the ISR?
+
+
+<p><b>General:</b><p>
+
+<li>Give the C language declaration for your TCB struct. Consider carefully what
+really needs to be in the TCB before deciding on what the TCB will include.
+
+<li>Describe the data structures that will be used to manage the TCBs (e.g.,
+linked lists, arrays, queues, etc.)
+
+<li>What should happen if YKNewTask is called before YKRun has been called?
+Should it call the scheduler? How about after YKRun is called?
+
+<li>Exactly what initialization will YKNewTask perform?
+
+<li>To what values should the registers be initialized when a task runs the
+first time? Where is this initialization performed? Consider specifically the
+segment registers and the flags register, which must have the interrupt flag
+enabled when a task runs for the first time.
+
+</ol>
+
+
+<h3>Pass-off</h3>
+
+On or before the due date for this lab, you must <b>submit your answers via Learning Suite to each of the above
+questions</b>, either in <b>.txt or .pdf</b> format. You must also include your <b>description of the kernel
+functions (pseudo-code)</b> at the end of the document.
+Make sure your answers are well organized with each response clearly numbered.
+Be sure to identify both lab partners in the document and in learning suite submission comments.
+Only one lab partner needs to send in a submission.
+
+<p> The purpose of this first part of the lab is to make you think carefully about all
+the design issues and to provide some feedback to help you avoid
+serious problems with your kernel. Due to the difficulty in evaluating
+the software designs of others, the TA's response to your answers will
+be very general and will only highlight <i>possible</i> problem areas,
+if any. For example, the TA may simply say that you appear to be on
+track, or the TA may identify a question that might need further
+consideration, possibly with a suggestion on where to go from there.
+
+<p>
+<br>
+<hr>
+<address>Last updated 4 September 2019</address>
+<br>
+</body>
+</html>

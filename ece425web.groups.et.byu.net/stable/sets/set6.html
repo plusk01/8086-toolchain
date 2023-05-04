@@ -1,0 +1,69 @@
+<html>
+
+<head>
+<title>ECEn 425 Set #6</title>
+</head>
+
+<body bgcolor="#ffffff">
+
+<center>
+<h2> Homework Set #6 </h2>
+</center>
+<HR>
+
+<OL>
+
+<li> Problem 6.4 from the text. To clarify, the code is attempting
+to use semaphores to protect access to the shared variable
+<samp>iRecordCount</samp>.<p>
+
+<li> Problem 6.5 from the text. <p>
+
+<li> Write a short C program that includes a switch statement matching
+an integer variable against at least eight consecutive integer
+constants with distinct actions for each case. It should have the
+following form:
+<pre>
+switch (i) {
+    case 0: actions_0; break;
+    case 1: actions_1; break;
+    case 2: actions_2; break;
+    case 3: actions_3; break;
+    case 4: actions_4; break;
+    case 5: actions_5; break;
+    case 6: actions_6; break;
+    case 7: actions_7; break;
+    default: actions_d; break;
+}
+</pre>
+where <i> actions_i </i> is an short sequence of C statements. Compile
+the program using the ECEn 425 tools and study the resulting .s file.  Describe
+in detail the mechanism used to implement the flow of control through
+the switch statement.
+<p>
+
+Write another C program that includes the switch statement again but this
+time have it match
+an integer variable against eight randomly chosen integer
+values (that you choose) between 0 and 1000.  Compile the program
+and study the resulting .s file.  Describe in detail the
+mechanism used to implement the flow of control through the switch
+statement.  <p>
+
+Compare and contrast the two implementations of switch statements
+that you discovered above.  How are they different, and why are they
+different?  On the basis of what you've seen can there be significant
+differences in overhead between switch statements that appear similar at
+the source code level?  What lesson should a programmer learn from
+this?
+<p>
+
+</ol>
+
+<HR>
+Turn in your typed solution for this assignment via LearningSuite by 11:00pm on the due date.
+<hr>
+<ADDRESS>Last updated 26 August 2019</ADDRESS>
+<ADDRESS>James Archibald jka@ee.byu.edu</ADDRESS>
+</body>
+</html>
